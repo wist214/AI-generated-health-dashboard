@@ -1,103 +1,139 @@
-# Health Aggregator - Picooc Data Viewer
+# Health Aggregator
 
-A web application to aggregate and visualize your health data from the Picooc smart scale app.
+A personal health dashboard that consolidates data from Oura Ring and Picooc smart scales into a unified interface.
+
+🌐 **Live Dashboard**: [https://ambitious-flower-061bc3203.2.azurestaticapps.net](https://ambitious-flower-061bc3203.2.azurestaticapps.net)
 
 ## Features
 
-- 📊 **Real-time Charts** - Visualize weight, body fat, BMI, muscle mass, and more over time
-- 📈 **Statistics** - View min, max, and average values for all metrics
-- 📋 **Data Table** - Browse all your measurements in a sortable table
-- 🔄 **Easy Sync** - One-click sync with your Picooc account
-- 🎨 **Modern UI** - Dark theme with responsive design
+- 📊 **Unified Dashboard** - View all health metrics at a glance
+- 💍 **Oura Ring Integration** - Sleep scores, readiness, activity, HRV, heart rate
+- ⚖️ **Weight Tracking** - Weight, body fat, muscle mass, BMI from Picooc scales
+- 📈 **Trends & Charts** - Interactive charts with customizable time ranges
+- 💡 **Smart Insights** - Personalized health recommendations
+- 🔄 **Auto-Sync** - Hourly automatic data synchronization
+- 🌙 **Dark Theme** - Modern, responsive design
 
-## Prerequisites
+## Architecture
 
-1. **Node.js** (v14 or higher)
-2. **SmartScaleConnect** binary - Download from [GitHub Releases](https://github.com/AlexxIT/SmartScaleConnect/releases/)
+```
+┌─────────────────────────────────────────────────────────────┐
+│                    Azure Static Web Apps                     │
+├─────────────────────────────────────────────────────────────┤
+│  ┌─────────────────┐         ┌─────────────────────────┐   │
+│  │  Static Files   │         │   Azure Functions API    │   │
+│  │  (Dashboard UI) │ ──────► │  (.NET 8 Isolated)      │   │
+│  └─────────────────┘         └──────────┬──────────────┘   │
+│                                         │                   │
+│                              ┌──────────┴──────────┐       │
+│                              ▼                     ▼       │
+│                    ┌─────────────────┐   ┌──────────────┐  │
+│                    │    Oura API     │   │  Picooc API  │  │
+│                    └─────────────────┘   └──────────────┘  │
+│                                                             │
+│                         ┌─────────────────┐                │
+│                         │  Azure Blob     │                │
+│                         │  Storage        │                │
+│                         └─────────────────┘                │
+└─────────────────────────────────────────────────────────────┘
+```
 
-## Installation
+## Tech Stack
 
-1. Clone or download this project
+- **Frontend**: Vanilla JavaScript, Chart.js, CSS3
+- **Backend**: .NET 8 Azure Functions (isolated worker)
+- **Storage**: Azure Blob Storage
+- **Hosting**: Azure Static Web Apps
+- **CI/CD**: GitHub Actions
 
-2. Install dependencies:
+## API Endpoints
+
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/api/oura/data` | GET | Get all Oura data |
+| `/api/oura/sync` | POST | Trigger Oura sync |
+| `/api/oura/stats` | GET | Get sleep/readiness/activity statistics |
+| `/api/oura/sleep/{id}` | GET | Get detailed sleep record |
+| `/api/picooc/data` | GET | Get all weight measurements |
+| `/api/picooc/sync` | POST | Trigger weight sync |
+| `/api/dashboard` | GET | Get combined dashboard data |
+
+## Local Development
+
+### Prerequisites
+
+- [.NET 8 SDK](https://dotnet.microsoft.com/download/dotnet/8.0)
+- [Azure Functions Core Tools v4](https://docs.microsoft.com/azure/azure-functions/functions-run-local)
+- [Node.js](https://nodejs.org/) (for serving static files locally)
+
+### Setup
+
+1. **Clone the repository**
    ```bash
-   npm install
+   git clone https://github.com/wist214/AI-generated-health-dashboard.git
+   cd AI-generated-health-dashboard
    ```
 
-3. Download SmartScaleConnect:
-   - Go to https://github.com/AlexxIT/SmartScaleConnect/releases/
-   - Download the binary for your OS (e.g., `scaleconnect_windows_amd64.exe` for Windows)
-   - Rename it to `scaleconnect.exe` (Windows) or `scaleconnect` (Linux/Mac)
-   - Place it in the project root directory
-   - On Linux/Mac, make it executable: `chmod +x scaleconnect`
-
-4. Create a `.env` file with your Picooc credentials:
-   ```env
-   PICOOC_USERNAME=your_email@example.com
-   PICOOC_PASSWORD=your_password
-   PICOOC_USER=optional_specific_user_name
-   PORT=3000
+2. **Configure credentials** in `HealthAggregatorApi/local.settings.json`:
+   ```json
+   {
+     "IsEncrypted": false,
+     "Values": {
+       "AzureWebJobsStorage": "UseDevelopmentStorage=true",
+       "FUNCTIONS_WORKER_RUNTIME": "dotnet-isolated",
+       "Oura:AccessToken": "YOUR_OURA_TOKEN",
+       "Picooc:Email": "YOUR_EMAIL",
+       "Picooc:Password": "YOUR_PASSWORD"
+     }
+   }
    ```
 
-## Usage
-
-1. Start the server:
-   ```bash
-   npm start
+3. **Start Azure Functions**
+   ```powershell
+   cd HealthAggregatorApi
+   func start
    ```
 
-2. Open your browser to `http://localhost:3000`
+4. **Serve the dashboard** (in another terminal)
+   ```powershell
+   cd HealthAggregatorApi
+   npx serve dashboard -l 4280 --cors
+   ```
 
-3. Click **"Sync Now"** to fetch your data from Picooc
+5. Open http://localhost:4280
 
-## Configuration
+## Deployment
 
-| Environment Variable | Description | Required |
-|---------------------|-------------|----------|
-| `PICOOC_USERNAME` | Your Picooc account email | Yes |
-| `PICOOC_PASSWORD` | Your Picooc account password | Yes |
-| `PICOOC_USER` | Specific user name (if multiple users) | No |
-| `PORT` | Server port (default: 3000) | No |
+The project auto-deploys to Azure Static Web Apps via GitHub Actions on every push to `main`.
 
-## Data Storage
+### Manual Deployment Setup
 
-- Your health data is cached locally in `data/picooc_data.json`
-- Authorization tokens are stored in `scaleconnect.json` by SmartScaleConnect
-- No data is sent to any third-party servers except Picooc's official API
+1. Create an Azure Static Web App in the Azure Portal
+2. Get the deployment token from Azure Portal → Static Web App → Manage deployment token
+3. Add the token as a GitHub secret named `AZURE_STATIC_WEB_APPS_API_TOKEN`
+4. Configure application settings in Azure:
+   - `Oura__AccessToken`
+   - `Picooc__Email`
+   - `Picooc__Password`
 
-## Supported Metrics
+## Getting API Credentials
 
-- Weight (kg)
-- BMI (Body Mass Index)
-- Body Fat (%)
-- Body Water (%)
-- Bone Mass (kg)
-- Muscle Mass (kg)
-- Visceral Fat (index)
-- Metabolic Age (years)
-- Basal Metabolism (kcal)
-- And more depending on your scale model
+### Oura Access Token
+1. Go to [Oura Cloud](https://cloud.ouraring.com/oauth/applications)
+2. Create a Personal Access Token
+3. Copy the token
 
-## Troubleshooting
+### Picooc Credentials
+Use your Picooc mobile app login credentials (email + password).
 
-### "SmartScaleConnect binary not found"
-- Download the binary from the releases page
-- Make sure it's in the project root directory
-- Rename it to `scaleconnect.exe` (Windows) or `scaleconnect` (Linux/Mac)
+## Cost
 
-### "Credentials not configured"
-- Create a `.env` file in the project root
-- Add your Picooc username and password
+Running on Azure Free Tier:
+- **Static Web Apps**: Free
+- **Functions**: Free (up to 1M executions/month)
+- **Blob Storage**: ~$0.01/month
 
-### Sync fails
-- Check your Picooc credentials are correct
-- Try logging into the Picooc app on your phone to verify credentials
-- Check the console output for detailed error messages
-
-## Credits
-
-- [SmartScaleConnect](https://github.com/AlexxIT/SmartScaleConnect) by AlexxIT - For the amazing scale data synchronization tool
-- [Chart.js](https://www.chartjs.org/) - For beautiful charts
+**Total: ~$0.01/month**
 
 ## License
 
