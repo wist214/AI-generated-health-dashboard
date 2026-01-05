@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Health Aggregator (.NET)</title>
+    <title>Health Aggregator</title>
     <link rel="preconnect" href="https://cdn.jsdelivr.net">
     <link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
     <link rel="stylesheet" href="/css/styles.css">
@@ -15,7 +15,7 @@
     <a href="#main-content" class="skip-link">Skip to main content</a>
     <div class="container">
         <header>
-            <h1>Health Aggregator <span class="badge">.NET</span></h1>
+            <h1>Health Aggregator</h1>
             <p>Track your health data from multiple sources</p>
         </header>
 
@@ -27,7 +27,7 @@
             </button>
             <button type="button" class="tab-btn" role="tab" aria-selected="false" aria-controls="picooc-tab" data-tab="picooc">
                 <span class="tab-icon">⚖️</span>
-                <span class="tab-text">Picooc Scale</span>
+                <span class="tab-text">Weight</span>
             </button>
             <button type="button" class="tab-btn oura-btn" role="tab" aria-selected="false" aria-controls="oura-tab" data-tab="oura">
                 <span class="tab-icon">💍</span>
@@ -1211,12 +1211,12 @@
                         } else if (diff > 0.3) {
                             insights.push({ icon: '📈', text: `Your weight increased by ${diff.toFixed(1)}kg over the past ${daysBetween} days.`, type: 'info' });
                         } else {
-                            insights.push({ icon: '✨', text: `Your weight has been stable (${latestWeight}kg) over the past ${daysBetween} days.`, type: 'positive' });
+                            insights.push({ icon: '✨', text: `Your weight has been stable (${parseFloat(latestWeight).toFixed(1)}kg) over the past ${daysBetween} days.`, type: 'positive' });
                         }
                     }
                     
                     // Also show current weight
-                    insights.push({ icon: '⚖️', text: `Current weight: ${latestWeight}kg (measured ${latestDate.toLocaleDateString()})`, type: 'info' });
+                    insights.push({ icon: '⚖️', text: `Current weight: ${parseFloat(latestWeight).toFixed(1)}kg (measured ${latestDate.toLocaleDateString()})`, type: 'info' });
                 }
             }
             
