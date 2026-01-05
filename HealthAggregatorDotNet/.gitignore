@@ -1,0 +1,19 @@
+# Credentials - NEVER COMMIT
+appsettings.Development.json
+appsettings.Local.json
+secrets.json
+
+# Build outputs
+[Dd]ebug/
+[Rr]elease/
+[Bb]in/
+[Oo]bj/
+
+# Data files
+data/
+*.backup
+
+# Visual Studio
+.vs/
+*.suo
+*.user

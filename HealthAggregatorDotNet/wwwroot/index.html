@@ -1,0 +1,2100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Health Aggregator (.NET)</title>
+    <link rel="preconnect" href="https://cdn.jsdelivr.net">
+    <link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
+    <link rel="stylesheet" href="/css/styles.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns"></script>
+    <style>.skip-link{position:absolute;top:-40px;left:0;background:#00d4ff;color:#fff;padding:8px 16px;z-index:1001;text-decoration:none;border-radius:0 0 8px 0;transition:top .2s}.skip-link:focus{top:0}</style>
+</head>
+<body>
+    <a href="#main-content" class="skip-link">Skip to main content</a>
+    <div class="container">
+        <header>
+            <h1>Health Aggregator <span class="badge">.NET</span></h1>
+            <p>Track your health data from multiple sources</p>
+        </header>
+
+        <!-- Tab Navigation -->
+        <div class="tab-nav" role="tablist" aria-label="Health data sections">
+            <button type="button" class="tab-btn dashboard-btn active" role="tab" aria-selected="true" aria-controls="dashboard-tab" data-tab="dashboard">
+                <span class="tab-icon">📊</span>
+                <span class="tab-text">Dashboard</span>
+            </button>
+            <button type="button" class="tab-btn" role="tab" aria-selected="false" aria-controls="picooc-tab" data-tab="picooc">
+                <span class="tab-icon">⚖️</span>
+                <span class="tab-text">Picooc Scale</span>
+            </button>
+            <button type="button" class="tab-btn oura-btn" role="tab" aria-selected="false" aria-controls="oura-tab" data-tab="oura">
+                <span class="tab-icon">💍</span>
+                <span class="tab-text">Oura Ring</span>
+            </button>
+        </div>
+
+        <!-- Dashboard Tab Content -->
+        <div id="dashboard-tab" class="tab-content active" role="tabpanel" aria-labelledby="dashboard-tab">
+            <div class="dashboard-header">
+                <h2>🎯 Your Health Dashboard</h2>
+                <p class="date" id="dashboardDate">Loading...</p>
+            </div>
+
+            <div class="dashboard-grid">
+                <!-- Weight Card -->
+                <div class="metric-card weight">
+                    <div class="metric-header">
+                        <div class="metric-title">
+                            <span class="icon">⚖️</span>
+                            <h3>Weight</h3>
+                        </div>
+                        <span class="metric-source">Picooc</span>
+                    </div>
+                    <div class="metric-value" id="dashWeight">--<span class="metric-unit"> kg</span></div>
+                    <div class="metric-date" id="dashWeightDate">No data</div>
+                    <div class="progress-section">
+                        <h4>Progress</h4>
+                        <div class="progress-grid">
+                            <div class="progress-item">
+                                <div class="label">vs Previous</div>
+                                <div class="change neutral" id="weightVsYesterday">--</div>
+                                <div class="abs-value" id="weightYesterdayAbs"></div>
+                            </div>
+                            <div class="progress-item">
+                                <div class="label">vs ~1 Week</div>
+                                <div class="change neutral" id="weightVsWeek">--</div>
+                                <div class="abs-value" id="weightWeekAbs"></div>
+                            </div>
+                            <div class="progress-item">
+                                <div class="label">vs ~1 Month</div>
+                                <div class="change neutral" id="weightVsMonth">--</div>
+                                <div class="abs-value" id="weightMonthAbs"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Body Score Card -->
+                <div class="metric-card body-score">
+                    <div class="metric-header">
+                        <div class="metric-title">
+                            <span class="icon">💪</span>
+                            <h3>Body Fat</h3>
+                        </div>
+                        <span class="metric-source">Picooc</span>
+                    </div>
+                    <div class="metric-value" id="dashBodyFat">--<span class="metric-unit">%</span></div>
+                    <div class="metric-date" id="dashBodyFatDate">No data</div>
+                    <div class="progress-section">
+                        <h4>Progress</h4>
+                        <div class="progress-grid">
+                            <div class="progress-item">
+                                <div class="label">vs Previous</div>
+                                <div class="change neutral" id="bodyFatVsYesterday">--</div>
+                                <div class="abs-value" id="bodyFatYesterdayAbs"></div>
+                            </div>
+                            <div class="progress-item">
+                                <div class="label">vs ~1 Week</div>
+                                <div class="change neutral" id="bodyFatVsWeek">--</div>
+                                <div class="abs-value" id="bodyFatWeekAbs"></div>
+                            </div>
+                            <div class="progress-item">
+                                <div class="label">vs ~1 Month</div>
+                                <div class="change neutral" id="bodyFatVsMonth">--</div>
+                                <div class="abs-value" id="bodyFatMonthAbs"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sleep Score Card -->
+                <div class="metric-card sleep">
+                    <div class="metric-header">
+                        <div class="metric-title">
+                            <span class="icon">😴</span>
+                            <h3>Sleep Score</h3>
+                        </div>
+                        <span class="metric-source">Oura Ring</span>
+                    </div>
+                    <div class="metric-value" id="dashSleepScore">--</div>
+                    <div class="metric-date" id="dashSleepDate">No data</div>
+                    <div class="progress-section">
+                        <h4>Progress</h4>
+                        <div class="progress-grid">
+                            <div class="progress-item">
+                                <div class="label">vs Yesterday</div>
+                                <div class="change neutral" id="sleepVsYesterday">--</div>
+                                <div class="abs-value" id="sleepYesterdayAbs"></div>
+                            </div>
+                            <div class="progress-item">
+                                <div class="label">vs 1 Week</div>
+                                <div class="change neutral" id="sleepVsWeek">--</div>
+                                <div class="abs-value" id="sleepWeekAbs"></div>
+                            </div>
+                            <div class="progress-item">
+                                <div class="label">vs 1 Month</div>
+                                <div class="change neutral" id="sleepVsMonth">--</div>
+                                <div class="abs-value" id="sleepMonthAbs"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Readiness Score Card -->
+                <div class="metric-card readiness">
+                    <div class="metric-header">
+                        <div class="metric-title">
+                            <span class="icon">⚡</span>
+                            <h3>Readiness</h3>
+                        </div>
+                        <span class="metric-source">Oura Ring</span>
+                    </div>
+                    <div class="metric-value" id="dashReadiness">--</div>
+                    <div class="metric-date" id="dashReadinessDate">No data</div>
+                    <div class="progress-section">
+                        <h4>Progress</h4>
+                        <div class="progress-grid">
+                            <div class="progress-item">
+                                <div class="label">vs Yesterday</div>
+                                <div class="change neutral" id="readinessVsYesterday">--</div>
+                                <div class="abs-value" id="readinessYesterdayAbs"></div>
+                            </div>
+                            <div class="progress-item">
+                                <div class="label">vs 1 Week</div>
+                                <div class="change neutral" id="readinessVsWeek">--</div>
+                                <div class="abs-value" id="readinessWeekAbs"></div>
+                            </div>
+                            <div class="progress-item">
+                                <div class="label">vs 1 Month</div>
+                                <div class="change neutral" id="readinessVsMonth">--</div>
+                                <div class="abs-value" id="readinessMonthAbs"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Stats Row -->
+            <div class="quick-stats">
+                <div class="quick-stat">
+                    <div class="icon">🏃</div>
+                    <div class="info">
+                        <h4>Steps Today</h4>
+                        <div class="value" id="dashSteps">--</div>
+                    </div>
+                </div>
+                <div class="quick-stat">
+                    <div class="icon">🛏️</div>
+                    <div class="info">
+                        <h4>Sleep Duration</h4>
+                        <div class="value" id="dashSleepDuration">--</div>
+                    </div>
+                </div>
+                <div class="quick-stat">
+                    <div class="icon">❤️</div>
+                    <div class="info">
+                        <h4>Avg Heart Rate</h4>
+                        <div class="value" id="dashAvgHR">--</div>
+                    </div>
+                </div>
+                <div class="quick-stat">
+                    <div class="icon">💧</div>
+                    <div class="info">
+                        <h4>Body Water</h4>
+                        <div class="value" id="dashBodyWater">--</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Goals Section -->
+            <div class="dashboard-section">
+                <h3>📈 Weekly Trends</h3>
+                <div class="chart-wrapper" style="height: 300px;">
+                    <canvas id="dashboardChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Tips Section -->
+            <div class="dashboard-section" id="tipsSection">
+                <h3>💡 Insights</h3>
+                <div id="insightsList" class="no-data-message">
+                    Sync your data to get personalized insights
+                </div>
+            </div>
+        </div>
+
+        <!-- Picooc Tab Content -->
+        <div id="picooc-tab" class="tab-content" role="tabpanel" aria-labelledby="picooc-tab">
+            <div class="controls">
+                <button type="button" class="btn btn-primary" id="syncBtn">
+                    🔄 Sync Data
+                </button>
+                <div id="statusMessage" class="status"></div>
+            </div>
+
+            <div class="stats-grid" id="statsGrid">
+                <div class="stat-card">
+                    <h3>Weight</h3>
+                    <div class="value" id="currentWeight">--</div>
+                    <div class="details" id="weightDetails">No data</div>
+                </div>
+                <div class="stat-card">
+                    <h3>Body Fat</h3>
+                    <div class="value" id="currentBodyFat">--</div>
+                    <div class="details" id="bodyFatDetails">No data</div>
+                </div>
+                <div class="stat-card">
+                    <h3>BMI</h3>
+                    <div class="value" id="currentBMI">--</div>
+                    <div class="details" id="bmiDetails">No data</div>
+                </div>
+                <div class="stat-card">
+                    <h3>Muscle Mass</h3>
+                    <div class="value" id="currentMuscle">--</div>
+                    <div class="details" id="muscleDetails">No data</div>
+                </div>
+            </div>
+
+            <div class="chart-container">
+                <div class="chart-header">
+                    <h2>📊 Weight Trends</h2>
+                    <div class="chart-toggles" data-chart="picooc">
+                        <label class="toggle-label">
+                            <input type="checkbox" id="showWeight" checked>
+                            <span style="color: #00d4ff">● Weight</span>
+                        </label>
+                        <label class="toggle-label">
+                            <input type="checkbox" id="showBodyFat" checked>
+                            <span style="color: #f472b6">● Body Fat</span>
+                        </label>
+                        <label class="toggle-label">
+                            <input type="checkbox" id="showBMI">
+                            <span style="color: #a78bfa">● BMI</span>
+                        </label>
+                        <label class="toggle-label">
+                            <input type="checkbox" id="showMuscle">
+                            <span style="color: #34d399">● Muscle</span>
+                        </label>
+                    </div>
+                </div>
+                <div class="time-range-selector" id="picooc-time-selector">
+                    <button type="button" class="time-btn" data-range="7d">7 Days</button>
+                    <button type="button" class="time-btn" data-range="30d">30 Days</button>
+                    <button type="button" class="time-btn" data-range="90d">3 Months</button>
+                    <button type="button" class="time-btn" data-range="6m">6 Months</button>
+                    <button type="button" class="time-btn" data-range="1y">1 Year</button>
+                    <button type="button" class="time-btn active" data-range="all">All Time</button>
+                </div>
+                <div class="chart-wrapper">
+                    <canvas id="picoocChart"></canvas>
+                </div>
+            </div>
+
+            <div class="data-table">
+                <h2>📋 Measurement History</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th scope="col">Date</th>
+                            <th scope="col">Weight (kg)</th>
+                            <th scope="col">Body Fat (%)</th>
+                            <th scope="col">BMI</th>
+                            <th scope="col">Muscle (kg)</th>
+                            <th scope="col">Water (%)</th>
+                            <th scope="col">Metabolic Age</th>
+                        </tr>
+                    </thead>
+                    <tbody id="picoocTableBody">
+                        <tr>
+                            <td colspan="7" class="empty-state">
+                                <h3>No data yet</h3>
+                                <p>Click "Sync Data" to fetch your measurements</p>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Oura Tab Content -->
+        <div id="oura-tab" class="tab-content" role="tabpanel" aria-labelledby="oura-tab">
+            <div class="controls">
+                <button type="button" class="btn btn-oura" id="ouraSyncBtn">
+                    🔄 Sync Oura Data
+                </button>
+                <div id="ouraStatusMessage" class="status"></div>
+            </div>
+
+            <div class="stats-grid">
+                <div class="stat-card oura">
+                    <h3>Sleep Score</h3>
+                    <div class="value" id="ouraSleepScore">--</div>
+                    <div class="details" id="ouraSleepDetails">No data</div>
+                </div>
+                <div class="stat-card oura">
+                    <h3>Readiness Score</h3>
+                    <div class="value" id="ouraReadinessScore">--</div>
+                    <div class="details" id="ouraReadinessDetails">No data</div>
+                </div>
+                <div class="stat-card oura">
+                    <h3>Activity Score</h3>
+                    <div class="value" id="ouraActivityScore">--</div>
+                    <div class="details" id="ouraActivityDetails">No data</div>
+                </div>
+                <div class="stat-card oura">
+                    <h3>Avg Sleep Duration</h3>
+                    <div class="value" id="ouraAvgSleep">--</div>
+                    <div class="details" id="ouraAvgSleepDetails">No data</div>
+                </div>
+            </div>
+
+            <div class="chart-container">
+                <div class="chart-header">
+                    <h2>📊 Health Scores</h2>
+                    <div class="chart-toggles" data-chart="oura">
+                        <label class="toggle-label">
+                            <input type="checkbox" id="showSleepScore" checked>
+                            <span style="color: #3b82f6">● Sleep</span>
+                        </label>
+                        <label class="toggle-label">
+                            <input type="checkbox" id="showReadinessScore" checked>
+                            <span style="color: #22c55e">● Readiness</span>
+                        </label>
+                        <label class="toggle-label">
+                            <input type="checkbox" id="showActivityScore" checked>
+                            <span style="color: #f59e0b">● Activity</span>
+                        </label>
+                        <label class="toggle-label">
+                            <input type="checkbox" id="showSteps">
+                            <span style="color: #8b5cf6">● Steps</span>
+                        </label>
+                    </div>
+                </div>
+                <div class="time-range-selector" id="oura-time-selector">
+                    <button type="button" class="time-btn oura" data-range="7d">7 Days</button>
+                    <button type="button" class="time-btn oura" data-range="30d">30 Days</button>
+                    <button type="button" class="time-btn oura" data-range="90d">3 Months</button>
+                    <button type="button" class="time-btn oura" data-range="6m">6 Months</button>
+                    <button type="button" class="time-btn oura active" data-range="1y">1 Year</button>
+                    <button type="button" class="time-btn oura" data-range="all">All Time</button>
+                </div>
+                <div class="chart-wrapper">
+                    <canvas id="ouraChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Sleep Details Section -->
+            <div class="chart-container">
+                <div class="chart-header">
+                    <h2>😴 Sleep Duration</h2>
+                    <div class="chart-toggles" data-chart="sleep">
+                        <label class="toggle-label">
+                            <input type="checkbox" id="showTotalSleep" checked>
+                            <span style="color: #3b82f6">● Total Sleep</span>
+                        </label>
+                        <label class="toggle-label">
+                            <input type="checkbox" id="showDeepSleep" checked>
+                            <span style="color: #1e40af">● Deep Sleep</span>
+                        </label>
+                        <label class="toggle-label">
+                            <input type="checkbox" id="showRemSleep" checked>
+                            <span style="color: #8b5cf6">● REM Sleep</span>
+                        </label>
+                        <label class="toggle-label">
+                            <input type="checkbox" id="showAvgHR">
+                            <span style="color: #ef4444">● Avg HR</span>
+                        </label>
+                    </div>
+                </div>
+                <div class="chart-wrapper">
+                    <canvas id="sleepChart"></canvas>
+                </div>
+            </div>
+
+            <div class="data-table oura-table">
+                <h2>😴 Sleep History</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th scope="col">Date</th>
+                            <th scope="col">Score</th>
+                            <th scope="col">Total Sleep</th>
+                            <th scope="col">Deep Sleep</th>
+                            <th scope="col">REM Sleep</th>
+                            <th scope="col">Avg HR</th>
+                            <th scope="col">HRV</th>
+                            <th scope="col">Efficiency</th>
+                        </tr>
+                    </thead>
+                    <tbody id="ouraSleepTableBody">
+                        <tr>
+                            <td colspan="8" class="empty-state">
+                                <h3>No data yet</h3>
+                                <p>Click "Sync Oura Data" to fetch your sleep data</p>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="data-table oura-table" style="margin-top: 30px;">
+                <h2>🏃 Activity History</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th scope="col">Date</th>
+                            <th scope="col">Score</th>
+                            <th scope="col">Steps</th>
+                            <th scope="col">Active Cal</th>
+                            <th scope="col">Total Cal</th>
+                            <th scope="col">Distance</th>
+                            <th scope="col">High Activity</th>
+                            <th scope="col">Med Activity</th>
+                        </tr>
+                    </thead>
+                    <tbody id="ouraActivityTableBody">
+                        <tr>
+                            <td colspan="8" class="empty-state">
+                                <h3>No data yet</h3>
+                                <p>Click "Sync Oura Data" to fetch your activity data</p>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sleep Detail Modal -->
+    <div class="modal-overlay" id="sleepModal">
+        <div class="modal sleep-modal">
+            <div class="modal-header" style="background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);">
+                <h2>Sleep Analysis</h2>
+                <div class="modal-date" id="modalDate">--</div>
+                <button type="button" class="modal-close" aria-label="Close sleep analysis modal">×</button>
+            </div>
+            <div class="modal-body">
+                <!-- Hero Metrics -->
+                <div class="metric-hero sleep-hero">
+                    <div class="hero-metric">
+                        <div class="hero-icon emoji-icon">🌙</div>
+                        <div class="hero-value" id="modalScore">--</div>
+                        <div class="hero-label">Sleep Score</div>
+                    </div>
+                    <div class="hero-metric">
+                        <div class="hero-icon emoji-icon">⏱️</div>
+                        <div class="hero-value" id="modalTotalSleep">--</div>
+                        <div class="hero-label">Total Sleep</div>
+                    </div>
+                    <div class="hero-metric">
+                        <div class="hero-icon emoji-icon">✨</div>
+                        <div class="hero-value" id="modalRestfulness">--</div>
+                        <div class="hero-label">Restfulness</div>
+                    </div>
+                </div>
+
+                <!-- Sleep Timing -->
+                <div class="sleep-timing-section">
+                    <div class="timing-row">
+                        <div class="timing-item">
+                            <span class="timing-label">Bedtime</span>
+                            <span class="timing-value" id="modalBedtime">--</span>
+                        </div>
+                        <div class="timing-arrow">→</div>
+                        <div class="timing-item">
+                            <span class="timing-label">Wake Time</span>
+                            <span class="timing-value" id="modalWakeTime">--</span>
+                        </div>
+                        <div class="timing-item efficiency">
+                            <span class="timing-label">Efficiency</span>
+                            <span class="timing-value" id="modalEfficiency">--</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sleep Stages -->
+                <div class="sleep-stages">
+                    <h3>Sleep Stages</h3>
+                    <div class="stage-bar" id="stageBar"></div>
+                    <div class="stage-legend">
+                        <div class="stage-legend-item"><span class="dot stage-deep"></span> Deep: <span id="modalDeep">--</span></div>
+                        <div class="stage-legend-item"><span class="dot stage-light"></span> Light: <span id="modalLight">--</span></div>
+                        <div class="stage-legend-item"><span class="dot stage-rem"></span> REM: <span id="modalRem">--</span></div>
+                        <div class="stage-legend-item"><span class="dot stage-awake"></span> Awake: <span id="modalAwake">--</span></div>
+                    </div>
+                </div>
+
+                <!-- Vitals Grid -->
+                <div class="vitals-section">
+                    <h3>Sleep Vitals</h3>
+                    <div class="vitals-grid">
+                        <div class="vital-card">
+                            <div class="vital-icon emoji-icon">❤️</div>
+                            <div class="vital-value" id="modalAvgHR">--</div>
+                            <div class="vital-label">Avg Heart Rate</div>
+                            <div class="vital-sub" id="modalLowestHR">Lowest: --</div>
+                        </div>
+                        <div class="vital-card">
+                            <div class="vital-icon emoji-icon">💓</div>
+                            <div class="vital-value" id="modalHRV">--</div>
+                            <div class="vital-label">HRV (RMSSD)</div>
+                        </div>
+                        <div class="vital-card">
+                            <div class="vital-icon emoji-icon">🌬️</div>
+                            <div class="vital-value" id="modalBreath">--</div>
+                            <div class="vital-label">Breathing Rate</div>
+                        </div>
+                        <div class="vital-card">
+                            <div class="vital-icon emoji-icon">⏳</div>
+                            <div class="vital-value" id="modalLatency">--</div>
+                            <div class="vital-label">Sleep Latency</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Time in Bed info -->
+                <div class="time-in-bed-info">
+                    <span id="modalTimeInBed">Time in bed: --</span>
+                    <span id="modalRestless">Restless periods: --</span>
+                </div>
+
+                <div class="contributors-section" id="contributorsSection" style="display: none;">
+                    <h3>Score Contributors</h3>
+                    <div class="contributor-list" id="contributorsList"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Measurement Detail Modal -->
+    <div class="modal-overlay" id="measurementModal">
+        <div class="modal measurement-modal">
+            <div class="modal-header" style="background: linear-gradient(135deg, #7c3aed 0%, #a855f7 100%);">
+                <h2>Body Composition</h2>
+                <div class="modal-date" id="measurementModalDate">--</div>
+                <button type="button" class="modal-close" aria-label="Close body composition modal">×</button>
+            </div>
+            <div class="modal-body">
+                <!-- Primary Metrics -->
+                <div class="metric-hero">
+                    <div class="hero-metric">
+                        <div class="hero-icon emoji-icon">⚖️</div>
+                        <div class="hero-value" id="measurementWeight">--</div>
+                        <div class="hero-label">Weight (kg)</div>
+                    </div>
+                    <div class="hero-metric">
+                        <div class="hero-icon emoji-icon">🔥</div>
+                        <div class="hero-value" id="measurementBodyFatHero">--</div>
+                        <div class="hero-label">Body Fat</div>
+                        <div class="hero-status" id="bodyFatStatus">%</div>
+                    </div>
+                    <div class="hero-metric">
+                        <div class="hero-icon emoji-icon">📊</div>
+                        <div class="hero-value" id="measurementBMI">--</div>
+                        <div class="hero-label">BMI</div>
+                        <div class="hero-status" id="measurementBMIStatus">--</div>
+                    </div>
+                </div>
+
+                <!-- Body Composition Section -->
+                <div class="composition-section">
+                    <h3>Body Composition</h3>
+                    <div class="composition-bars">
+                        <div class="comp-item">
+                            <div class="comp-header">
+                                <span class="comp-label">💪 Muscle Mass</span>
+                                <span class="comp-value" id="measurementMuscle">--</span>
+                                <span class="comp-unit">kg</span>
+                            </div>
+                            <div class="comp-bar"><div class="comp-fill muscle" id="muscleBar"></div></div>
+                        </div>
+                        <div class="comp-item">
+                            <div class="comp-header">
+                                <span class="comp-label">🔥 Body Fat</span>
+                                <span class="comp-value" id="measurementBodyFat">--</span>
+                                <span class="comp-unit">%</span>
+                            </div>
+                            <div class="comp-bar"><div class="comp-fill fat" id="fatBar"></div></div>
+                        </div>
+                        <div class="comp-item">
+                            <div class="comp-header">
+                                <span class="comp-label">💧 Body Water</span>
+                                <span class="comp-value" id="measurementWater">--</span>
+                                <span class="comp-unit">%</span>
+                            </div>
+                            <div class="comp-bar"><div class="comp-fill water" id="waterBar"></div></div>
+                        </div>
+                        <div class="comp-item">
+                            <div class="comp-header">
+                                <span class="comp-label">🦴 Bone Mass</span>
+                                <span class="comp-value" id="measurementBone">--</span>
+                                <span class="comp-unit">kg</span>
+                            </div>
+                            <div class="comp-bar"><div class="comp-fill bone" id="boneBar"></div></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Health Indicators -->
+                <div class="health-indicators">
+                    <h3>Health Indicators</h3>
+                    <div class="indicator-grid" style="grid-template-columns: repeat(3, 1fr);">
+                        <div class="indicator-card">
+                            <div class="indicator-icon emoji-icon">🎂</div>
+                            <div class="indicator-value" id="measurementMetabolicAge">--</div>
+                            <div class="indicator-label">Metabolic Age</div>
+                            <div class="indicator-sub">years</div>
+                        </div>
+                        <div class="indicator-card">
+                            <div class="indicator-icon emoji-icon">🎯</div>
+                            <div class="indicator-value" id="measurementVisceralFat">--</div>
+                            <div class="indicator-label">Visceral Fat</div>
+                            <div class="indicator-sub" id="visceralStatus">level</div>
+                        </div>
+                        <div class="indicator-card">
+                            <div class="indicator-icon emoji-icon">⚡</div>
+                            <div class="indicator-value" id="measurementBMR">--</div>
+                            <div class="indicator-label">BMR</div>
+                            <div class="indicator-sub">kcal/day</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ============================================
+        // Global State
+        // ============================================
+        let picoocData = [];
+        let ouraData = { sleepRecords: [], dailySleep: [], readiness: [], activity: [] };
+        let picoocChart = null;
+        let ouraChart = null;
+        let sleepChart = null;
+        let dashboardChart = null;
+        let picoocTimeRange = 'all';
+        let ouraTimeRange = '1y';
+
+        // ============================================
+        // Tab Navigation
+        // ============================================
+        function switchTab(tabName, btn) {
+            // Update tab buttons
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+
+            // Update tab content
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+            document.getElementById(`${tabName}-tab`).classList.add('active');
+            
+            // Refresh dashboard if switching to it
+            if (tabName === 'dashboard') {
+                updateDashboard();
+            }
+        }
+
+        // ============================================
+        // Initialization
+        // ============================================
+        document.addEventListener('DOMContentLoaded', () => {
+            // Initialize event listeners
+            initEventListeners();
+            
+            // Load data
+            loadPicoocData();
+            loadOuraData();
+            checkPicoocStatus();
+            checkOuraStatus();
+            
+            // Set dashboard date
+            document.getElementById('dashboardDate').textContent = new Date().toLocaleDateString('en-US', {
+                weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
+            });
+        });
+
+        // ============================================
+        // Event Listeners Setup
+        // ============================================
+        function initEventListeners() {
+            // Tab navigation
+            document.querySelectorAll('[data-tab]').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const tabName = e.currentTarget.dataset.tab;
+                    switchTab(tabName, e.currentTarget);
+                });
+            });
+
+            // Sync buttons
+            document.getElementById('syncBtn').addEventListener('click', syncPicoocData);
+            document.getElementById('ouraSyncBtn').addEventListener('click', syncOuraData);
+
+            // Time range buttons - Picooc
+            document.getElementById('picooc-time-selector').addEventListener('click', (e) => {
+                const btn = e.target.closest('[data-range]');
+                if (btn) {
+                    setPicoocTimeRange(btn.dataset.range, btn);
+                }
+            });
+
+            // Time range buttons - Oura
+            document.getElementById('oura-time-selector').addEventListener('click', (e) => {
+                const btn = e.target.closest('[data-range]');
+                if (btn) {
+                    setOuraTimeRange(btn.dataset.range, btn);
+                }
+            });
+
+            // Chart toggles - Picooc
+            document.querySelector('[data-chart="picooc"]').addEventListener('change', (e) => {
+                if (e.target.type === 'checkbox') {
+                    updatePicoocChart();
+                }
+            });
+
+            // Chart toggles - Oura
+            document.querySelector('[data-chart="oura"]').addEventListener('change', (e) => {
+                if (e.target.type === 'checkbox') {
+                    updateOuraChart();
+                }
+            });
+
+            // Chart toggles - Sleep
+            document.querySelector('[data-chart="sleep"]').addEventListener('change', (e) => {
+                if (e.target.type === 'checkbox') {
+                    updateSleepChart();
+                }
+            });
+
+            // Modal close buttons and overlay clicks
+            document.querySelectorAll('.modal-overlay').forEach(modal => {
+                // Close on overlay click
+                modal.addEventListener('click', (e) => {
+                    if (e.target === modal) {
+                        closeModal(modal.id);
+                    }
+                });
+
+                // Close button
+                const closeBtn = modal.querySelector('.modal-close');
+                if (closeBtn) {
+                    closeBtn.addEventListener('click', () => closeModal(modal.id));
+                }
+
+                // Prevent click propagation from modal content
+                const modalContent = modal.querySelector('.modal');
+                if (modalContent) {
+                    modalContent.addEventListener('click', (e) => e.stopPropagation());
+                }
+            });
+
+            // Table row clicks with event delegation - Picooc
+            document.getElementById('picoocTableBody').addEventListener('click', (e) => {
+                const row = e.target.closest('tr[data-index]');
+                if (row) {
+                    showMeasurementDetail(parseInt(row.dataset.index));
+                }
+            });
+
+            // Table row clicks with event delegation - Oura Sleep
+            document.getElementById('ouraSleepTableBody').addEventListener('click', (e) => {
+                const row = e.target.closest('tr[data-sleep-id]');
+                if (row) {
+                    openSleepDetail(row.dataset.sleepId);
+                }
+            });
+        }
+
+        // Generic modal close function
+        function closeModal(modalId) {
+            const modal = document.getElementById(modalId);
+            if (modal) {
+                modal.classList.remove('active');
+            }
+        }
+
+        // ============================================
+        // Dashboard Functions
+        // ============================================
+        function updateDashboard() {
+            updateDashboardMetrics();
+            updateDashboardChart();
+            updateInsights();
+        }
+
+        function updateDashboardMetrics() {
+            // Update date
+            document.getElementById('dashboardDate').textContent = new Date().toLocaleDateString('en-US', {
+                weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
+            });
+
+            // Weight metrics from Picooc
+            if (picoocData.length > 0) {
+                const getDate = (d) => new Date(d.date || d.Date);
+                const getWeight = (d) => d.weight || d.Weight;
+                const getBodyFat = (d) => d.bodyFat || d.BodyFat;
+                const getBodyWater = (d) => d.bodyWater || d.BodyWater;
+                
+                const sortedPicooc = [...picoocData].sort((a, b) => getDate(b) - getDate(a));
+                const latest = sortedPicooc[0];
+                
+                // Current weight
+                const currentWeight = getWeight(latest);
+                if (currentWeight) {
+                    document.getElementById('dashWeight').innerHTML = `${currentWeight}<span class="metric-unit"> kg</span>`;
+                    document.getElementById('dashWeightDate').textContent = getDate(latest).toLocaleDateString();
+                    
+                    // Calculate progress
+                    calculateProgress('weight', sortedPicooc, getWeight, getDate, true);
+                }
+                
+                // Body Fat
+                const currentBodyFat = getBodyFat(latest);
+                if (currentBodyFat) {
+                    document.getElementById('dashBodyFat').innerHTML = `${currentBodyFat}<span class="metric-unit">%</span>`;
+                    document.getElementById('dashBodyFatDate').textContent = getDate(latest).toLocaleDateString();
+                    
+                    calculateProgress('bodyFat', sortedPicooc, getBodyFat, getDate, true);
+                }
+                
+                // Body Water
+                const currentBodyWater = getBodyWater(latest);
+                if (currentBodyWater) {
+                    document.getElementById('dashBodyWater').textContent = `${currentBodyWater}%`;
+                }
+            }
+
+            // Sleep metrics from Oura
+            if (ouraData.dailySleep && ouraData.dailySleep.length > 0) {
+                const sortedSleep = [...ouraData.dailySleep].sort((a, b) => new Date(b.day) - new Date(a.day));
+                const latest = sortedSleep[0];
+                
+                if (latest.score) {
+                    document.getElementById('dashSleepScore').textContent = latest.score;
+                    document.getElementById('dashSleepDate').textContent = new Date(latest.day).toLocaleDateString();
+                    
+                    calculateProgress('sleep', sortedSleep, d => d.score, d => new Date(d.day), false);
+                }
+            }
+
+            // Readiness from Oura
+            if (ouraData.readiness && ouraData.readiness.length > 0) {
+                const sortedReadiness = [...ouraData.readiness].sort((a, b) => new Date(b.day) - new Date(a.day));
+                const latest = sortedReadiness[0];
+                
+                if (latest.score) {
+                    document.getElementById('dashReadiness').textContent = latest.score;
+                    document.getElementById('dashReadinessDate').textContent = new Date(latest.day).toLocaleDateString();
+                    
+                    calculateProgress('readiness', sortedReadiness, d => d.score, d => new Date(d.day), false);
+                }
+            }
+
+            // Activity (Steps) from Oura
+            if (ouraData.activity && ouraData.activity.length > 0) {
+                const sortedActivity = [...ouraData.activity].sort((a, b) => new Date(b.day) - new Date(a.day));
+                const latest = sortedActivity[0];
+                
+                if (latest.steps) {
+                    document.getElementById('dashSteps').textContent = latest.steps.toLocaleString();
+                }
+            }
+
+            // Sleep Duration from Sleep Records (only long_sleep, not naps)
+            if (ouraData.sleepRecords && ouraData.sleepRecords.length > 0) {
+                // Filter for long sleep only (exclude naps)
+                const longSleepRecords = ouraData.sleepRecords.filter(r => r.type === 'long_sleep');
+                const sortedSleepRecords = [...longSleepRecords].sort((a, b) => new Date(b.day) - new Date(a.day));
+                
+                if (sortedSleepRecords.length > 0) {
+                    const latest = sortedSleepRecords[0];
+                    
+                    if (latest.totalSleepDuration) {
+                        document.getElementById('dashSleepDuration').textContent = formatDuration(latest.totalSleepDuration);
+                    }
+                    
+                    if (latest.averageHeartRate) {
+                        document.getElementById('dashAvgHR').textContent = `${Math.round(latest.averageHeartRate)} bpm`;
+                    }
+                }
+            }
+        }
+
+        function calculateProgress(metricType, data, getValue, getDate, lowerIsBetter) {
+            if (!data || data.length < 2) return; // Need at least 2 records to compare
+            
+            const latestDate = getDate(data[0]);
+            const current = getValue(data[0]);
+            if (!current) return;
+            
+            // Find the value at approximately N days before the latest record
+            const findValueDaysBeforeLatest = (targetDaysBack, tolerance = 0.5) => {
+                // Skip the first record (that's our current value)
+                for (let i = 1; i < data.length; i++) {
+                    const item = data[i];
+                    const itemDate = getDate(item);
+                    const val = getValue(item);
+                    
+                    // Skip if no value
+                    if (!val) continue;
+                    
+                    // Days between this record and the latest record
+                    const daysSinceLatest = (latestDate.getTime() - itemDate.getTime()) / (24 * 60 * 60 * 1000);
+                    
+                    // For flexible matching with tolerance range
+                    const minDays = targetDaysBack * (1 - tolerance);
+                    const maxDays = targetDaysBack * (1 + tolerance);
+                    
+                    if (daysSinceLatest >= minDays && daysSinceLatest <= maxDays) {
+                        return val;
+                    }
+                }
+                
+                // Fallback: find closest record before target
+                let closest = null;
+                let closestDiff = Infinity;
+                
+                for (let i = 1; i < data.length; i++) {
+                    const item = data[i];
+                    const itemDate = getDate(item);
+                    const val = getValue(item);
+                    
+                    if (!val) continue;
+                    
+                    const daysSinceLatest = (latestDate.getTime() - itemDate.getTime()) / (24 * 60 * 60 * 1000);
+                    const diff = Math.abs(daysSinceLatest - targetDaysBack);
+                    
+                    if (diff < closestDiff && daysSinceLatest > 0) {
+                        closest = val;
+                        closestDiff = diff;
+                    }
+                }
+                
+                return closest;
+            };
+            
+            // Find previous record (for "yesterday" - just the previous measurement)
+            const findPreviousRecord = () => {
+                for (let i = 1; i < data.length; i++) {
+                    const val = getValue(data[i]);
+                    if (val) return val;
+                }
+                return null;
+            };
+            
+            const yesterdayVal = findPreviousRecord(); // Previous measurement
+            const weekVal = findValueDaysBeforeLatest(7, 0.6); // ~7 days with 60% tolerance (4-11 days)
+            const monthVal = findValueDaysBeforeLatest(30, 0.3); // ~30 days with 30% tolerance (21-39 days)
+            
+            updateProgressDisplay(metricType, 'Yesterday', yesterdayVal, current, lowerIsBetter);
+            updateProgressDisplay(metricType, 'Week', weekVal, current, lowerIsBetter);
+            updateProgressDisplay(metricType, 'Month', monthVal, current, lowerIsBetter);
+        }
+
+        function updateProgressDisplay(metricType, period, oldValue, newValue, lowerIsBetter) {
+            const changeEl = document.getElementById(`${metricType}Vs${period}`);
+            const absEl = document.getElementById(`${metricType}${period}Abs`);
+            
+            if (!oldValue || !newValue) {
+                changeEl.textContent = '--';
+                changeEl.className = 'change neutral';
+                if (absEl) absEl.textContent = '';
+                return;
+            }
+            
+            const diff = newValue - oldValue;
+            const pctChange = ((diff / oldValue) * 100).toFixed(1);
+            
+            let changeClass = 'neutral';
+            let arrow = '';
+            
+            if (Math.abs(diff) < 0.01) {
+                changeClass = 'neutral';
+                arrow = '→';
+            } else if (lowerIsBetter) {
+                // For weight/body fat, lower is better
+                changeClass = diff < 0 ? 'positive' : 'negative';
+                arrow = diff < 0 ? '↓' : '↑';
+            } else {
+                // For scores, higher is better
+                changeClass = diff > 0 ? 'positive' : 'negative';
+                arrow = diff > 0 ? '↑' : '↓';
+            }
+            
+            changeEl.textContent = `${arrow} ${Math.abs(pctChange)}%`;
+            changeEl.className = `change ${changeClass}`;
+            
+            if (absEl) {
+                const sign = diff > 0 ? '+' : '';
+                absEl.textContent = `${sign}${diff.toFixed(1)}`;
+            }
+        }
+
+        function updateDashboardChart() {
+            const canvas = document.getElementById('dashboardChart');
+            const ctx = canvas.getContext('2d');
+            
+            if (dashboardChart) {
+                dashboardChart.destroy();
+                dashboardChart = null;
+            }
+            
+            // Get last 7 days of data
+            const dates = [];
+            const now = new Date();
+            for (let i = 6; i >= 0; i--) {
+                const d = new Date(now.getTime() - i * 24 * 60 * 60 * 1000);
+                dates.push(d.toISOString().split('T')[0]);
+            }
+            
+            const sleepMap = {};
+            const readinessMap = {};
+            const weightMap = {};
+            
+            if (ouraData.dailySleep) {
+                ouraData.dailySleep.forEach(d => { sleepMap[d.day] = d.score; });
+            }
+            if (ouraData.readiness) {
+                ouraData.readiness.forEach(d => { readinessMap[d.day] = d.score; });
+            }
+            if (picoocData.length > 0) {
+                picoocData.forEach(d => {
+                    const date = new Date(d.date || d.Date).toISOString().split('T')[0];
+                    const weight = d.weight || d.Weight;
+                    if (weight) weightMap[date] = weight;
+                });
+            }
+            
+            const labels = dates.map(d => new Date(d).toLocaleDateString('en-US', { weekday: 'short', day: 'numeric' }));
+            
+            const datasets = [];
+            
+            // Only add datasets that have data
+            const sleepData = dates.map(d => sleepMap[d] || null);
+            const readinessData = dates.map(d => readinessMap[d] || null);
+            const weightData = dates.map(d => weightMap[d] || null);
+            
+            // Three simple lines - no fill, all on single Y axis (Score/kg 1:1)
+            if (sleepData.some(v => v !== null)) {
+                datasets.push({
+                    label: 'Sleep Score',
+                    data: sleepData,
+                    borderColor: '#3b82f6',
+                    backgroundColor: '#3b82f6',
+                    borderWidth: 3,
+                    pointRadius: 5,
+                    pointHoverRadius: 7,
+                    tension: 0.3,
+                    fill: false
+                });
+            }
+            
+            if (readinessData.some(v => v !== null)) {
+                datasets.push({
+                    label: 'Readiness',
+                    data: readinessData,
+                    borderColor: '#22c55e',
+                    backgroundColor: '#22c55e',
+                    borderWidth: 3,
+                    pointRadius: 5,
+                    pointHoverRadius: 7,
+                    tension: 0.3,
+                    fill: false
+                });
+            }
+            
+            if (weightData.some(v => v !== null)) {
+                datasets.push({
+                    label: 'Weight (kg)',
+                    data: weightData,
+                    borderColor: '#00d4ff',
+                    backgroundColor: '#00d4ff',
+                    borderWidth: 3,
+                    pointRadius: 5,
+                    pointHoverRadius: 7,
+                    tension: 0.3,
+                    fill: false
+                });
+            }
+            
+            if (datasets.length === 0) {
+                return;
+            }
+            
+            dashboardChart = new Chart(ctx, {
+                type: 'line',
+                data: { labels, datasets },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    interaction: { mode: 'index', intersect: false },
+                    plugins: {
+                        legend: { 
+                            labels: { color: '#aaa' },
+                            position: 'top'
+                        }
+                    },
+                    scales: {
+                        x: { 
+                            grid: { color: 'rgba(255,255,255,0.05)' }, 
+                            ticks: { color: '#888' } 
+                        },
+                        y: { 
+                            type: 'linear', 
+                            display: true, 
+                            position: 'left', 
+                            min: 0, 
+                            max: 100,
+                            grid: { color: 'rgba(255,255,255,0.05)' }, 
+                            ticks: { color: '#aaa' },
+                            title: { display: true, text: 'Score / Weight (kg)', color: '#aaa' }
+                        }
+                    }
+                }
+            });
+        }
+
+        function updateInsights() {
+            const insightsList = document.getElementById('insightsList');
+            const insights = [];
+            const now = new Date();
+            
+            // Weight insights - compare latest with ~1 week ago record
+            if (picoocData.length > 1) {
+                const getWeight = (d) => d.weight || d.Weight;
+                const getDate = (d) => new Date(d.date || d.Date);
+                const sorted = [...picoocData].filter(d => getWeight(d)).sort((a, b) => getDate(b) - getDate(a));
+                
+                if (sorted.length >= 2) {
+                    const latest = sorted[0];
+                    const latestWeight = getWeight(latest);
+                    const latestDate = getDate(latest);
+                    
+                    // Find record closest to 7 days before latest
+                    let weekAgoRecord = null;
+                    let closestDiff = Infinity;
+                    
+                    for (let i = 1; i < sorted.length; i++) {
+                        const recordDate = getDate(sorted[i]);
+                        const daysDiff = (latestDate - recordDate) / (24 * 60 * 60 * 1000);
+                        const diffFrom7 = Math.abs(daysDiff - 7);
+                        
+                        if (daysDiff >= 5 && daysDiff <= 14 && diffFrom7 < closestDiff) {
+                            weekAgoRecord = sorted[i];
+                            closestDiff = diffFrom7;
+                        }
+                    }
+                    
+                    if (weekAgoRecord) {
+                        const weekAgoWeight = getWeight(weekAgoRecord);
+                        const diff = latestWeight - weekAgoWeight;
+                        const daysBetween = Math.round((latestDate - getDate(weekAgoRecord)) / (24 * 60 * 60 * 1000));
+                        
+                        if (diff < -0.3) {
+                            insights.push({ icon: '🎉', text: `Great progress! You've lost ${Math.abs(diff).toFixed(1)}kg over the past ${daysBetween} days.`, type: 'positive' });
+                        } else if (diff > 0.3) {
+                            insights.push({ icon: '📈', text: `Your weight increased by ${diff.toFixed(1)}kg over the past ${daysBetween} days.`, type: 'info' });
+                        } else {
+                            insights.push({ icon: '✨', text: `Your weight has been stable (${latestWeight}kg) over the past ${daysBetween} days.`, type: 'positive' });
+                        }
+                    }
+                    
+                    // Also show current weight
+                    insights.push({ icon: '⚖️', text: `Current weight: ${latestWeight}kg (measured ${latestDate.toLocaleDateString()})`, type: 'info' });
+                }
+            }
+            
+            // Sleep insights
+            if (ouraData.dailySleep && ouraData.dailySleep.length > 0) {
+                const sorted = [...ouraData.dailySleep].filter(d => d.score).sort((a, b) => new Date(b.day) - new Date(a.day));
+                const latestScore = sorted[0]?.score;
+                
+                if (latestScore) {
+                    if (latestScore >= 85) {
+                        insights.push({ icon: '😴', text: `Excellent sleep score of ${latestScore}! You're well-rested.`, type: 'positive' });
+                    } else if (latestScore < 70) {
+                        insights.push({ icon: '💤', text: `Your sleep score is ${latestScore}. Try going to bed earlier tonight.`, type: 'warning' });
+                    }
+                }
+                
+                // Check sleep consistency
+                if (sorted.length >= 7) {
+                    const weekScores = sorted.slice(0, 7).map(d => d.score).filter(s => s);
+                    const avgScore = weekScores.reduce((a, b) => a + b, 0) / weekScores.length;
+                    insights.push({ icon: '📊', text: `Your 7-day average sleep score is ${Math.round(avgScore)}.`, type: 'info' });
+                }
+            }
+            
+            // Readiness insights
+            if (ouraData.readiness && ouraData.readiness.length > 0) {
+                const latest = [...ouraData.readiness].sort((a, b) => new Date(b.day) - new Date(a.day))[0];
+                if (latest?.score) {
+                    if (latest.score >= 85) {
+                        insights.push({ icon: '⚡', text: `High readiness score of ${latest.score}! Great day for intense activity.`, type: 'positive' });
+                    } else if (latest.score < 70) {
+                        insights.push({ icon: '🧘', text: `Readiness is at ${latest.score}. Consider a lighter workout or rest day.`, type: 'warning' });
+                    }
+                }
+            }
+            
+            // Activity insights
+            if (ouraData.activity && ouraData.activity.length > 0) {
+                const sorted = [...ouraData.activity].sort((a, b) => new Date(b.day) - new Date(a.day));
+                const latest = sorted[0];
+                
+                if (latest?.steps) {
+                    if (latest.steps >= 10000) {
+                        insights.push({ icon: '🏆', text: `You hit ${latest.steps.toLocaleString()} steps! Keep up the great work!`, type: 'positive' });
+                    } else if (latest.steps < 5000) {
+                        insights.push({ icon: '👟', text: `Only ${latest.steps.toLocaleString()} steps so far. Try a short walk!`, type: 'warning' });
+                    }
+                }
+            }
+            
+            // Display insights
+            if (insights.length > 0) {
+                insightsList.innerHTML = insights.map(i => `
+                    <div style="display: flex; align-items: flex-start; gap: 15px; padding: 15px; 
+                                background: rgba(255,255,255,0.03); border-radius: 12px; margin-bottom: 10px;
+                                border-left: 3px solid ${i.type === 'positive' ? '#22c55e' : i.type === 'warning' ? '#f59e0b' : '#3b82f6'};">
+                        <span style="font-size: 1.5rem;">${i.icon}</span>
+                        <span style="color: #ccc; line-height: 1.5;">${i.text}</span>
+                    </div>
+                `).join('');
+            } else {
+                insightsList.innerHTML = '<div class="no-data-message">Sync your data to get personalized insights</div>';
+            }
+        }
+
+        // ============================================
+        // Picooc Functions
+        // ============================================
+        async function checkPicoocStatus() {
+            try {
+                const response = await fetch('/api/status');
+                const status = await response.json();
+                
+                const statusEl = document.getElementById('statusMessage');
+                if (!status.configured) {
+                    if (!status.hasCredentials) {
+                        statusEl.className = 'status warning';
+                        statusEl.textContent = '⚠️ Credentials not configured';
+                    } else if (!status.hasDocker) {
+                        statusEl.className = 'status warning';
+                        statusEl.textContent = '⚠️ Docker not available';
+                    }
+                } else {
+                    statusEl.className = 'status success';
+                    statusEl.textContent = `✅ Ready (${status.syncMethod})`;
+                }
+            } catch (e) {
+                console.error('Status check failed:', e);
+            }
+        }
+
+        async function loadPicoocData() {
+            try {
+                const response = await fetch('/api/data');
+                picoocData = await response.json();
+                updatePicoocUI();
+                loadPicoocStats();
+                updateDashboard(); // Update dashboard with new data
+            } catch (e) {
+                console.error('Failed to load Picooc data:', e);
+            }
+        }
+
+        async function loadPicoocStats() {
+            try {
+                const response = await fetch('/api/stats');
+                const stats = await response.json();
+                
+                if (stats.weight) {
+                    document.getElementById('currentWeight').textContent = stats.weight.current + ' kg';
+                    document.getElementById('weightDetails').textContent = 
+                        `Min: ${stats.weight.min} | Max: ${stats.weight.max} | Avg: ${stats.weight.avg}`;
+                }
+                
+                if (stats.bodyFat) {
+                    document.getElementById('currentBodyFat').textContent = stats.bodyFat.current + '%';
+                    document.getElementById('bodyFatDetails').textContent = 
+                        `Min: ${stats.bodyFat.min} | Max: ${stats.bodyFat.max} | Avg: ${stats.bodyFat.avg}`;
+                }
+                
+                if (stats.bmi) {
+                    document.getElementById('currentBMI').textContent = stats.bmi.current;
+                    document.getElementById('bmiDetails').textContent = 
+                        `Min: ${stats.bmi.min} | Max: ${stats.bmi.max} | Avg: ${stats.bmi.avg}`;
+                }
+                
+                if (stats.muscle) {
+                    document.getElementById('currentMuscle').textContent = stats.muscle.current + ' kg';
+                    document.getElementById('muscleDetails').textContent = 
+                        `Min: ${stats.muscle.min} | Max: ${stats.muscle.max} | Avg: ${stats.muscle.avg}`;
+                }
+            } catch (e) {
+                console.error('Failed to load stats:', e);
+            }
+        }
+
+        async function syncPicoocData() {
+            const btn = document.getElementById('syncBtn');
+            const statusEl = document.getElementById('statusMessage');
+            
+            btn.disabled = true;
+            btn.innerHTML = '<span class="loading"></span> Syncing...';
+            statusEl.className = 'status';
+            statusEl.textContent = 'Connecting to Picooc...';
+            
+            try {
+                const response = await fetch('/api/sync', { method: 'POST' });
+                const result = await response.json();
+                
+                if (result.success) {
+                    picoocData = result.data;
+                    updatePicoocUI();
+                    loadPicoocStats();
+                    updateDashboard(); // Update dashboard
+                    statusEl.className = 'status success';
+                    statusEl.textContent = `✅ Synced ${result.count} measurements`;
+                } else {
+                    statusEl.className = 'status error';
+                    statusEl.textContent = `❌ ${result.error}`;
+                }
+            } catch (e) {
+                statusEl.className = 'status error';
+                statusEl.textContent = `❌ Sync failed: ${e.message}`;
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '🔄 Sync Data';
+            }
+        }
+
+        function updatePicoocUI() {
+            updatePicoocChart();
+            updatePicoocTable();
+        }
+
+        function setPicoocTimeRange(range, btn) {
+            picoocTimeRange = range;
+            document.querySelectorAll('#picooc-time-selector .time-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            updatePicoocChart();
+        }
+
+        function filterDataByTimeRange(data, range, getDateFn) {
+            if (range === 'all') return data;
+            
+            const now = new Date();
+            let cutoffDate;
+            
+            switch (range) {
+                case '7d': cutoffDate = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000); break;
+                case '30d': cutoffDate = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000); break;
+                case '90d': cutoffDate = new Date(now.getTime() - 90 * 24 * 60 * 60 * 1000); break;
+                case '6m': cutoffDate = new Date(new Date().setMonth(new Date().getMonth() - 6)); break;
+                case '1y': cutoffDate = new Date(new Date().setFullYear(new Date().getFullYear() - 1)); break;
+                case '2y': cutoffDate = new Date(new Date().setFullYear(new Date().getFullYear() - 2)); break;
+                default: return data;
+            }
+            
+            return data.filter(d => getDateFn(d) >= cutoffDate);
+        }
+
+        function updatePicoocChart() {
+            const canvas = document.getElementById('picoocChart');
+            const ctx = canvas.getContext('2d');
+            
+            const showWeight = document.getElementById('showWeight').checked;
+            const showBodyFat = document.getElementById('showBodyFat').checked;
+            const showBMI = document.getElementById('showBMI').checked;
+            const showMuscle = document.getElementById('showMuscle').checked;
+            
+            if (picoocChart) {
+                picoocChart.destroy();
+                picoocChart = null;
+            }
+            
+            if (picoocData.length === 0) return;
+            
+            const getVal = (d, key1, key2) => {
+                const v = d[key1] ?? d[key2];
+                return (v && v > 0) ? v : null;
+            };
+            const getDate = (d) => new Date(d.date || d.Date);
+            
+            const filteredData = filterDataByTimeRange(picoocData, picoocTimeRange, getDate);
+            const sortedData = [...filteredData].filter(d => d.date || d.Date).sort((a, b) => getDate(a) - getDate(b));
+            
+            if (sortedData.length === 0) return;
+            
+            const labelFormat = ['7d', '30d'].includes(picoocTimeRange) 
+                ? { month: 'short', day: 'numeric' }
+                : { month: 'short', year: '2-digit' };
+            
+            const labels = sortedData.map(d => getDate(d).toLocaleDateString('en-US', labelFormat));
+            const datasets = [];
+            
+            if (showWeight) {
+                datasets.push({
+                    label: 'Weight (kg)', data: sortedData.map(d => getVal(d, 'Weight', 'weight')),
+                    borderColor: '#00d4ff', backgroundColor: '#00d4ff', borderWidth: 2,
+                    pointRadius: 0, pointHoverRadius: 4, tension: 0.4, fill: false, spanGaps: true, yAxisID: 'y'
+                });
+            }
+            
+            if (showBodyFat) {
+                datasets.push({
+                    label: 'Body Fat (%)', data: sortedData.map(d => getVal(d, 'BodyFat', 'bodyFat')),
+                    borderColor: '#f472b6', backgroundColor: '#f472b6', borderWidth: 2,
+                    pointRadius: 0, pointHoverRadius: 4, tension: 0.4, fill: false, spanGaps: true, yAxisID: 'y1'
+                });
+            }
+            
+            if (showBMI) {
+                datasets.push({
+                    label: 'BMI', data: sortedData.map(d => getVal(d, 'BMI', 'bmi')),
+                    borderColor: '#a78bfa', backgroundColor: '#a78bfa', borderWidth: 2,
+                    pointRadius: 0, pointHoverRadius: 4, tension: 0.4, fill: false, spanGaps: true, yAxisID: 'y1'
+                });
+            }
+            
+            if (showMuscle) {
+                datasets.push({
+                    label: 'Muscle Mass (kg)', data: sortedData.map(d => getVal(d, 'SkeletalMuscleMass', 'skeletalMuscleMass')),
+                    borderColor: '#34d399', backgroundColor: '#34d399', borderWidth: 2,
+                    pointRadius: 0, pointHoverRadius: 4, tension: 0.4, fill: false, spanGaps: true, yAxisID: 'y'
+                });
+            }
+            
+            picoocChart = new Chart(ctx, {
+                type: 'line',
+                data: { labels, datasets },
+                options: {
+                    responsive: true, maintainAspectRatio: false,
+                    interaction: { mode: 'index', intersect: false },
+                    plugins: { legend: { labels: { color: '#aaa' } } },
+                    scales: {
+                        x: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#888', maxRotation: 45, autoSkip: true, maxTicksLimit: 12 } },
+                        y: { type: 'linear', display: true, position: 'left', grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#00d4ff' }, title: { display: true, text: 'kg', color: '#00d4ff' } },
+                        y1: { type: 'linear', display: true, position: 'right', grid: { drawOnChartArea: false }, ticks: { color: '#f472b6' }, title: { display: true, text: '% / BMI', color: '#f472b6' } }
+                    }
+                }
+            });
+        }
+
+        function updatePicoocTable() {
+            const tbody = document.getElementById('picoocTableBody');
+            
+            if (picoocData.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="7" class="empty-state"><h3>No data yet</h3><p>Click "Sync Data" to fetch your measurements</p></td></tr>`;
+                return;
+            }
+            
+            tbody.innerHTML = picoocData.slice(0, 50).map((d, index) => `
+                <tr data-index="${index}" style="cursor: pointer;" title="Click for details">
+                    <td>${new Date(d.date || d.Date).toLocaleString()}</td>
+                    <td>${d.weight || d.Weight || '--'}</td>
+                    <td>${d.bodyFat || d.BodyFat || '--'}</td>
+                    <td>${d.bmi || d.BMI || '--'}</td>
+                    <td>${d.skeletalMuscleMass || d.SkeletalMuscleMass || '--'}</td>
+                    <td>${d.bodyWater || d.BodyWater || '--'}</td>
+                    <td>${d.metabolicAge || d.MetabolicAge || '--'}</td>
+                </tr>
+            `).join('');
+        }
+
+        // ============================================
+        // Oura Functions
+        // ============================================
+        async function checkOuraStatus() {
+            try {
+                const response = await fetch('/api/oura/status');
+                const status = await response.json();
+                
+                const statusEl = document.getElementById('ouraStatusMessage');
+                if (!status.configured) {
+                    statusEl.className = 'status warning';
+                    statusEl.textContent = '⚠️ Oura access token not configured in appsettings.json';
+                } else {
+                    statusEl.className = 'status success';
+                    const lastSync = status.lastSync ? new Date(status.lastSync).toLocaleString() : 'Never';
+                    statusEl.textContent = `✅ Connected (${status.dataCount} records, Last sync: ${lastSync})`;
+                }
+            } catch (e) {
+                console.error('Oura status check failed:', e);
+            }
+        }
+
+        async function loadOuraData() {
+            try {
+                const response = await fetch('/api/oura/data');
+                const data = await response.json();
+                ouraData = {
+                    sleepRecords: data.sleepRecords || [],
+                    dailySleep: data.dailySleep || [],
+                    readiness: data.readiness || [],
+                    activity: data.activity || []
+                };
+                updateOuraUI();
+                loadOuraStats();
+                updateDashboard(); // Update dashboard with new data
+            } catch (e) {
+                console.error('Failed to load Oura data:', e);
+            }
+        }
+
+        async function loadOuraStats() {
+            try {
+                const response = await fetch('/api/oura/stats');
+                const stats = await response.json();
+                
+                if (stats.averageSleepScore) {
+                    document.getElementById('ouraSleepScore').textContent = Math.round(stats.averageSleepScore);
+                    document.getElementById('ouraSleepDetails').textContent = `${stats.totalSleepRecords} records`;
+                }
+                
+                if (stats.averageReadinessScore) {
+                    document.getElementById('ouraReadinessScore').textContent = Math.round(stats.averageReadinessScore);
+                    document.getElementById('ouraReadinessDetails').textContent = `${stats.totalReadinessRecords} records`;
+                }
+                
+                if (stats.averageActivityScore) {
+                    document.getElementById('ouraActivityScore').textContent = Math.round(stats.averageActivityScore);
+                    document.getElementById('ouraActivityDetails').textContent = `${stats.averageSteps || 0} avg steps`;
+                }
+                
+                if (stats.averageSleepDuration) {
+                    document.getElementById('ouraAvgSleep').textContent = `${stats.averageSleepDuration}h`;
+                    document.getElementById('ouraAvgSleepDetails').textContent = `${stats.firstDate || ''} - ${stats.lastDate || ''}`;
+                }
+            } catch (e) {
+                console.error('Failed to load Oura stats:', e);
+            }
+        }
+
+        async function syncOuraData() {
+            const btn = document.getElementById('ouraSyncBtn');
+            const statusEl = document.getElementById('ouraStatusMessage');
+            
+            btn.disabled = true;
+            btn.innerHTML = '<span class="loading"></span> Syncing...';
+            statusEl.className = 'status';
+            statusEl.textContent = 'Connecting to Oura API...';
+            
+            try {
+                const response = await fetch('/api/oura/sync', { method: 'POST' });
+                const result = await response.json();
+                
+                if (result.success) {
+                    ouraData = {
+                        sleepRecords: result.data.sleepRecords || [],
+                        dailySleep: result.data.dailySleep || [],
+                        readiness: result.data.readiness || [],
+                        activity: result.data.activity || []
+                    };
+                    updateOuraUI();
+                    loadOuraStats();
+                    updateDashboard(); // Update dashboard
+                    statusEl.className = 'status success';
+                    statusEl.textContent = `✅ Synced ${result.sleepCount} sleep, ${result.readinessCount} readiness, ${result.activityCount} activity records`;
+                } else {
+                    statusEl.className = 'status error';
+                    statusEl.textContent = `❌ ${result.error}`;
+                }
+            } catch (e) {
+                statusEl.className = 'status error';
+                statusEl.textContent = `❌ Sync failed: ${e.message}`;
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '🔄 Sync Oura Data';
+            }
+        }
+
+        function updateOuraUI() {
+            updateOuraChart();
+            updateSleepChart();
+            updateOuraTables();
+        }
+
+        function setOuraTimeRange(range, btn) {
+            ouraTimeRange = range;
+            document.querySelectorAll('#oura-time-selector .time-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            updateOuraChart();
+            updateSleepChart();
+        }
+
+        function updateOuraChart() {
+            const canvas = document.getElementById('ouraChart');
+            const ctx = canvas.getContext('2d');
+            
+            const showSleep = document.getElementById('showSleepScore').checked;
+            const showReadiness = document.getElementById('showReadinessScore').checked;
+            const showActivity = document.getElementById('showActivityScore').checked;
+            const showSteps = document.getElementById('showSteps').checked;
+            
+            if (ouraChart) {
+                ouraChart.destroy();
+                ouraChart = null;
+            }
+            
+            // Combine all dates
+            const allDates = [...new Set([
+                ...ouraData.dailySleep.map(d => d.day),
+                ...ouraData.readiness.map(d => d.day),
+                ...ouraData.activity.map(d => d.day)
+            ])].sort();
+            
+            if (allDates.length === 0) return;
+            
+            const getDate = (d) => new Date(d);
+            const filteredDates = filterDataByTimeRange(allDates.map(d => ({ day: d })), ouraTimeRange, d => getDate(d.day)).map(d => d.day);
+            
+            if (filteredDates.length === 0) return;
+            
+            const sleepMap = Object.fromEntries(ouraData.dailySleep.map(d => [d.day, d.score]));
+            const readinessMap = Object.fromEntries(ouraData.readiness.map(d => [d.day, d.score]));
+            const activityMap = Object.fromEntries(ouraData.activity.map(d => [d.day, { score: d.score, steps: d.steps }]));
+            
+            const labels = filteredDates.map(d => new Date(d).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }));
+            const datasets = [];
+            
+            if (showSleep) {
+                datasets.push({
+                    label: 'Sleep Score', data: filteredDates.map(d => sleepMap[d] || null),
+                    borderColor: '#3b82f6', backgroundColor: '#3b82f6', borderWidth: 2,
+                    pointRadius: 0, pointHoverRadius: 4, tension: 0.4, fill: false, spanGaps: true, yAxisID: 'y'
+                });
+            }
+            
+            if (showReadiness) {
+                datasets.push({
+                    label: 'Readiness Score', data: filteredDates.map(d => readinessMap[d] || null),
+                    borderColor: '#22c55e', backgroundColor: '#22c55e', borderWidth: 2,
+                    pointRadius: 0, pointHoverRadius: 4, tension: 0.4, fill: false, spanGaps: true, yAxisID: 'y'
+                });
+            }
+            
+            if (showActivity) {
+                datasets.push({
+                    label: 'Activity Score', data: filteredDates.map(d => activityMap[d]?.score || null),
+                    borderColor: '#f59e0b', backgroundColor: '#f59e0b', borderWidth: 2,
+                    pointRadius: 0, pointHoverRadius: 4, tension: 0.4, fill: false, spanGaps: true, yAxisID: 'y'
+                });
+            }
+            
+            if (showSteps) {
+                datasets.push({
+                    label: 'Steps', data: filteredDates.map(d => activityMap[d]?.steps || null),
+                    borderColor: '#8b5cf6', backgroundColor: '#8b5cf6', borderWidth: 2,
+                    pointRadius: 0, pointHoverRadius: 4, tension: 0.4, fill: false, spanGaps: true, yAxisID: 'y1'
+                });
+            }
+            
+            ouraChart = new Chart(ctx, {
+                type: 'line',
+                data: { labels, datasets },
+                options: {
+                    responsive: true, maintainAspectRatio: false,
+                    interaction: { mode: 'index', intersect: false },
+                    plugins: { legend: { labels: { color: '#aaa' } } },
+                    scales: {
+                        x: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#888', maxRotation: 45, autoSkip: true, maxTicksLimit: 15 } },
+                        y: { type: 'linear', display: true, position: 'left', min: 0, max: 100, grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#3b82f6' }, title: { display: true, text: 'Score', color: '#3b82f6' } },
+                        y1: { type: 'linear', display: showSteps, position: 'right', grid: { drawOnChartArea: false }, ticks: { color: '#8b5cf6' }, title: { display: true, text: 'Steps', color: '#8b5cf6' } }
+                    }
+                }
+            });
+        }
+
+        function updateSleepChart() {
+            const canvas = document.getElementById('sleepChart');
+            const ctx = canvas.getContext('2d');
+            
+            const showTotal = document.getElementById('showTotalSleep').checked;
+            const showDeep = document.getElementById('showDeepSleep').checked;
+            const showRem = document.getElementById('showRemSleep').checked;
+            const showHR = document.getElementById('showAvgHR').checked;
+            
+            if (sleepChart) {
+                sleepChart.destroy();
+                sleepChart = null;
+            }
+            
+            // Filter for long_sleep only (exclude naps)
+            const longSleepRecords = ouraData.sleepRecords.filter(r => r.type === 'long_sleep');
+            
+            if (longSleepRecords.length === 0) return;
+            
+            const getDate = (d) => new Date(d.day);
+            const filteredData = filterDataByTimeRange(longSleepRecords, ouraTimeRange, getDate);
+            const sortedData = [...filteredData].sort((a, b) => getDate(a) - getDate(b));
+            
+            if (sortedData.length === 0) return;
+            
+            const toHours = (seconds) => seconds ? Math.round(seconds / 3600 * 10) / 10 : null;
+            const labels = sortedData.map(d => new Date(d.day).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }));
+            const datasets = [];
+            
+            if (showTotal) {
+                datasets.push({
+                    label: 'Total Sleep (h)', data: sortedData.map(d => toHours(d.totalSleepDuration)),
+                    borderColor: '#3b82f6', backgroundColor: '#3b82f6', borderWidth: 2,
+                    pointRadius: 0, pointHoverRadius: 4, tension: 0.4, fill: false, spanGaps: true, yAxisID: 'y'
+                });
+            }
+            
+            if (showDeep) {
+                datasets.push({
+                    label: 'Deep Sleep (h)', data: sortedData.map(d => toHours(d.deepSleepDuration)),
+                    borderColor: '#1e40af', backgroundColor: '#1e40af', borderWidth: 2,
+                    pointRadius: 0, pointHoverRadius: 4, tension: 0.4, fill: false, spanGaps: true, yAxisID: 'y'
+                });
+            }
+            
+            if (showRem) {
+                datasets.push({
+                    label: 'REM Sleep (h)', data: sortedData.map(d => toHours(d.remSleepDuration)),
+                    borderColor: '#8b5cf6', backgroundColor: '#8b5cf6', borderWidth: 2,
+                    pointRadius: 0, pointHoverRadius: 4, tension: 0.4, fill: false, spanGaps: true, yAxisID: 'y'
+                });
+            }
+            
+            if (showHR) {
+                datasets.push({
+                    label: 'Avg Heart Rate', data: sortedData.map(d => d.averageHeartRate || null),
+                    borderColor: '#ef4444', backgroundColor: '#ef4444', borderWidth: 2,
+                    pointRadius: 0, pointHoverRadius: 4, tension: 0.4, fill: false, spanGaps: true, yAxisID: 'y1'
+                });
+            }
+            
+            sleepChart = new Chart(ctx, {
+                type: 'line',
+                data: { labels, datasets },
+                options: {
+                    responsive: true, maintainAspectRatio: false,
+                    interaction: { mode: 'index', intersect: false },
+                    plugins: { legend: { labels: { color: '#aaa' } } },
+                    scales: {
+                        x: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#888', maxRotation: 45, autoSkip: true, maxTicksLimit: 15 } },
+                        y: { type: 'linear', display: true, position: 'left', grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#3b82f6' }, title: { display: true, text: 'Hours', color: '#3b82f6' } },
+                        y1: { type: 'linear', display: showHR, position: 'right', grid: { drawOnChartArea: false }, ticks: { color: '#ef4444' }, title: { display: true, text: 'BPM', color: '#ef4444' } }
+                    }
+                }
+            });
+        }
+
+        function getScoreClass(score) {
+            if (!score) return '';
+            if (score >= 85) return 'score-good';
+            if (score >= 70) return 'score-ok';
+            return 'score-low';
+        }
+
+        function formatDuration(seconds) {
+            if (!seconds) return '--';
+            const hours = Math.floor(seconds / 3600);
+            const mins = Math.floor((seconds % 3600) / 60);
+            return `${hours}h ${mins}m`;
+        }
+
+        function updateOuraTables() {
+            // Sleep table - combine long_sleep records with dailySleep scores
+            const sleepTbody = document.getElementById('ouraSleepTableBody');
+            
+            // Filter for long_sleep only
+            const longSleepRecords = ouraData.sleepRecords.filter(r => r.type === 'long_sleep');
+            
+            // Create a combined list: start with long_sleep records, then add any dailySleep entries that don't have a matching long_sleep record
+            const sleepWithScores = longSleepRecords.map(sleep => {
+                const dailySleep = ouraData.dailySleep.find(d => d.day === sleep.day);
+                return { ...sleep, score: dailySleep?.score, hasDetailedData: true };
+            });
+            
+            // Add dailySleep entries that don't have a matching long_sleep record (shows score only)
+            ouraData.dailySleep.forEach(daily => {
+                const hasLongSleep = longSleepRecords.some(r => r.day === daily.day);
+                if (!hasLongSleep) {
+                    sleepWithScores.push({
+                        id: daily.id,
+                        day: daily.day,
+                        score: daily.score,
+                        totalSleepDuration: null,
+                        deepSleepDuration: null,
+                        remSleepDuration: null,
+                        averageHeartRate: null,
+                        averageHrv: null,
+                        efficiency: null,
+                        hasDetailedData: false
+                    });
+                }
+            });
+            
+            if (sleepWithScores.length === 0) {
+                sleepTbody.innerHTML = `<tr><td colspan="8" class="empty-state"><h3>No data yet</h3><p>Click "Sync Oura Data" to fetch your sleep data</p></td></tr>`;
+            } else {
+                // Sort by date descending
+                sleepWithScores.sort((a, b) => new Date(b.day) - new Date(a.day));
+                
+                sleepTbody.innerHTML = sleepWithScores.slice(0, 30).map(d => `
+                    <tr class="${d.hasDetailedData ? 'clickable-row' : ''}" ${d.hasDetailedData ? `data-sleep-id="${d.id}"` : ''} ${!d.hasDetailedData ? 'title="Detailed sleep data not yet available from Oura"' : ''}>
+                        <td>${d.day}</td>
+                        <td><span class="score-badge ${getScoreClass(d.score)}">${d.score || '--'}</span></td>
+                        <td>${d.totalSleepDuration ? formatDuration(d.totalSleepDuration) : '--'}</td>
+                        <td>${d.deepSleepDuration ? formatDuration(d.deepSleepDuration) : '--'}</td>
+                        <td>${d.remSleepDuration ? formatDuration(d.remSleepDuration) : '--'}</td>
+                        <td>${d.averageHeartRate ? Math.round(d.averageHeartRate) : '--'}</td>
+                        <td>${d.averageHrv ? Math.round(d.averageHrv) : '--'}</td>
+                        <td>${d.efficiency ? d.efficiency + '%' : '--'}</td>
+                    </tr>
+                `).join('');
+            }
+            
+            // Activity table
+            const activityTbody = document.getElementById('ouraActivityTableBody');
+            
+            if (ouraData.activity.length === 0) {
+                activityTbody.innerHTML = `<tr><td colspan="8" class="empty-state"><h3>No data yet</h3><p>Click "Sync Oura Data" to fetch your activity data</p></td></tr>`;
+            } else {
+                activityTbody.innerHTML = ouraData.activity.slice(0, 30).map(d => `
+                    <tr>
+                        <td>${d.day}</td>
+                        <td><span class="score-badge ${getScoreClass(d.score)}">${d.score || '--'}</span></td>
+                        <td>${d.steps?.toLocaleString() || '--'}</td>
+                        <td>${d.activeCalories || '--'}</td>
+                        <td>${d.totalCalories || '--'}</td>
+                        <td>${d.equivalentWalkingDistance ? (d.equivalentWalkingDistance / 1000).toFixed(1) + ' km' : '--'}</td>
+                        <td>${formatDuration(d.highActivityTime)}</td>
+                        <td>${formatDuration(d.mediumActivityTime)}</td>
+                    </tr>
+                `).join('');
+            }
+        }
+
+        // ============================================
+        // Sleep Detail Modal Functions
+        // ============================================
+        async function openSleepDetail(sleepId) {
+            try {
+                const response = await fetch(`/api/oura/sleep/${sleepId}`);
+                if (!response.ok) {
+                    console.error('Failed to fetch sleep details');
+                    return;
+                }
+                
+                const data = await response.json();
+                const sleep = data.sleepRecord;
+                const contributors = data.contributors;
+                
+                // Populate modal - Hero section
+                document.getElementById('modalDate').textContent = sleep.day || '--';
+                document.getElementById('modalScore').textContent = data.score || '--';
+                document.getElementById('modalTotalSleep').textContent = formatDuration(sleep.totalSleepDuration);
+                
+                // Restfulness - get from contributors if available
+                const restfulness = contributors?.restfulness || '--';
+                document.getElementById('modalRestfulness').textContent = restfulness;
+                
+                // Timing section
+                document.getElementById('modalTimeInBed').textContent = `Time in bed: ${formatDuration(sleep.timeInBed)}`;
+                document.getElementById('modalEfficiency').textContent = sleep.efficiency ? sleep.efficiency + '%' : '--';
+                document.getElementById('modalLatency').textContent = formatDuration(sleep.latency);
+                
+                // Format bedtime
+                const bedStart = sleep.bedtimeStart ? new Date(sleep.bedtimeStart).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }) : '--';
+                const bedEnd = sleep.bedtimeEnd ? new Date(sleep.bedtimeEnd).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }) : '--';
+                document.getElementById('modalBedtime').textContent = bedStart;
+                document.getElementById('modalWakeTime').textContent = bedEnd;
+                
+                // Sleep stages
+                document.getElementById('modalDeep').textContent = formatDuration(sleep.deepSleepDuration);
+                document.getElementById('modalLight').textContent = formatDuration(sleep.lightSleepDuration);
+                document.getElementById('modalRem').textContent = formatDuration(sleep.remSleepDuration);
+                document.getElementById('modalAwake').textContent = formatDuration(sleep.awakeTime);
+                
+                // Create stage bar
+                const total = (sleep.deepSleepDuration || 0) + (sleep.lightSleepDuration || 0) + 
+                              (sleep.remSleepDuration || 0) + (sleep.awakeTime || 0);
+                if (total > 0) {
+                    const deepPct = ((sleep.deepSleepDuration || 0) / total * 100).toFixed(1);
+                    const lightPct = ((sleep.lightSleepDuration || 0) / total * 100).toFixed(1);
+                    const remPct = ((sleep.remSleepDuration || 0) / total * 100).toFixed(1);
+                    const awakePct = ((sleep.awakeTime || 0) / total * 100).toFixed(1);
+                    
+                    document.getElementById('stageBar').innerHTML = `
+                        <div class="stage stage-deep" style="width: ${deepPct}%">${deepPct > 10 ? deepPct + '%' : ''}</div>
+                        <div class="stage stage-light" style="width: ${lightPct}%">${lightPct > 10 ? lightPct + '%' : ''}</div>
+                        <div class="stage stage-rem" style="width: ${remPct}%">${remPct > 10 ? remPct + '%' : ''}</div>
+                        <div class="stage stage-awake" style="width: ${awakePct}%">${awakePct > 10 ? awakePct + '%' : ''}</div>
+                    `;
+                } else {
+                    document.getElementById('stageBar').innerHTML = '<div style="width:100%;text-align:center;color:#666;">No stage data</div>';
+                }
+                
+                // Heart & breath stats
+                document.getElementById('modalAvgHR').textContent = sleep.averageHeartRate ? Math.round(sleep.averageHeartRate) : '--';
+                document.getElementById('modalLowestHR').textContent = `Lowest: ${sleep.lowestHeartRate ? Math.round(sleep.lowestHeartRate) + ' bpm' : '--'}`;
+                document.getElementById('modalHRV').textContent = sleep.averageHrv ? Math.round(sleep.averageHrv) : '--';
+                document.getElementById('modalBreath').textContent = sleep.averageBreath ? sleep.averageBreath.toFixed(1) : '--';
+                document.getElementById('modalRestless').textContent = `Restless periods: ${sleep.restlessPeriods || '--'}`;
+                
+                // Contributors
+                const contributorsSection = document.getElementById('contributorsSection');
+                const contributorsList = document.getElementById('contributorsList');
+                
+                if (contributors) {
+                    contributorsSection.style.display = 'block';
+                    const contributorNames = {
+                        deepSleep: 'Deep Sleep',
+                        efficiency: 'Efficiency',
+                        latency: 'Latency',
+                        remSleep: 'REM Sleep',
+                        restfulness: 'Restfulness',
+                        timing: 'Timing',
+                        totalSleep: 'Total Sleep'
+                    };
+                    
+                    contributorsList.innerHTML = Object.entries(contributors)
+                        .filter(([key, value]) => value !== null && value !== undefined)
+                        .map(([key, value]) => `
+                            <div class="contributor-item">
+                                <span class="name">${contributorNames[key] || key}</span>
+                                <span class="value">${value}</span>
+                            </div>
+                        `).join('');
+                } else {
+                    contributorsSection.style.display = 'none';
+                }
+                
+                // Show modal
+                document.getElementById('sleepModal').classList.add('active');
+                document.body.style.overflow = 'hidden';
+                
+            } catch (e) {
+                console.error('Error loading sleep details:', e);
+            }
+        }
+
+        function closeSleepModal(event) {
+            if (event && event.target !== event.currentTarget) return;
+            document.getElementById('sleepModal').classList.remove('active');
+            document.body.style.overflow = '';
+        }
+
+        // ============================================
+        // Measurement Detail Modal Functions
+        // ============================================
+        function showMeasurementDetail(index) {
+            const measurement = picoocData[index];
+            if (!measurement) return;
+
+            // Helper to get value with fallback
+            const getValue = (m, ...keys) => {
+                for (const key of keys) {
+                    if (m[key] !== undefined && m[key] !== null && m[key] !== 0) return m[key];
+                }
+                return '--';
+            };
+
+            const getNumValue = (m, ...keys) => {
+                for (const key of keys) {
+                    if (m[key] !== undefined && m[key] !== null && m[key] !== 0) return parseFloat(m[key]);
+                }
+                return 0;
+            };
+
+            // Populate modal
+            const date = new Date(measurement.date || measurement.Date);
+            document.getElementById('measurementModalDate').textContent = date.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+            
+            document.getElementById('measurementWeight').textContent = getValue(measurement, 'weight', 'Weight');
+            document.getElementById('measurementBMI').textContent = getValue(measurement, 'bmi', 'BMI');
+            document.getElementById('measurementBodyFat').textContent = getValue(measurement, 'bodyFat', 'BodyFat');
+            document.getElementById('measurementBodyFatHero').textContent = getValue(measurement, 'bodyFat', 'BodyFat');
+            document.getElementById('measurementMuscle').textContent = getValue(measurement, 'skeletalMuscleMass', 'SkeletalMuscleMass');
+            document.getElementById('measurementWater').textContent = getValue(measurement, 'bodyWater', 'BodyWater');
+            document.getElementById('measurementBone').textContent = getValue(measurement, 'boneMass', 'BoneMass');
+            document.getElementById('measurementMetabolicAge').textContent = getValue(measurement, 'metabolicAge', 'MetabolicAge');
+            document.getElementById('measurementVisceralFat').textContent = getValue(measurement, 'visceralFat', 'VisceralFat');
+            document.getElementById('measurementBMR').textContent = getValue(measurement, 'basalMetabolism', 'BasalMetabolism');
+
+            // Body Fat status
+            const bodyFatVal = getNumValue(measurement, 'bodyFat', 'BodyFat');
+            const bodyFatStatusEl = document.getElementById('bodyFatStatus');
+            if (bodyFatVal > 0) {
+                // General ranges (varies by age/gender, using male averages)
+                if (bodyFatVal < 14) { bodyFatStatusEl.textContent = '💪 Athletic'; bodyFatStatusEl.style.color = '#3b82f6'; }
+                else if (bodyFatVal < 20) { bodyFatStatusEl.textContent = '✅ Fit'; bodyFatStatusEl.style.color = '#22c55e'; }
+                else if (bodyFatVal < 25) { bodyFatStatusEl.textContent = '👍 Average'; bodyFatStatusEl.style.color = '#84cc16'; }
+                else { bodyFatStatusEl.textContent = '⚠️ Above Avg'; bodyFatStatusEl.style.color = '#f59e0b'; }
+            } else {
+                bodyFatStatusEl.textContent = '%';
+                bodyFatStatusEl.style.color = '#888';
+            }
+
+            // BMI status with color
+            const bmi = getNumValue(measurement, 'bmi', 'BMI');
+            const bmiStatusEl = document.getElementById('measurementBMIStatus');
+            let bmiStatus = '--', bmiColor = '#888';
+            if (bmi > 0) {
+                if (bmi < 18.5) { bmiStatus = '⚠️ Underweight'; bmiColor = '#f59e0b'; }
+                else if (bmi < 25) { bmiStatus = '✅ Normal'; bmiColor = '#22c55e'; }
+                else if (bmi < 30) { bmiStatus = '⚠️ Overweight'; bmiColor = '#f59e0b'; }
+                else { bmiStatus = '🔴 Obese'; bmiColor = '#ef4444'; }
+            }
+            bmiStatusEl.textContent = bmiStatus;
+            bmiStatusEl.style.color = bmiColor;
+
+            // Visceral fat status
+            const visceralFat = getNumValue(measurement, 'visceralFat', 'VisceralFat');
+            const visceralStatusEl = document.getElementById('visceralStatus');
+            if (visceralFat > 0) {
+                if (visceralFat <= 9) { visceralStatusEl.textContent = '✅ Healthy'; visceralStatusEl.style.color = '#22c55e'; }
+                else if (visceralFat <= 14) { visceralStatusEl.textContent = '⚠️ High'; visceralStatusEl.style.color = '#f59e0b'; }
+                else { visceralStatusEl.textContent = '🔴 Very High'; visceralStatusEl.style.color = '#ef4444'; }
+            } else {
+                visceralStatusEl.textContent = 'level';
+                visceralStatusEl.style.color = '#888';
+            }
+
+            // Composition bars (approximate percentages for visual)
+            const weight = getNumValue(measurement, 'weight', 'Weight');
+            const muscle = getNumValue(measurement, 'skeletalMuscleMass', 'SkeletalMuscleMass');
+            const bodyFat = getNumValue(measurement, 'bodyFat', 'BodyFat');
+            const water = getNumValue(measurement, 'bodyWater', 'BodyWater');
+            const bone = getNumValue(measurement, 'boneMass', 'BoneMass');
+
+            // Set bar widths (scaled for visual appeal)
+            document.getElementById('muscleBar').style.width = weight > 0 ? Math.min((muscle / weight) * 250, 100) + '%' : '0%';
+            document.getElementById('fatBar').style.width = Math.min(bodyFat * 2, 100) + '%';
+            document.getElementById('waterBar').style.width = Math.min(water, 100) + '%';
+            document.getElementById('boneBar').style.width = weight > 0 ? Math.min((bone / weight) * 500, 100) + '%' : '0%';
+
+            // Show modal
+            document.getElementById('measurementModal').classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeMeasurementModal(event) {
+            if (event && event.target !== event.currentTarget) return;
+            document.getElementById('measurementModal').classList.remove('active');
+            document.body.style.overflow = '';
+        }
+
+        // Close modal on Escape key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                closeSleepModal();
+                closeMeasurementModal();
+            }
+        });
+    </script>
+</body>
+</html>
+
+
+
+

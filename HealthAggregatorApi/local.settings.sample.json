@@ -1,0 +1,14 @@
+{
+    "IsEncrypted": false,
+    "Values": {
+        "AzureWebJobsStorage": "UseDevelopmentStorage=true",
+        "FUNCTIONS_WORKER_RUNTIME": "dotnet-isolated",
+        "Oura:AccessToken": "YOUR_OURA_ACCESS_TOKEN_HERE",
+        "Picooc:Email": "YOUR_PICOOC_EMAIL_HERE",
+        "Picooc:Password": "YOUR_PICOOC_PASSWORD_HERE"
+    },
+    "Host": {
+        "CORS": "*",
+        "CORSCredentials": false
+    }
+}
