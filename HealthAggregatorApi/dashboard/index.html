@@ -315,6 +315,11 @@
                         </tr>
                     </tbody>
                 </table>
+                <div class="pagination" id="picoocPagination">
+                    <button type="button" class="page-btn" id="picoocPrevBtn" disabled>← Previous</button>
+                    <span class="page-info" id="picoocPageInfo">Page 1 of 1</span>
+                    <button type="button" class="page-btn" id="picoocNextBtn" disabled>Next →</button>
+                </div>
             </div>
         </div>
 
@@ -685,6 +690,8 @@
         let dashboardChart = null;
         let picoocTimeRange = 'all';
         let ouraTimeRange = '1y';
+        let picoocCurrentPage = 1;
+        const picoocPageSize = 15;
 
         // ============================================
         // Tab Navigation
@@ -805,6 +812,10 @@
                     showMeasurementDetail(parseInt(row.dataset.index));
                 }
             });
+            
+            // Pagination buttons - Picooc
+            document.getElementById('picoocPrevBtn').addEventListener('click', picoocPrevPage);
+            document.getElementById('picoocNextBtn').addEventListener('click', picoocNextPage);
 
             // Table row clicks with event delegation - Oura Sleep
             document.getElementById('ouraSleepTableBody').addEventListener('click', (e) => {
@@ -1500,18 +1511,34 @@
 
         function updatePicoocTable() {
             const tbody = document.getElementById('picoocTableBody');
+            const pagination = document.getElementById('picoocPagination');
+            const prevBtn = document.getElementById('picoocPrevBtn');
+            const nextBtn = document.getElementById('picoocNextBtn');
+            const pageInfo = document.getElementById('picoocPageInfo');
             
             if (picoocData.length === 0) {
                 tbody.innerHTML = `<tr><td colspan="7" class="empty-state"><h3>No data yet</h3><p>Click "Sync Data" to fetch your measurements</p></td></tr>`;
+                pagination.style.display = 'none';
                 return;
             }
+            
+            // Calculate pagination
+            const totalPages = Math.ceil(picoocData.length / picoocPageSize);
+            picoocCurrentPage = Math.min(picoocCurrentPage, totalPages);
+            picoocCurrentPage = Math.max(picoocCurrentPage, 1);
+            
+            const startIndex = (picoocCurrentPage - 1) * picoocPageSize;
+            const endIndex = startIndex + picoocPageSize;
+            const pageData = picoocData.slice(startIndex, endIndex);
             
             // Helper to format numbers to 1 decimal place
             const fmt = (v) => v != null && v !== '--' ? parseFloat(v).toFixed(1) : '--';
             const fmtInt = (v) => v != null && v !== '--' ? Math.round(parseFloat(v)) : '--';
             
-            tbody.innerHTML = picoocData.slice(0, 50).map((d, index) => `
-                <tr data-index="${index}" style="cursor: pointer;" title="Click for details">
+            tbody.innerHTML = pageData.map((d, i) => {
+                const actualIndex = startIndex + i;
+                return `
+                <tr data-index="${actualIndex}" style="cursor: pointer;" title="Click for details">
                     <td>${new Date(d.date || d.Date).toLocaleString()}</td>
                     <td>${fmt(d.weight || d.Weight)}</td>
                     <td>${fmt(d.bodyFat || d.BodyFat)}</td>
@@ -1520,7 +1547,28 @@
                     <td>${fmt(d.bodyWater || d.BodyWater)}</td>
                     <td>${fmtInt(d.metabolicAge || d.MetabolicAge)}</td>
                 </tr>
-            `).join('');
+            `}).join('');
+            
+            // Update pagination controls
+            pagination.style.display = 'flex';
+            pageInfo.textContent = `Page ${picoocCurrentPage} of ${totalPages}`;
+            prevBtn.disabled = picoocCurrentPage <= 1;
+            nextBtn.disabled = picoocCurrentPage >= totalPages;
+        }
+        
+        function picoocPrevPage() {
+            if (picoocCurrentPage > 1) {
+                picoocCurrentPage--;
+                updatePicoocTable();
+            }
+        }
+        
+        function picoocNextPage() {
+            const totalPages = Math.ceil(picoocData.length / picoocPageSize);
+            if (picoocCurrentPage < totalPages) {
+                picoocCurrentPage++;
+                updatePicoocTable();
+            }
         }
 
         // ============================================
