@@ -9,6 +9,7 @@ using HealthAggregatorApi.Infrastructure.ExternalApis;
 using HealthAggregatorApi.Infrastructure.Persistence;
 using HealthAggregatorApi.Core.Models.Oura;
 using HealthAggregatorApi.Core.Models.Picooc;
+using HealthAggregatorApi.Core.Models.Cronometer;
 
 var builder = FunctionsApplication.CreateBuilder(args);
 
@@ -57,6 +58,27 @@ builder.Services.AddSingleton<IPicoocSyncClient>(sp =>
 });
 
 builder.Services.AddSingleton<IPicoocDataService, PicoocDataService>();
+
+// Register Cronometer services
+var cronometerEmail = configuration["Cronometer:Email"] ?? string.Empty;
+var cronometerPassword = configuration["Cronometer:Password"] ?? string.Empty;
+
+builder.Services.AddSingleton<IDataRepository<CronometerData>>(sp =>
+    new BlobDataRepository<CronometerData>(blobConnectionString, "health-data", "cronometer_data.json"));
+
+builder.Services.AddSingleton<ICronometerApiClient>(sp =>
+{
+    var logger = sp.GetRequiredService<ILogger<CronometerApiClient>>();
+    return new CronometerApiClient(logger);
+});
+
+builder.Services.AddSingleton<ICronometerDataService>(sp =>
+{
+    var apiClient = sp.GetRequiredService<ICronometerApiClient>();
+    var repository = sp.GetRequiredService<IDataRepository<CronometerData>>();
+    var logger = sp.GetRequiredService<ILogger<CronometerDataService>>();
+    return new CronometerDataService(apiClient, repository, cronometerEmail, cronometerPassword, logger);
+});
 
 var app = builder.Build();
 

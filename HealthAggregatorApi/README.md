@@ -47,8 +47,16 @@ HealthAggregatorApi/
 - `GET /api/picooc/latest` - Get latest measurement
 - `POST /api/picooc/sync` - Trigger manual sync
 
+### Cronometer (Food & Nutrition)
+- `GET /api/cronometer/data` - Get all nutrition data
+- `GET /api/cronometer/daily/{date}` - Get nutrition for specific date
+- `GET /api/cronometer/latest` - Get latest nutrition record
+- `GET /api/cronometer/stats` - Get nutrition statistics
+- `GET /api/cronometer/status` - Check configuration status
+- `POST /api/cronometer/sync` - Trigger manual sync
+
 ### Dashboard
-- `GET /api/dashboard` - Combined Oura + Picooc data
+- `GET /api/dashboard` - Combined Oura + Picooc + Cronometer data
 - `GET /api/dashboard/metrics` - Latest metrics summary
 
 ### Timer
@@ -72,7 +80,9 @@ HealthAggregatorApi/
     "FUNCTIONS_WORKER_RUNTIME": "dotnet-isolated",
     "Oura:AccessToken": "YOUR_OURA_TOKEN",
     "Picooc:Email": "YOUR_PICOOC_EMAIL",
-    "Picooc:Password": "YOUR_PICOOC_PASSWORD"
+    "Picooc:Password": "YOUR_PICOOC_PASSWORD",
+    "Cronometer:Email": "YOUR_CRONOMETER_EMAIL",
+    "Cronometer:Password": "YOUR_CRONOMETER_PASSWORD"
   }
 }
 ```
@@ -92,10 +102,12 @@ func start
 # Check status
 Invoke-RestMethod http://localhost:7071/api/oura/status
 Invoke-RestMethod http://localhost:7071/api/picooc/status
+Invoke-RestMethod http://localhost:7071/api/cronometer/status
 
 # Sync data
 Invoke-RestMethod -Method POST http://localhost:7071/api/oura/sync
 Invoke-RestMethod -Method POST http://localhost:7071/api/picooc/sync
+Invoke-RestMethod -Method POST http://localhost:7071/api/cronometer/sync
 
 # Get dashboard metrics
 Invoke-RestMethod http://localhost:7071/api/dashboard/metrics

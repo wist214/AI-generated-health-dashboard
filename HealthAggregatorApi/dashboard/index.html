@@ -33,6 +33,10 @@
                 <span class="tab-icon">💍</span>
                 <span class="tab-text">Oura Ring</span>
             </button>
+            <button type="button" class="tab-btn food-btn" role="tab" aria-selected="false" aria-controls="food-tab" data-tab="food">
+                <span class="tab-icon">🍎</span>
+                <span class="tab-text">Food</span>
+            </button>
         </div>
 
         <!-- Dashboard Tab Content -->
@@ -472,6 +476,178 @@
         </div>
     </div>
 
+    <!-- Food Tab -->
+    <div id="food-tab" class="tab-content" role="tabpanel" aria-labelledby="food-tab-btn">
+        <div class="tab-header">
+            <h2>🍎 Food & Nutrition</h2>
+            <div class="header-actions">
+                <span id="food-last-sync">Last sync: --</span>
+                <button type="button" class="sync-btn food-sync-btn" id="syncFoodBtn">
+                    <span class="sync-icon">🔄</span> Sync Cronometer
+                </button>
+            </div>
+        </div>
+
+        <!-- Today's Summary Cards -->
+        <div class="stats-grid food-stats">
+            <div class="metric-card calories">
+                <div class="metric-icon">🔥</div>
+                <div class="metric-value" id="food-calories">--</div>
+                <div class="metric-label">Calories</div>
+                <div class="metric-target" id="food-calories-target">Target: --</div>
+            </div>
+            <div class="metric-card protein">
+                <div class="metric-icon">🥩</div>
+                <div class="metric-value" id="food-protein">--</div>
+                <div class="metric-label">Protein (g)</div>
+                <div class="metric-target" id="food-protein-target">Target: --</div>
+            </div>
+            <div class="metric-card carbs">
+                <div class="metric-icon">🍞</div>
+                <div class="metric-value" id="food-carbs">--</div>
+                <div class="metric-label">Carbs (g)</div>
+                <div class="metric-target" id="food-carbs-target">Target: --</div>
+            </div>
+            <div class="metric-card fat">
+                <div class="metric-icon">🥑</div>
+                <div class="metric-value" id="food-fat">--</div>
+                <div class="metric-label">Fat (g)</div>
+                <div class="metric-target" id="food-fat-target">Target: --</div>
+            </div>
+        </div>
+
+        <!-- Charts Row -->
+        <div class="charts-row">
+            <div class="chart-container macro-chart-container">
+                <h3>Macro Breakdown</h3>
+                <div class="chart-wrapper">
+                    <canvas id="macroChart"></canvas>
+                </div>
+                <div class="macro-legend" id="macroLegend"></div>
+            </div>
+            <div class="chart-container calorie-trend-container">
+                <h3>Calorie Trend (7 Days)</h3>
+                <div class="chart-wrapper">
+                    <canvas id="calorieTrendChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Nutrient Progress Bars -->
+        <div class="section-card nutrients-section">
+            <h3>Key Nutrients</h3>
+            <div class="nutrients-grid" id="nutrientsGrid">
+                <div class="nutrient-bar">
+                    <div class="nutrient-header">
+                        <span class="nutrient-name">Fiber</span>
+                        <span class="nutrient-value" id="nutrient-fiber">-- / -- g</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill fiber" id="fiber-progress" style="width: 0%"></div>
+                    </div>
+                </div>
+                <div class="nutrient-bar">
+                    <div class="nutrient-header">
+                        <span class="nutrient-name">Sugar</span>
+                        <span class="nutrient-value" id="nutrient-sugar">-- / -- g</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill sugar" id="sugar-progress" style="width: 0%"></div>
+                    </div>
+                </div>
+                <div class="nutrient-bar">
+                    <div class="nutrient-header">
+                        <span class="nutrient-name">Sodium</span>
+                        <span class="nutrient-value" id="nutrient-sodium">-- / -- mg</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill sodium" id="sodium-progress" style="width: 0%"></div>
+                    </div>
+                </div>
+                <div class="nutrient-bar">
+                    <div class="nutrient-header">
+                        <span class="nutrient-name">Cholesterol</span>
+                        <span class="nutrient-value" id="nutrient-cholesterol">-- / -- mg</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill cholesterol" id="cholesterol-progress" style="width: 0%"></div>
+                    </div>
+                </div>
+                <div class="nutrient-bar">
+                    <div class="nutrient-header">
+                        <span class="nutrient-name">Vitamin D</span>
+                        <span class="nutrient-value" id="nutrient-vitaminD">-- / -- µg</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill vitamin" id="vitaminD-progress" style="width: 0%"></div>
+                    </div>
+                </div>
+                <div class="nutrient-bar">
+                    <div class="nutrient-header">
+                        <span class="nutrient-name">Calcium</span>
+                        <span class="nutrient-value" id="nutrient-calcium">-- / -- mg</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill mineral" id="calcium-progress" style="width: 0%"></div>
+                    </div>
+                </div>
+                <div class="nutrient-bar">
+                    <div class="nutrient-header">
+                        <span class="nutrient-name">Iron</span>
+                        <span class="nutrient-value" id="nutrient-iron">-- / -- mg</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill mineral" id="iron-progress" style="width: 0%"></div>
+                    </div>
+                </div>
+                <div class="nutrient-bar">
+                    <div class="nutrient-header">
+                        <span class="nutrient-name">Potassium</span>
+                        <span class="nutrient-value" id="nutrient-potassium">-- / -- mg</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill mineral" id="potassium-progress" style="width: 0%"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Food Log Table -->
+        <div class="section-card food-log-section">
+            <div class="section-header">
+                <h3>Today's Food Log</h3>
+                <div class="date-selector">
+                    <button type="button" class="date-nav" id="foodPrevDay">◀</button>
+                    <span id="foodSelectedDate">Today</span>
+                    <button type="button" class="date-nav" id="foodNextDay">▶</button>
+                </div>
+            </div>
+            <div class="table-container">
+                <table class="data-table food-table">
+                    <thead>
+                        <tr>
+                            <th>Food</th>
+                            <th>Category</th>
+                            <th>Amount</th>
+                            <th>Calories</th>
+                            <th>Protein</th>
+                            <th>Carbs</th>
+                            <th>Fat</th>
+                        </tr>
+                    </thead>
+                    <tbody id="foodLogBody">
+                        <tr class="empty-state">
+                            <td colspan="7">
+                                <div class="empty-icon">🍽️</div>
+                                <p>Click "Sync Cronometer" to fetch your food data</p>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
     <!-- Sleep Detail Modal -->
     <div class="modal-overlay" id="sleepModal">
         <div class="modal sleep-modal">
@@ -684,13 +860,17 @@
         // ============================================
         let picoocData = [];
         let ouraData = { sleepRecords: [], dailySleep: [], readiness: [], activity: [] };
+        let cronometerData = { dailyNutrition: [], servings: [], exercises: [], biometrics: [], notes: [] };
         let picoocChart = null;
         let ouraChart = null;
         let sleepChart = null;
         let dashboardChart = null;
+        let macroChart = null;
+        let calorieTrendChart = null;
         let picoocTimeRange = 'all';
         let ouraTimeRange = '1y';
         let picoocCurrentPage = 1;
+        let foodSelectedDate = new Date().toISOString().split('T')[0];
         const picoocPageSize = 15;
 
         // ============================================
@@ -721,8 +901,10 @@
             // Load data
             loadPicoocData();
             loadOuraData();
+            loadCronometerData();
             checkPicoocStatus();
             checkOuraStatus();
+            checkCronometerStatus();
             
             // Set dashboard date
             document.getElementById('dashboardDate').textContent = new Date().toLocaleDateString('en-US', {
@@ -745,6 +927,11 @@
             // Sync buttons
             document.getElementById('syncBtn').addEventListener('click', syncPicoocData);
             document.getElementById('ouraSyncBtn').addEventListener('click', syncOuraData);
+            document.getElementById('syncFoodBtn').addEventListener('click', syncCronometerData);
+
+            // Food date navigation
+            document.getElementById('foodPrevDay').addEventListener('click', () => navigateFoodDate(-1));
+            document.getElementById('foodNextDay').addEventListener('click', () => navigateFoodDate(1));
 
             // Time range buttons - Picooc
             document.getElementById('picooc-time-selector').addEventListener('click', (e) => {
@@ -1943,6 +2130,282 @@
                     </tr>
                 `).join('');
             }
+        }
+
+        // ============================================
+        // Cronometer/Food Functions
+        // ============================================
+        async function checkCronometerStatus() {
+            try {
+                const response = await fetch(`${API_BASE}/api/cronometer/status`);
+                const status = await response.json();
+                
+                const syncEl = document.getElementById('food-last-sync');
+                if (status.lastSync) {
+                    syncEl.textContent = `Last sync: ${new Date(status.lastSync).toLocaleString()}`;
+                } else {
+                    syncEl.textContent = 'Never synced';
+                }
+            } catch (e) {
+                console.error('Cronometer status check failed:', e);
+            }
+        }
+
+        async function loadCronometerData() {
+            try {
+                const response = await fetch(`${API_BASE}/api/cronometer/data`);
+                if (!response.ok) return;
+                
+                const result = await response.json();
+                cronometerData = result.data || result || { dailyNutrition: [], servings: [], exercises: [], biometrics: [], notes: [] };
+                
+                updateFoodUI();
+                updateDashboard();
+            } catch (e) {
+                console.error('Failed to load Cronometer data:', e);
+            }
+        }
+
+        async function syncCronometerData() {
+            const btn = document.getElementById('syncFoodBtn');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<span class="sync-icon spinning">🔄</span> Syncing...';
+            btn.disabled = true;
+
+            try {
+                const response = await fetch(`${API_BASE}/api/cronometer/sync`, { method: 'POST' });
+                const result = await response.json();
+
+                if (result.success) {
+                    await loadCronometerData();
+                    await checkCronometerStatus();
+                } else {
+                    alert('Sync failed: ' + (result.error || 'Unknown error'));
+                }
+            } catch (e) {
+                console.error('Cronometer sync failed:', e);
+                alert('Sync failed: ' + e.message);
+            } finally {
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            }
+        }
+
+        function navigateFoodDate(delta) {
+            const date = new Date(foodSelectedDate);
+            date.setDate(date.getDate() + delta);
+            
+            // Don't allow future dates
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            if (date > today) return;
+            
+            foodSelectedDate = date.toISOString().split('T')[0];
+            updateFoodDateDisplay();
+            updateFoodUI();
+        }
+
+        function updateFoodDateDisplay() {
+            const dateEl = document.getElementById('foodSelectedDate');
+            const today = new Date().toISOString().split('T')[0];
+            const yesterday = new Date(Date.now() - 86400000).toISOString().split('T')[0];
+            
+            if (foodSelectedDate === today) {
+                dateEl.textContent = 'Today';
+            } else if (foodSelectedDate === yesterday) {
+                dateEl.textContent = 'Yesterday';
+            } else {
+                dateEl.textContent = new Date(foodSelectedDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+            }
+        }
+
+        function updateFoodUI() {
+            const nutrition = cronometerData.dailyNutrition || [];
+            const servings = cronometerData.servings || [];
+            
+            // Find today's nutrition data
+            const todayNutrition = nutrition.find(n => n.date === foodSelectedDate) || 
+                                   nutrition[nutrition.length - 1] || {};
+            
+            // Update summary cards
+            document.getElementById('food-calories').textContent = Math.round(todayNutrition.energyKcal || 0);
+            document.getElementById('food-protein').textContent = (todayNutrition.protein || 0).toFixed(1);
+            document.getElementById('food-carbs').textContent = (todayNutrition.carbs || 0).toFixed(1);
+            document.getElementById('food-fat').textContent = (todayNutrition.fat || 0).toFixed(1);
+            
+            // Update nutrient progress bars
+            updateNutrientBar('fiber', todayNutrition.fiber, 30, 'g');
+            updateNutrientBar('sugar', todayNutrition.sugars, 50, 'g');
+            updateNutrientBar('sodium', todayNutrition.sodium, 2300, 'mg');
+            updateNutrientBar('cholesterol', todayNutrition.cholesterol, 300, 'mg');
+            updateNutrientBar('vitaminD', todayNutrition.vitaminD, 20, 'µg');
+            updateNutrientBar('calcium', todayNutrition.calcium, 1000, 'mg');
+            updateNutrientBar('iron', todayNutrition.iron, 18, 'mg');
+            updateNutrientBar('potassium', todayNutrition.potassium, 3500, 'mg');
+            
+            // Update macro chart
+            updateMacroChart(todayNutrition);
+            
+            // Update calorie trend chart
+            updateCalorieTrendChart(nutrition);
+            
+            // Update food log table
+            updateFoodLog(servings);
+        }
+
+        function updateNutrientBar(nutrient, value, target, unit) {
+            const percent = value ? Math.min((value / target) * 100, 100) : 0;
+            const valueEl = document.getElementById(`nutrient-${nutrient}`);
+            const progressEl = document.getElementById(`${nutrient}-progress`);
+            
+            if (valueEl) {
+                valueEl.textContent = `${(value || 0).toFixed(1)} / ${target} ${unit}`;
+            }
+            if (progressEl) {
+                progressEl.style.width = `${percent}%`;
+            }
+        }
+
+        function updateMacroChart(nutrition) {
+            const ctx = document.getElementById('macroChart');
+            if (!ctx) return;
+            
+            const protein = nutrition.protein || 0;
+            const carbs = nutrition.carbs || 0;
+            const fat = nutrition.fat || 0;
+            const total = protein + carbs + fat;
+            
+            if (macroChart) {
+                macroChart.destroy();
+            }
+            
+            macroChart = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Protein', 'Carbs', 'Fat'],
+                    datasets: [{
+                        data: [protein, carbs, fat],
+                        backgroundColor: ['#ef4444', '#eab308', '#22c55e'],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    cutout: '65%'
+                }
+            });
+            
+            // Update legend
+            const legendEl = document.getElementById('macroLegend');
+            if (legendEl && total > 0) {
+                legendEl.innerHTML = `
+                    <div class="macro-legend-item">
+                        <span class="color-dot" style="background: #ef4444"></span>
+                        Protein ${((protein / total) * 100).toFixed(0)}%
+                    </div>
+                    <div class="macro-legend-item">
+                        <span class="color-dot" style="background: #eab308"></span>
+                        Carbs ${((carbs / total) * 100).toFixed(0)}%
+                    </div>
+                    <div class="macro-legend-item">
+                        <span class="color-dot" style="background: #22c55e"></span>
+                        Fat ${((fat / total) * 100).toFixed(0)}%
+                    </div>
+                `;
+            }
+        }
+
+        function updateCalorieTrendChart(nutrition) {
+            const ctx = document.getElementById('calorieTrendChart');
+            if (!ctx) return;
+            
+            // Get last 7 days of data
+            const last7 = nutrition.slice(-7);
+            const labels = last7.map(n => {
+                const d = new Date(n.date);
+                return d.toLocaleDateString('en-US', { weekday: 'short' });
+            });
+            const calories = last7.map(n => n.energyKcal || 0);
+            
+            if (calorieTrendChart) {
+                calorieTrendChart.destroy();
+            }
+            
+            calorieTrendChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Calories',
+                        data: calories,
+                        borderColor: '#f97316',
+                        backgroundColor: 'rgba(249, 115, 22, 0.1)',
+                        fill: true,
+                        tension: 0.4,
+                        pointBackgroundColor: '#f97316',
+                        pointBorderColor: '#fff',
+                        pointBorderWidth: 2,
+                        pointRadius: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: false,
+                            grid: { color: 'rgba(255,255,255,0.1)' },
+                            ticks: { color: '#888' }
+                        },
+                        x: {
+                            grid: { display: false },
+                            ticks: { color: '#888' }
+                        }
+                    }
+                }
+            });
+        }
+
+        function updateFoodLog(servings) {
+            const tbody = document.getElementById('foodLogBody');
+            if (!tbody) return;
+            
+            // Filter servings for selected date
+            const dayServings = servings.filter(s => {
+                const servingDate = s.day || s.date;
+                return servingDate === foodSelectedDate;
+            });
+            
+            if (dayServings.length === 0) {
+                tbody.innerHTML = `
+                    <tr class="empty-state">
+                        <td colspan="7">
+                            <div class="empty-icon">🍽️</div>
+                            <p>No food logged for this day</p>
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+            
+            tbody.innerHTML = dayServings.map(s => `
+                <tr>
+                    <td>${s.foodName || s.name || '--'}</td>
+                    <td><span class="food-category">${s.category || '--'}</span></td>
+                    <td>${s.amount || '--'} ${s.unit || ''}</td>
+                    <td>${Math.round(s.energy || s.calories || 0)}</td>
+                    <td>${(s.protein || 0).toFixed(1)}</td>
+                    <td>${(s.carbs || 0).toFixed(1)}</td>
+                    <td>${(s.fat || 0).toFixed(1)}</td>
+                </tr>
+            `).join('');
         }
 
         // ============================================
