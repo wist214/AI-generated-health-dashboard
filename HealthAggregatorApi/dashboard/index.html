@@ -1312,7 +1312,8 @@
                     }
                 } else {
                     statusEl.className = 'status success';
-                    statusEl.textContent = `✅ Ready (${status.syncMethod})`;
+                    const lastSync = status.lastSync ? new Date(status.lastSync).toLocaleString() : 'Never';
+                    statusEl.textContent = `✅ Connected (${status.dataCount} records, Last sync: ${lastSync})`;
                 }
             } catch (e) {
                 console.error('Status check failed:', e);

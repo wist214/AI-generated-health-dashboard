@@ -208,12 +208,14 @@ public class OuraFunctions
         [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "oura/status")] HttpRequestData req)
     {
         var data = await _service.GetAllDataAsync();
+        var totalRecords = data.DailySleep.Count + data.Readiness.Count + data.Activity.Count;
         
         var response = req.CreateResponse(HttpStatusCode.OK);
         await response.WriteAsJsonAsync(new
         {
             configured = true,
             lastSync = data.LastSync,
+            dataCount = totalRecords,
             recordCounts = new Dictionary<string, int>
             {
                 ["sleep"] = data.DailySleep.Count,
