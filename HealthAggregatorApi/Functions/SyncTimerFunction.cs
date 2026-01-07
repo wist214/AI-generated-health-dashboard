@@ -11,15 +11,18 @@ public class SyncTimerFunction
 {
     private readonly IOuraDataService _ouraService;
     private readonly IPicoocDataService _picoocService;
+    private readonly ICronometerDataService _cronometerService;
     private readonly ILogger<SyncTimerFunction> _logger;
 
     public SyncTimerFunction(
         IOuraDataService ouraService,
         IPicoocDataService picoocService,
+        ICronometerDataService cronometerService,
         ILogger<SyncTimerFunction> logger)
     {
         _ouraService = ouraService;
         _picoocService = picoocService;
+        _cronometerService = cronometerService;
         _logger = logger;
     }
 
@@ -66,6 +69,22 @@ public class SyncTimerFunction
         catch (Exception ex)
         {
             _logger.LogError(ex, "Picooc sync failed");
+        }
+
+        // Sync Cronometer (last 7 days)
+        try
+        {
+            var endDate = DateTime.UtcNow.AddDays(1);
+            var startDate = DateTime.UtcNow.AddDays(-7);
+            
+            _logger.LogInformation("Syncing Cronometer data from {Start} to {End}", startDate, endDate);
+            var cronometerData = await _cronometerService.SyncDataAsync(startDate, endDate);
+            _logger.LogInformation("Cronometer sync completed: {Nutrition} nutrition, {Servings} serving records",
+                cronometerData.DailyNutrition.Count, cronometerData.Servings.Count);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Cronometer sync failed");
         }
 
         _logger.LogInformation("=== Hourly sync completed at {Time} ===", DateTime.UtcNow);
