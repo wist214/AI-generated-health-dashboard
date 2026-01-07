@@ -2584,8 +2584,9 @@
             const ctx = document.getElementById('calorieTrendChart');
             if (!ctx) return;
             
-            // Get last 7 days of data (API returns PascalCase)
-            const last7 = nutrition.slice(-7);
+            // Get last 7 days of data (API returns data sorted descending - newest first)
+            // Take first 7 (most recent) and reverse to get chronological order (oldest to newest, left to right)
+            const last7 = nutrition.slice(0, 7).reverse();
             const labels = last7.map(n => {
                 const d = new Date(n.Date);
                 return d.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
