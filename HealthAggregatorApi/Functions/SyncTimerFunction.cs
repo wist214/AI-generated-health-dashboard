@@ -80,7 +80,7 @@ public class SyncTimerFunction
             _logger.LogInformation("Syncing Cronometer data from {Start} to {End}", startDate, endDate);
             var cronometerData = await _cronometerService.SyncDataAsync(startDate, endDate);
             _logger.LogInformation("Cronometer sync completed: {Nutrition} nutrition, {Servings} serving records",
-                cronometerData.DailyNutrition.Count, cronometerData.Servings.Count);
+                cronometerData.DailyNutrition.Count, cronometerData.FoodServings.Count);
         }
         catch (Exception ex)
         {
