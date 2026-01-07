@@ -10,6 +10,7 @@ using HealthAggregatorApi.Infrastructure.Persistence;
 using HealthAggregatorApi.Core.Models.Oura;
 using HealthAggregatorApi.Core.Models.Picooc;
 using HealthAggregatorApi.Core.Models.Cronometer;
+using HealthAggregatorApi.Core.Models.Settings;
 
 var builder = FunctionsApplication.CreateBuilder(args);
 
@@ -79,6 +80,10 @@ builder.Services.AddSingleton<ICronometerDataService>(sp =>
     var logger = sp.GetRequiredService<ILogger<CronometerDataService>>();
     return new CronometerDataService(apiClient, repository, cronometerEmail, cronometerPassword, logger);
 });
+
+// Register User Settings repository
+builder.Services.AddSingleton<IDataRepository<UserSettings>>(sp =>
+    new BlobDataRepository<UserSettings>(blobConnectionString, "health-data", "user_settings.json"));
 
 var app = builder.Build();
 

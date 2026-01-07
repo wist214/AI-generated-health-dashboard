@@ -6,7 +6,7 @@
     <title>Health Aggregator</title>
     <link rel="preconnect" href="https://cdn.jsdelivr.net">
     <link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
-    <link rel="stylesheet" href="/css/styles.css">
+    <link rel="stylesheet" href="/api/css/styles.css">
     <script defer src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns"></script>
     <style>.skip-link{position:absolute;top:-40px;left:0;background:#00d4ff;color:#fff;padding:8px 16px;z-index:1001;text-decoration:none;border-radius:0 0 8px 0;transition:top .2s}.skip-link:focus{top:0}</style>
@@ -15,8 +15,16 @@
     <a href="#main-content" class="skip-link">Skip to main content</a>
     <div class="container">
         <header>
-            <h1>Health Aggregator</h1>
-            <p>Track your health data from multiple sources</p>
+            <div class="header-content" style="display: flex; justify-content: space-between; align-items: center;">
+                <div style="width: 50px;"></div>
+                <div class="header-text" style="flex: 1; text-align: center;">
+                    <h1>Health Aggregator</h1>
+                    <p>Track your health data from multiple sources</p>
+                </div>
+                <button type="button" class="settings-btn" onclick="openSettingsModal()" aria-label="Open Settings" style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); border-radius: 8px; padding: 10px 14px; font-size: 1.5rem; cursor: pointer; width: 50px;">
+                    ⚙️
+                </button>
+            </div>
         </header>
 
         <!-- Tab Navigation -->
@@ -474,68 +482,67 @@
                 </table>
             </div>
         </div>
-    </div>
 
-    <!-- Food Tab -->
-    <div id="food-tab" class="tab-content" role="tabpanel" aria-labelledby="food-tab-btn">
-        <div class="tab-header">
-            <h2>🍎 Food & Nutrition</h2>
-            <div class="header-actions">
-                <span id="food-last-sync">Last sync: --</span>
-                <button type="button" class="sync-btn food-sync-btn" id="syncFoodBtn">
-                    <span class="sync-icon">🔄</span> Sync Cronometer
-                </button>
-            </div>
+        <!-- Food Tab -->
+        <div id="food-tab" class="tab-content" role="tabpanel" aria-labelledby="food-tab-btn">
+        <div class="controls">
+            <button type="button" class="btn btn-food" id="syncFoodBtn">
+                🔄 Sync Cronometer
+            </button>
+            <div id="foodStatusMessage" class="status"></div>
         </div>
 
         <!-- Today's Summary Cards -->
-        <div class="stats-grid food-stats">
-            <div class="metric-card calories">
-                <div class="metric-icon">🔥</div>
-                <div class="metric-value" id="food-calories">--</div>
-                <div class="metric-label">Calories</div>
-                <div class="metric-target" id="food-calories-target">Target: --</div>
+        <div class="stats-grid">
+            <div class="stat-card food">
+                <h3>Calories</h3>
+                <div class="value" id="food-calories">--</div>
+                <div class="details" id="food-calories-details">No data</div>
             </div>
-            <div class="metric-card protein">
-                <div class="metric-icon">🥩</div>
-                <div class="metric-value" id="food-protein">--</div>
-                <div class="metric-label">Protein (g)</div>
-                <div class="metric-target" id="food-protein-target">Target: --</div>
+            <div class="stat-card food">
+                <h3>Protein</h3>
+                <div class="value" id="food-protein">--</div>
+                <div class="details" id="food-protein-details">No data</div>
             </div>
-            <div class="metric-card carbs">
-                <div class="metric-icon">🍞</div>
-                <div class="metric-value" id="food-carbs">--</div>
-                <div class="metric-label">Carbs (g)</div>
-                <div class="metric-target" id="food-carbs-target">Target: --</div>
+            <div class="stat-card food">
+                <h3>Carbs</h3>
+                <div class="value" id="food-carbs">--</div>
+                <div class="details" id="food-carbs-details">No data</div>
             </div>
-            <div class="metric-card fat">
-                <div class="metric-icon">🥑</div>
-                <div class="metric-value" id="food-fat">--</div>
-                <div class="metric-label">Fat (g)</div>
-                <div class="metric-target" id="food-fat-target">Target: --</div>
+            <div class="stat-card food">
+                <h3>Fat</h3>
+                <div class="value" id="food-fat">--</div>
+                <div class="details" id="food-fat-details">No data</div>
             </div>
         </div>
 
         <!-- Charts Row -->
-        <div class="charts-row">
-            <div class="chart-container macro-chart-container">
-                <h3>Macro Breakdown</h3>
-                <div class="chart-wrapper">
+        <div class="chart-container">
+            <div class="chart-header">
+                <h2>📊 Calorie Trend (7 Days)</h2>
+            </div>
+            <div class="chart-wrapper">
+                <canvas id="calorieTrendChart"></canvas>
+            </div>
+        </div>
+
+        <div class="chart-container">
+            <div class="chart-header">
+                <h2>🥧 Macro Breakdown</h2>
+            </div>
+            <div class="macro-chart-row">
+                <div class="macro-chart-wrapper">
                     <canvas id="macroChart"></canvas>
                 </div>
                 <div class="macro-legend" id="macroLegend"></div>
             </div>
-            <div class="chart-container calorie-trend-container">
-                <h3>Calorie Trend (7 Days)</h3>
-                <div class="chart-wrapper">
-                    <canvas id="calorieTrendChart"></canvas>
-                </div>
-            </div>
         </div>
 
         <!-- Nutrient Progress Bars -->
-        <div class="section-card nutrients-section">
-            <h3>Key Nutrients</h3>
+        <div class="chart-container">
+            <div class="chart-header">
+                <h2>🧪 Key Nutrients</h2>
+            </div>
             <div class="nutrients-grid" id="nutrientsGrid">
                 <div class="nutrient-bar">
                     <div class="nutrient-header">
@@ -613,17 +620,17 @@
         </div>
 
         <!-- Food Log Table -->
-        <div class="section-card food-log-section">
-            <div class="section-header">
-                <h3>Today's Food Log</h3>
+        <div class="chart-container">
+            <div class="chart-header">
+                <h2>🍽️ Today's Food Log</h2>
                 <div class="date-selector">
-                    <button type="button" class="date-nav" id="foodPrevDay">◀</button>
+                    <button type="button" class="time-btn food" id="foodPrevDay">◀</button>
                     <span id="foodSelectedDate">Today</span>
-                    <button type="button" class="date-nav" id="foodNextDay">▶</button>
+                    <button type="button" class="time-btn food" id="foodNextDay">▶</button>
                 </div>
             </div>
             <div class="table-container">
-                <table class="data-table food-table">
+                <table class="data-table">
                     <thead>
                         <tr>
                             <th>Food</th>
@@ -647,6 +654,7 @@
             </div>
         </div>
     </div>
+    </div> <!-- end container -->
 
     <!-- Sleep Detail Modal -->
     <div class="modal-overlay" id="sleepModal">
@@ -839,6 +847,155 @@
                             <div class="indicator-value" id="measurementBMR">--</div>
                             <div class="indicator-label">BMR</div>
                             <div class="indicator-sub">kcal/day</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Settings Modal -->
+    <div class="modal-overlay" id="settingsModal" onclick="closeSettingsModal(event)">
+        <div class="modal settings-modal" onclick="event.stopPropagation()">
+            <div class="modal-header" style="background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);">
+                <h2>⚙️ Settings</h2>
+                <span id="settingsModalSubtitle" style="color: rgba(255,255,255,0.9); font-size: 0.95rem;">Configure your health targets</span>
+                <button type="button" class="modal-close" onclick="closeSettingsModal()" aria-label="Close settings">×</button>
+            </div>
+            <div class="modal-body">
+                <!-- Body Measurements -->
+                <div class="settings-section">
+                    <h3>📏 Body Measurements</h3>
+                    <div class="settings-grid">
+                        <div class="setting-item">
+                            <label for="settingWeight">Current Weight (kg)</label>
+                            <input type="number" id="settingWeight" step="0.1" min="30" max="300" placeholder="70.0">
+                        </div>
+                        <div class="setting-item">
+                            <label for="settingHeight">Height (cm)</label>
+                            <input type="number" id="settingHeight" step="1" min="100" max="250" placeholder="175">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Daily Nutrition Targets -->
+                <div class="settings-section">
+                    <h3>🎯 Daily Nutrition Targets</h3>
+                    <div class="settings-grid">
+                        <div class="setting-item">
+                            <label for="settingCalories">Calories (kcal)</label>
+                            <input type="number" id="settingCalories" step="50" min="1000" max="5000" placeholder="2000">
+                        </div>
+                        <div class="setting-item">
+                            <label for="settingProtein">Protein (g)</label>
+                            <input type="number" id="settingProtein" step="1" min="30" max="300" placeholder="150">
+                        </div>
+                        <div class="setting-item">
+                            <label for="settingCarbs">Carbs (g)</label>
+                            <input type="number" id="settingCarbs" step="1" min="50" max="500" placeholder="250">
+                        </div>
+                        <div class="setting-item">
+                            <label for="settingFat">Fat (g)</label>
+                            <input type="number" id="settingFat" step="1" min="20" max="200" placeholder="65">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quick Presets -->
+                <div class="settings-section">
+                    <h3>⚡ Quick Presets</h3>
+                    <div class="preset-buttons">
+                        <button type="button" class="preset-btn" onclick="applyPreset('maintenance')">Maintenance</button>
+                        <button type="button" class="preset-btn" onclick="applyPreset('cutting')">Weight Loss</button>
+                        <button type="button" class="preset-btn" onclick="applyPreset('bulking')">Muscle Gain</button>
+                    </div>
+                </div>
+
+                <!-- Save Button -->
+                <div class="settings-actions">
+                    <button type="button" class="btn btn-primary" onclick="saveSettings()">💾 Save Settings</button>
+                    <button type="button" class="btn btn-secondary" onclick="closeSettingsModal()">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Food Detail Modal -->
+    <div class="modal-overlay" id="foodDetailModal" onclick="closeFoodDetailModal(event)">
+        <div class="modal food-modal" onclick="event.stopPropagation()">
+            <div class="modal-header" style="background: linear-gradient(135deg, #f97316 0%, #fb923c 100%);">
+                <h2>Food Details</h2>
+                <span id="foodModalDate" style="color: #1a1a2e !important; font-weight: 700 !important; font-size: 1.1rem !important; opacity: 1 !important; display: block;">--</span>
+                <button type="button" class="modal-close" onclick="closeFoodDetailModal()" aria-label="Close food details modal">×</button>
+            </div>
+            <div class="modal-body">
+                <!-- Food Hero -->
+                <div class="metric-hero food-hero">
+                    <div class="hero-metric">
+                        <div class="hero-icon emoji-icon">🍽️</div>
+                        <div class="hero-value" id="foodModalName">--</div>
+                        <div class="hero-label">Food Item</div>
+                    </div>
+                </div>
+
+                <!-- Basic Info -->
+                <div class="food-info-section">
+                    <div class="food-info-row">
+                        <span class="food-info-label">📁 Category</span>
+                        <span class="food-info-value" id="foodModalCategory">--</span>
+                    </div>
+                    <div class="food-info-row">
+                        <span class="food-info-label">⚖️ Amount</span>
+                        <span class="food-info-value" id="foodModalAmount">--</span>
+                    </div>
+                    <div class="food-info-row">
+                        <span class="food-info-label">📅 Meal Group</span>
+                        <span class="food-info-value" id="foodModalGroup">--</span>
+                    </div>
+                </div>
+
+                <!-- Nutrition Summary -->
+                <div class="food-nutrition-section">
+                    <h3>🔥 Nutrition Facts</h3>
+                    <div class="food-nutrition-grid">
+                        <div class="food-nutrition-card calories">
+                            <div class="nutrition-icon">🔥</div>
+                            <div class="nutrition-value" id="foodModalCalories">--</div>
+                            <div class="nutrition-label">Calories</div>
+                        </div>
+                        <div class="food-nutrition-card protein">
+                            <div class="nutrition-icon">🥩</div>
+                            <div class="nutrition-value" id="foodModalProtein">--</div>
+                            <div class="nutrition-label">Protein</div>
+                        </div>
+                        <div class="food-nutrition-card carbs">
+                            <div class="nutrition-icon">🍞</div>
+                            <div class="nutrition-value" id="foodModalCarbs">--</div>
+                            <div class="nutrition-label">Carbs</div>
+                        </div>
+                        <div class="food-nutrition-card fat">
+                            <div class="nutrition-icon">🥑</div>
+                            <div class="nutrition-value" id="foodModalFat">--</div>
+                            <div class="nutrition-label">Fat</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Additional Nutrients -->
+                <div class="food-extra-section">
+                    <h3>📊 Additional Nutrients</h3>
+                    <div class="food-extra-grid">
+                        <div class="food-extra-item">
+                            <span class="extra-label">Fiber</span>
+                            <span class="extra-value" id="foodModalFiber">--</span>
+                        </div>
+                        <div class="food-extra-item">
+                            <span class="extra-label">Sugar</span>
+                            <span class="extra-value" id="foodModalSugar">--</span>
+                        </div>
+                        <div class="food-extra-item">
+                            <span class="extra-label">Sodium</span>
+                            <span class="extra-value" id="foodModalSodium">--</span>
                         </div>
                     </div>
                 </div>
@@ -2140,11 +2297,14 @@
                 const response = await fetch(`${API_BASE}/api/cronometer/status`);
                 const status = await response.json();
                 
-                const syncEl = document.getElementById('food-last-sync');
-                if (status.lastSync) {
-                    syncEl.textContent = `Last sync: ${new Date(status.lastSync).toLocaleString()}`;
+                const statusEl = document.getElementById('foodStatusMessage');
+                if (!status.configured || !status.hasCredentials) {
+                    statusEl.className = 'status warning';
+                    statusEl.textContent = '⚠️ Cronometer credentials not configured';
                 } else {
-                    syncEl.textContent = 'Never synced';
+                    statusEl.className = 'status success';
+                    const lastSync = status.lastSync ? new Date(status.lastSync).toLocaleString() : 'Never';
+                    statusEl.textContent = `✅ Connected (${status.dataCount || 0} records, Last sync: ${lastSync})`;
                 }
             } catch (e) {
                 console.error('Cronometer status check failed:', e);
@@ -2157,7 +2317,7 @@
                 if (!response.ok) return;
                 
                 const result = await response.json();
-                cronometerData = result.data || result || { dailyNutrition: [], servings: [], exercises: [], biometrics: [], notes: [] };
+                cronometerData = result.data || result || { dailyNutrition: [], foodServings: [], exercises: [], biometrics: [], notes: [] };
                 
                 updateFoodUI();
                 updateDashboard();
@@ -2169,7 +2329,7 @@
         async function syncCronometerData() {
             const btn = document.getElementById('syncFoodBtn');
             const originalText = btn.innerHTML;
-            btn.innerHTML = '<span class="sync-icon spinning">🔄</span> Syncing...';
+            btn.innerHTML = '🔄 Syncing...';
             btn.disabled = true;
 
             try {
@@ -2219,29 +2379,64 @@
             }
         }
 
-        function updateFoodUI() {
+        async function updateFoodUI() {
             const nutrition = cronometerData.dailyNutrition || [];
-            const servings = cronometerData.servings || [];
+            const servings = cronometerData.foodServings || [];
+            const settings = await getSettings();
             
-            // Find today's nutrition data
-            const todayNutrition = nutrition.find(n => n.date === foodSelectedDate) || 
-                                   nutrition[nutrition.length - 1] || {};
+            // Find selected date's nutrition data (API returns PascalCase properties)
+            // Data is sorted descending, so first item is most recent
+            let todayNutrition = nutrition.find(n => n.Date === foodSelectedDate);
             
-            // Update summary cards
-            document.getElementById('food-calories').textContent = Math.round(todayNutrition.energyKcal || 0);
-            document.getElementById('food-protein').textContent = (todayNutrition.protein || 0).toFixed(1);
-            document.getElementById('food-carbs').textContent = (todayNutrition.carbs || 0).toFixed(1);
-            document.getElementById('food-fat').textContent = (todayNutrition.fat || 0).toFixed(1);
+            // If no data for selected date, use most recent and update selected date
+            if (!todayNutrition && nutrition.length > 0) {
+                todayNutrition = nutrition[0];
+                foodSelectedDate = todayNutrition.Date;
+                updateFoodDateDisplay();
+            }
+            todayNutrition = todayNutrition || {};
             
-            // Update nutrient progress bars
-            updateNutrientBar('fiber', todayNutrition.fiber, 30, 'g');
-            updateNutrientBar('sugar', todayNutrition.sugars, 50, 'g');
-            updateNutrientBar('sodium', todayNutrition.sodium, 2300, 'mg');
-            updateNutrientBar('cholesterol', todayNutrition.cholesterol, 300, 'mg');
-            updateNutrientBar('vitaminD', todayNutrition.vitaminD, 20, 'µg');
-            updateNutrientBar('calcium', todayNutrition.calcium, 1000, 'mg');
-            updateNutrientBar('iron', todayNutrition.iron, 18, 'mg');
-            updateNutrientBar('potassium', todayNutrition.potassium, 3500, 'mg');
+            // Update summary cards with current/target format
+            // API returns PascalCase: Energy, Protein, Carbs, Fat
+            const calories = Math.round(todayNutrition.Energy || 0);
+            const protein = Math.round(todayNutrition.Protein || 0);
+            const carbs = Math.round(todayNutrition.Carbs || 0);
+            const fat = Math.round(todayNutrition.Fat || 0);
+            
+            // Display as current / target
+            document.getElementById('food-calories').innerHTML = `${calories}<span class="target">/${settings.calories}</span>`;
+            document.getElementById('food-protein').innerHTML = `${protein}g<span class="target">/${settings.protein}g</span>`;
+            document.getElementById('food-carbs').innerHTML = `${carbs}g<span class="target">/${settings.carbs}g</span>`;
+            document.getElementById('food-fat').innerHTML = `${fat}g<span class="target">/${settings.fat}g</span>`;
+            
+            // Update details with remaining values
+            const caloriesRemaining = settings.calories - calories;
+            const proteinRemaining = settings.protein - protein;
+            const carbsRemaining = settings.carbs - carbs;
+            const fatRemaining = settings.fat - fat;
+            
+            document.getElementById('food-calories-details').textContent = caloriesRemaining >= 0 
+                ? `${caloriesRemaining} remaining` 
+                : `${Math.abs(caloriesRemaining)} over`;
+            document.getElementById('food-protein-details').textContent = proteinRemaining >= 0 
+                ? `${proteinRemaining}g remaining` 
+                : `${Math.abs(proteinRemaining)}g over`;
+            document.getElementById('food-carbs-details').textContent = carbsRemaining >= 0 
+                ? `${carbsRemaining}g remaining` 
+                : `${Math.abs(carbsRemaining)}g over`;
+            document.getElementById('food-fat-details').textContent = fatRemaining >= 0 
+                ? `${fatRemaining}g remaining` 
+                : `${Math.abs(fatRemaining)}g over`;
+            
+            // Update nutrient progress bars (API returns PascalCase)
+            updateNutrientBar('fiber', todayNutrition.Fiber, 30, 'g');
+            updateNutrientBar('sugar', todayNutrition.Sugars, 50, 'g');
+            updateNutrientBar('sodium', todayNutrition.Sodium, 2300, 'mg');
+            updateNutrientBar('cholesterol', todayNutrition.Cholesterol, 300, 'mg');
+            updateNutrientBar('vitaminD', todayNutrition.VitaminD, 20, 'µg');
+            updateNutrientBar('calcium', todayNutrition.Calcium, 1000, 'mg');
+            updateNutrientBar('iron', todayNutrition.Iron, 18, 'mg');
+            updateNutrientBar('potassium', todayNutrition.Potassium, 3500, 'mg');
             
             // Update macro chart
             updateMacroChart(todayNutrition);
@@ -2255,14 +2450,22 @@
 
         function updateNutrientBar(nutrient, value, target, unit) {
             const percent = value ? Math.min((value / target) * 100, 100) : 0;
+            const exceeded = value > target;
             const valueEl = document.getElementById(`nutrient-${nutrient}`);
             const progressEl = document.getElementById(`${nutrient}-progress`);
+            const barContainer = progressEl?.closest('.nutrient-bar');
             
             if (valueEl) {
-                valueEl.textContent = `${(value || 0).toFixed(1)} / ${target} ${unit}`;
+                const exceedMark = exceeded ? ' ⚠️' : '';
+                valueEl.textContent = `${(value || 0).toFixed(1)} / ${target} ${unit}${exceedMark}`;
+                valueEl.classList.toggle('exceeded', exceeded);
             }
             if (progressEl) {
                 progressEl.style.width = `${percent}%`;
+                progressEl.classList.toggle('exceeded', exceeded);
+            }
+            if (barContainer) {
+                barContainer.classList.toggle('exceeded', exceeded);
             }
         }
 
@@ -2270,9 +2473,10 @@
             const ctx = document.getElementById('macroChart');
             if (!ctx) return;
             
-            const protein = nutrition.protein || 0;
-            const carbs = nutrition.carbs || 0;
-            const fat = nutrition.fat || 0;
+            // API returns PascalCase properties
+            const protein = nutrition.Protein || 0;
+            const carbs = nutrition.Carbs || 0;
+            const fat = nutrition.Fat || 0;
             const total = protein + carbs + fat;
             
             if (macroChart) {
@@ -2291,7 +2495,7 @@
                 },
                 options: {
                     responsive: true,
-                    maintainAspectRatio: false,
+                    maintainAspectRatio: true,
                     plugins: {
                         legend: { display: false }
                     },
@@ -2301,21 +2505,25 @@
             
             // Update legend
             const legendEl = document.getElementById('macroLegend');
-            if (legendEl && total > 0) {
-                legendEl.innerHTML = `
-                    <div class="macro-legend-item">
-                        <span class="color-dot" style="background: #ef4444"></span>
-                        Protein ${((protein / total) * 100).toFixed(0)}%
-                    </div>
-                    <div class="macro-legend-item">
-                        <span class="color-dot" style="background: #eab308"></span>
-                        Carbs ${((carbs / total) * 100).toFixed(0)}%
-                    </div>
-                    <div class="macro-legend-item">
-                        <span class="color-dot" style="background: #22c55e"></span>
-                        Fat ${((fat / total) * 100).toFixed(0)}%
-                    </div>
-                `;
+            if (legendEl) {
+                if (total > 0) {
+                    legendEl.innerHTML = `
+                        <div class="macro-legend-item">
+                            <span class="color-dot" style="background: #ef4444"></span>
+                            Protein ${((protein / total) * 100).toFixed(0)}% (${protein.toFixed(1)}g)
+                        </div>
+                        <div class="macro-legend-item">
+                            <span class="color-dot" style="background: #eab308"></span>
+                            Carbs ${((carbs / total) * 100).toFixed(0)}% (${carbs.toFixed(1)}g)
+                        </div>
+                        <div class="macro-legend-item">
+                            <span class="color-dot" style="background: #22c55e"></span>
+                            Fat ${((fat / total) * 100).toFixed(0)}% (${fat.toFixed(1)}g)
+                        </div>
+                    `;
+                } else {
+                    legendEl.innerHTML = '<div class="macro-legend-item">No data</div>';
+                }
             }
         }
 
@@ -2323,13 +2531,13 @@
             const ctx = document.getElementById('calorieTrendChart');
             if (!ctx) return;
             
-            // Get last 7 days of data
+            // Get last 7 days of data (API returns PascalCase)
             const last7 = nutrition.slice(-7);
             const labels = last7.map(n => {
-                const d = new Date(n.date);
-                return d.toLocaleDateString('en-US', { weekday: 'short' });
+                const d = new Date(n.Date);
+                return d.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
             });
-            const calories = last7.map(n => n.energyKcal || 0);
+            const calories = last7.map(n => n.Energy || 0);
             
             if (calorieTrendChart) {
                 calorieTrendChart.destroy();
@@ -2373,15 +2581,21 @@
             });
         }
 
+        // Store current day's servings for modal access
+        let currentDayServings = [];
+
         function updateFoodLog(servings) {
             const tbody = document.getElementById('foodLogBody');
             if (!tbody) return;
             
-            // Filter servings for selected date
+            // Filter servings for selected date (API returns PascalCase: Day)
             const dayServings = servings.filter(s => {
-                const servingDate = s.day || s.date;
+                const servingDate = s.Day || s.date;
                 return servingDate === foodSelectedDate;
             });
+            
+            // Store for modal access
+            currentDayServings = dayServings;
             
             if (dayServings.length === 0) {
                 tbody.innerHTML = `
@@ -2395,17 +2609,26 @@
                 return;
             }
             
-            tbody.innerHTML = dayServings.map(s => `
-                <tr>
-                    <td>${s.foodName || s.name || '--'}</td>
-                    <td><span class="food-category">${s.category || '--'}</span></td>
-                    <td>${s.amount || '--'} ${s.unit || ''}</td>
-                    <td>${Math.round(s.energy || s.calories || 0)}</td>
-                    <td>${(s.protein || 0).toFixed(1)}</td>
-                    <td>${(s.carbs || 0).toFixed(1)}</td>
-                    <td>${(s.fat || 0).toFixed(1)}</td>
+            // API returns PascalCase: FoodName, Category, Amount, Energy, Protein, Carbs, Fat
+            tbody.innerHTML = dayServings.map((s, index) => `
+                <tr class="clickable-row food-row" data-food-index="${index}">
+                    <td>${s.FoodName || s.name || '--'}</td>
+                    <td><span class="food-category">${s.Category || '--'}</span></td>
+                    <td>${s.Amount || '--'}</td>
+                    <td>${Math.round(s.Energy || s.calories || 0)}</td>
+                    <td>${(s.Protein || 0).toFixed(1)}</td>
+                    <td>${(s.Carbs || 0).toFixed(1)}</td>
+                    <td>${(s.Fat || 0).toFixed(1)}</td>
                 </tr>
             `).join('');
+            
+            // Add click handlers
+            tbody.querySelectorAll('.food-row').forEach(row => {
+                row.addEventListener('click', () => {
+                    const index = parseInt(row.dataset.foodIndex);
+                    openFoodDetailModal(index);
+                });
+            });
         }
 
         // ============================================
@@ -2624,11 +2847,222 @@
             document.body.style.overflow = 'auto';
         }
 
+        // ============================================
+        // Settings Modal Functions
+        // ============================================
+        
+        // Default settings
+        const defaultSettings = {
+            weight: 70,
+            height: 175,
+            calories: 2000,
+            protein: 150,
+            carbs: 250,
+            fat: 65
+        };
+        
+        // Cache for settings to avoid multiple API calls
+        let cachedSettings = null;
+        
+        async function getSettings() {
+            // Return cached settings if available
+            if (cachedSettings) {
+                return { ...defaultSettings, ...cachedSettings };
+            }
+            
+            // Try to load from API
+            try {
+                const response = await fetch(`${API_BASE}/settings`);
+                if (response.ok) {
+                    const data = await response.json();
+                    cachedSettings = data;
+                    return { ...defaultSettings, ...data };
+                }
+            } catch (e) {
+                console.warn('Failed to load settings from API, using localStorage fallback');
+            }
+            
+            // Fallback to localStorage
+            const stored = localStorage.getItem('healthAggregatorSettings');
+            if (stored) {
+                return { ...defaultSettings, ...JSON.parse(stored) };
+            }
+            return { ...defaultSettings };
+        }
+        
+        async function saveSettingsToStorage(settings) {
+            try {
+                const response = await fetch(`${API_BASE}/settings`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(settings)
+                });
+                
+                if (response.ok) {
+                    cachedSettings = settings;
+                    // Also save to localStorage as backup
+                    localStorage.setItem('healthAggregatorSettings', JSON.stringify(settings));
+                    return true;
+                } else {
+                    throw new Error('API save failed');
+                }
+            } catch (e) {
+                console.warn('Failed to save settings to API, saving to localStorage only');
+                localStorage.setItem('healthAggregatorSettings', JSON.stringify(settings));
+                return false;
+            }
+        }
+        
+        async function openSettingsModal() {
+            const settings = await getSettings();
+            
+            // Populate form with current settings
+            document.getElementById('settingWeight').value = settings.weight || '';
+            document.getElementById('settingHeight').value = settings.height || '';
+            document.getElementById('settingCalories').value = settings.calories || '';
+            document.getElementById('settingProtein').value = settings.protein || '';
+            document.getElementById('settingCarbs').value = settings.carbs || '';
+            document.getElementById('settingFat').value = settings.fat || '';
+            
+            // Show modal
+            document.getElementById('settingsModal').classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+        
+        function closeSettingsModal(event) {
+            if (event && event.target.closest('.settings-modal')) return;
+            document.getElementById('settingsModal').classList.remove('active');
+            document.body.style.overflow = 'auto';
+        }
+        
+        async function saveSettings() {
+            const settings = {
+                weight: parseFloat(document.getElementById('settingWeight').value) || defaultSettings.weight,
+                height: parseInt(document.getElementById('settingHeight').value) || defaultSettings.height,
+                calories: parseInt(document.getElementById('settingCalories').value) || defaultSettings.calories,
+                protein: parseInt(document.getElementById('settingProtein').value) || defaultSettings.protein,
+                carbs: parseInt(document.getElementById('settingCarbs').value) || defaultSettings.carbs,
+                fat: parseInt(document.getElementById('settingFat').value) || defaultSettings.fat
+            };
+            
+            const saved = await saveSettingsToStorage(settings);
+            closeSettingsModal();
+            
+            // Refresh the Food tab display if it's active
+            if (document.querySelector('[data-tab="food"]')?.classList.contains('active')) {
+                displayCronometerData();
+            }
+            
+            // Show success notification
+            showNotification(saved ? 'Settings saved to cloud!' : 'Settings saved locally', saved ? 'success' : 'info');
+        }
+        
+        function applyPreset(preset) {
+            const weight = parseFloat(document.getElementById('settingWeight').value) || 70;
+            
+            let calories, protein, carbs, fat;
+            
+            switch (preset) {
+                case 'maintenance':
+                    // Moderate activity: ~30 kcal per kg
+                    calories = Math.round(weight * 30);
+                    protein = Math.round(weight * 1.8);    // 1.8g per kg
+                    fat = Math.round(calories * 0.25 / 9); // 25% of calories
+                    carbs = Math.round((calories - protein * 4 - fat * 9) / 4);
+                    break;
+                case 'cutting':
+                    // Deficit: ~24 kcal per kg
+                    calories = Math.round(weight * 24);
+                    protein = Math.round(weight * 2.2);    // Higher protein for muscle preservation
+                    fat = Math.round(calories * 0.25 / 9); // 25% of calories
+                    carbs = Math.round((calories - protein * 4 - fat * 9) / 4);
+                    break;
+                case 'bulking':
+                    // Surplus: ~35 kcal per kg
+                    calories = Math.round(weight * 35);
+                    protein = Math.round(weight * 2.0);    // 2g per kg
+                    fat = Math.round(calories * 0.25 / 9); // 25% of calories
+                    carbs = Math.round((calories - protein * 4 - fat * 9) / 4);
+                    break;
+            }
+            
+            document.getElementById('settingCalories').value = calories;
+            document.getElementById('settingProtein').value = protein;
+            document.getElementById('settingCarbs').value = carbs;
+            document.getElementById('settingFat').value = fat;
+        }
+        
+        function showNotification(message, type = 'info') {
+            // Create notification element
+            const notification = document.createElement('div');
+            notification.className = `notification notification-${type}`;
+            notification.textContent = message;
+            notification.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                padding: 15px 25px;
+                background: ${type === 'success' ? '#22c55e' : '#3b82f6'};
+                color: white;
+                border-radius: 8px;
+                font-weight: 500;
+                z-index: 10000;
+                animation: slideIn 0.3s ease;
+            `;
+            
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.style.animation = 'slideOut 0.3s ease';
+                setTimeout(() => notification.remove(), 300);
+            }, 3000);
+        }
+
+        // ============================================
+        // Food Detail Modal Functions
+        // ============================================
+        function openFoodDetailModal(index) {
+            const food = currentDayServings[index];
+            if (!food) return;
+            
+            // Populate modal fields
+            document.getElementById('foodModalDate').textContent = food.Day || food.date || '--';
+            document.getElementById('foodModalName').textContent = food.FoodName || food.name || '--';
+            document.getElementById('foodModalCategory').textContent = food.Category || '--';
+            document.getElementById('foodModalAmount').textContent = food.Amount || '--';
+            document.getElementById('foodModalGroup').textContent = food.Group || 'Uncategorized';
+            
+            // Nutrition values
+            document.getElementById('foodModalCalories').textContent = Math.round(food.Energy || food.calories || 0) + ' kcal';
+            document.getElementById('foodModalProtein').textContent = (food.Protein || 0).toFixed(1) + 'g';
+            document.getElementById('foodModalCarbs').textContent = (food.Carbs || 0).toFixed(1) + 'g';
+            document.getElementById('foodModalFat').textContent = (food.Fat || 0).toFixed(1) + 'g';
+            
+            // Additional nutrients
+            document.getElementById('foodModalFiber').textContent = food.Fiber != null ? (food.Fiber).toFixed(1) + 'g' : '--';
+            document.getElementById('foodModalSugar').textContent = food.Sugars != null ? (food.Sugars).toFixed(1) + 'g' : '--';
+            document.getElementById('foodModalSodium').textContent = food.Sodium != null ? Math.round(food.Sodium) + 'mg' : '--';
+            
+            // Show modal
+            document.getElementById('foodDetailModal').classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeFoodDetailModal(event) {
+            if (event && event.target.closest('.modal-content')) return;
+            document.getElementById('foodDetailModal').classList.remove('active');
+            document.body.style.overflow = 'auto';
+        }
+
         // Close modal on Escape key
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Escape') {
                 closeSleepModal();
                 closeMeasurementModal();
+                closeFoodDetailModal();
+                closeSettingsModal();
             }
         });
     </script>

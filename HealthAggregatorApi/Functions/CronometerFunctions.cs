@@ -1,5 +1,6 @@
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.Functions.Worker.Http;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using HealthAggregatorApi.Core.Interfaces;
 using System.Net;
@@ -12,11 +13,13 @@ namespace HealthAggregatorApi.Functions;
 public class CronometerFunctions
 {
     private readonly ICronometerDataService _service;
+    private readonly IConfiguration _configuration;
     private readonly ILogger<CronometerFunctions> _logger;
 
-    public CronometerFunctions(ICronometerDataService service, ILogger<CronometerFunctions> logger)
+    public CronometerFunctions(ICronometerDataService service, IConfiguration configuration, ILogger<CronometerFunctions> logger)
     {
         _service = service;
+        _configuration = configuration;
         _logger = logger;
     }
 
@@ -134,7 +137,7 @@ public class CronometerFunctions
         _logger.LogInformation("GetCronometerStatus called");
         
         var data = await _service.GetAllDataAsync();
-        var hasCredentials = !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("Cronometer__Email"));
+        var hasCredentials = !string.IsNullOrEmpty(_configuration["Cronometer:Email"]);
         
         var response = req.CreateResponse(HttpStatusCode.OK);
         await response.WriteAsJsonAsync(new
