@@ -2054,3 +2054,118 @@ tr:hover {
         opacity: 0;
     }
 }
+
+/* ===========================================
+   Kcal Dashboard Card Styles
+   =========================================== */
+.metric-card.kcal {
+    border-left: 4px solid #f97316;
+}
+
+.metric-card.kcal .metric-header .icon {
+    color: #f97316;
+}
+
+.metric-card.kcal .metric-value {
+    color: #f97316;
+}
+
+/* Kcal tab related styles (for Food tab stat cards) */
+.stat-card.kcal {
+    border-left: 4px solid #f97316;
+}
+
+.stat-card.kcal.highlight {
+    background: linear-gradient(135deg, rgba(249, 115, 22, 0.2) 0%, rgba(249, 115, 22, 0.05) 100%);
+    border-left: 4px solid #f97316;
+}
+
+.kcal-btn {
+    --tab-color: #f97316;
+}
+
+.kcal-btn:hover,
+.kcal-btn.active {
+    background: rgba(249, 115, 22, 0.2);
+    border-color: #f97316;
+}
+
+.balance-summary {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: var(--spacing-lg);
+    padding: var(--spacing-lg);
+}
+
+.balance-card {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--spacing-md);
+    padding: var(--spacing-lg);
+    background: var(--bg-card);
+    border-radius: var(--radius-lg);
+    border-left: 4px solid var(--color-primary);
+}
+
+.balance-card.week {
+    border-left-color: #3b82f6;
+}
+
+.balance-card.month {
+    border-left-color: #8b5cf6;
+}
+
+.balance-icon {
+    font-size: 2.5rem;
+    opacity: 0.9;
+}
+
+.balance-content {
+    flex: 1;
+}
+
+.balance-content h3 {
+    margin: 0 0 var(--spacing-xs) 0;
+    color: var(--text-primary);
+    font-size: 1rem;
+}
+
+.balance-value {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-bottom: var(--spacing-xs);
+}
+
+.balance-details {
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+}
+
+.balance-avg {
+    color: var(--text-muted);
+    font-size: 0.8rem;
+    margin-top: var(--spacing-xs);
+}
+
+/* Kcal table balance colors */
+#kcalLogBody td.deficit {
+    color: #22c55e;
+    font-weight: 600;
+}
+
+#kcalLogBody td.surplus {
+    color: #ef4444;
+    font-weight: 600;
+}
+
+@media (max-width: 600px) {
+    .balance-summary {
+        grid-template-columns: 1fr;
+    }
+    
+    .balance-card {
+        flex-direction: column;
+        text-align: center;
+    }
+}
+

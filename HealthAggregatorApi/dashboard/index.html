@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -212,10 +212,10 @@
                     </div>
                 </div>
                 <div class="quick-stat">
-                    <div class="icon">💧</div>
+                    <div class="icon">🔥</div>
                     <div class="info">
-                        <h4>Body Water</h4>
-                        <div class="value" id="dashBodyWater">--</div>
+                        <h4>Calories</h4>
+                        <div class="value" id="dashKcalQuick">-- / --</div>
                     </div>
                 </div>
             </div>
@@ -868,10 +868,6 @@
                     <h3>📏 Body Measurements</h3>
                     <div class="settings-grid">
                         <div class="setting-item">
-                            <label for="settingWeight">Current Weight (kg)</label>
-                            <input type="number" id="settingWeight" step="0.1" min="30" max="300" placeholder="70.0">
-                        </div>
-                        <div class="setting-item">
                             <label for="settingHeight">Height (cm)</label>
                             <input type="number" id="settingHeight" step="1" min="100" max="250" placeholder="175">
                         </div>
@@ -1223,13 +1219,10 @@
                     
                     calculateProgress('bodyFat', sortedPicooc, getBodyFat, getDate, true);
                 }
-                
-                // Body Water
-                const currentBodyWater = getBodyWater(latest);
-                if (currentBodyWater) {
-                    document.getElementById('dashBodyWater').textContent = `${fmt(currentBodyWater)}%`;
-                }
             }
+            
+            // Update Kcal quick stat from Cronometer
+            updateDashboardKcal();
 
             // Sleep metrics from Oura
             if (ouraData.dailySleep && ouraData.dailySleep.length > 0) {
@@ -1291,6 +1284,29 @@
             }
         }
 
+        async function updateDashboardKcal() {
+            const settings = await getSettings();
+            const dailyTarget = settings.calories;
+            
+            const nutrition = cronometerData.dailyNutrition || [];
+            const today = new Date().toISOString().split('T')[0];
+            const todayNutrition = nutrition.find(n => n.Date === today);
+            const todayCalories = Math.round(todayNutrition?.Energy || 0);
+            
+            const quickEl = document.getElementById('dashKcalQuick');
+            if (quickEl) {
+                quickEl.textContent = `${todayCalories.toLocaleString()} / ${dailyTarget.toLocaleString()}`;
+                // Color coding
+                if (todayCalories > dailyTarget) {
+                    quickEl.style.color = '#ff6b6b';
+                } else if (todayCalories >= dailyTarget * 0.9) {
+                    quickEl.style.color = '#ffa94d';
+                } else {
+                    quickEl.style.color = '';
+                }
+            }
+        }
+
         function calculateProgress(metricType, data, getValue, getDate, lowerIsBetter) {
             if (!data || data.length < 2) return; // Need at least 2 records to compare
             
@@ -1299,7 +1315,12 @@
             if (!current) return;
             
             // Find the value at approximately N days before the latest record
-            const findValueDaysBeforeLatest = (targetDaysBack, tolerance = 0.5) => {
+            // minDays/maxDays define the acceptable range
+            const findValueInRange = (minDays, maxDays) => {
+                let bestMatch = null;
+                let bestDaysDiff = Infinity;
+                const targetDays = (minDays + maxDays) / 2;
+                
                 // Skip the first record (that's our current value)
                 for (let i = 1; i < data.length; i++) {
                     const item = data[i];
@@ -1312,36 +1333,40 @@
                     // Days between this record and the latest record
                     const daysSinceLatest = (latestDate.getTime() - itemDate.getTime()) / (24 * 60 * 60 * 1000);
                     
-                    // For flexible matching with tolerance range
-                    const minDays = targetDaysBack * (1 - tolerance);
-                    const maxDays = targetDaysBack * (1 + tolerance);
-                    
+                    // Check if within range
                     if (daysSinceLatest >= minDays && daysSinceLatest <= maxDays) {
-                        return val;
+                        // Prefer the one closest to target
+                        const diff = Math.abs(daysSinceLatest - targetDays);
+                        if (diff < bestDaysDiff) {
+                            bestMatch = val;
+                            bestDaysDiff = diff;
+                        }
                     }
                 }
                 
-                // Fallback: find closest record before target
-                let closest = null;
-                let closestDiff = Infinity;
-                
-                for (let i = 1; i < data.length; i++) {
-                    const item = data[i];
-                    const itemDate = getDate(item);
-                    const val = getValue(item);
-                    
-                    if (!val) continue;
-                    
-                    const daysSinceLatest = (latestDate.getTime() - itemDate.getTime()) / (24 * 60 * 60 * 1000);
-                    const diff = Math.abs(daysSinceLatest - targetDaysBack);
-                    
-                    if (diff < closestDiff && daysSinceLatest > 0) {
-                        closest = val;
-                        closestDiff = diff;
+                // If no match in range, find closest record that's at least minDays old
+                if (!bestMatch) {
+                    for (let i = 1; i < data.length; i++) {
+                        const item = data[i];
+                        const itemDate = getDate(item);
+                        const val = getValue(item);
+                        
+                        if (!val) continue;
+                        
+                        const daysSinceLatest = (latestDate.getTime() - itemDate.getTime()) / (24 * 60 * 60 * 1000);
+                        
+                        // Only consider records at least minDays old
+                        if (daysSinceLatest >= minDays) {
+                            const diff = Math.abs(daysSinceLatest - targetDays);
+                            if (diff < bestDaysDiff) {
+                                bestMatch = val;
+                                bestDaysDiff = diff;
+                            }
+                        }
                     }
                 }
                 
-                return closest;
+                return bestMatch;
             };
             
             // Find previous record (for "yesterday" - just the previous measurement)
@@ -1354,8 +1379,8 @@
             };
             
             const yesterdayVal = findPreviousRecord(); // Previous measurement
-            const weekVal = findValueDaysBeforeLatest(7, 0.6); // ~7 days with 60% tolerance (4-11 days)
-            const monthVal = findValueDaysBeforeLatest(30, 0.3); // ~30 days with 30% tolerance (21-39 days)
+            const weekVal = findValueInRange(5, 14); // ~1 week: 5-14 days range
+            const monthVal = findValueInRange(21, 45); // ~1 month: 21-45 days range
             
             updateProgressDisplay(metricType, 'Yesterday', yesterdayVal, current, lowerIsBetter);
             updateProgressDisplay(metricType, 'Week', weekVal, current, lowerIsBetter);
@@ -1374,12 +1399,14 @@
             }
             
             const diff = newValue - oldValue;
-            const pctChange = ((diff / oldValue) * 100).toFixed(1);
+            const pctChange = (diff / oldValue) * 100;
+            const pctDisplay = Math.abs(pctChange).toFixed(1);
             
             let changeClass = 'neutral';
-            let arrow = '';
+            let arrow = '→';
             
-            if (Math.abs(diff) < 0.01) {
+            if (Math.abs(pctChange) < 0.05) {
+                // Essentially no change (less than 0.05%)
                 changeClass = 'neutral';
                 arrow = '→';
             } else if (lowerIsBetter) {
@@ -1392,7 +1419,7 @@
                 arrow = diff > 0 ? '↑' : '↓';
             }
             
-            changeEl.textContent = `${arrow} ${Math.abs(pctChange)}%`;
+            changeEl.textContent = `${arrow} ${pctDisplay}%`;
             changeEl.className = `change ${changeClass}`;
             
             if (absEl) {
@@ -2386,15 +2413,24 @@
             
             // Find selected date's nutrition data (API returns PascalCase properties)
             // Data is sorted descending, so first item is most recent
+            const today = new Date().toISOString().split('T')[0];
             let todayNutrition = nutrition.find(n => n.Date === foodSelectedDate);
             
-            // If no data for selected date, use most recent and update selected date
-            if (!todayNutrition && nutrition.length > 0) {
-                todayNutrition = nutrition[0];
-                foodSelectedDate = todayNutrition.Date;
-                updateFoodDateDisplay();
+            // If requesting today but no data, keep showing today with zeros
+            // Only fallback to most recent if explicitly navigating to a past date that has no data
+            if (!todayNutrition) {
+                if (foodSelectedDate === today) {
+                    // Keep today selected, show zeros
+                    todayNutrition = {};
+                } else if (nutrition.length > 0) {
+                    // For past dates without data, fallback to most recent
+                    todayNutrition = nutrition[0];
+                    foodSelectedDate = todayNutrition.Date;
+                    updateFoodDateDisplay();
+                } else {
+                    todayNutrition = {};
+                }
             }
-            todayNutrition = todayNutrition || {};
             
             // Update summary cards with current/target format
             // API returns PascalCase: Energy, Protein, Carbs, Fat
@@ -2853,7 +2889,6 @@
         
         // Default settings
         const defaultSettings = {
-            weight: 70,
             height: 175,
             calories: 2000,
             protein: 150,
@@ -2919,7 +2954,6 @@
             const settings = await getSettings();
             
             // Populate form with current settings
-            document.getElementById('settingWeight').value = settings.weight || '';
             document.getElementById('settingHeight').value = settings.height || '';
             document.getElementById('settingCalories').value = settings.calories || '';
             document.getElementById('settingProtein').value = settings.protein || '';
@@ -2939,7 +2973,6 @@
         
         async function saveSettings() {
             const settings = {
-                weight: parseFloat(document.getElementById('settingWeight').value) || defaultSettings.weight,
                 height: parseInt(document.getElementById('settingHeight').value) || defaultSettings.height,
                 calories: parseInt(document.getElementById('settingCalories').value) || defaultSettings.calories,
                 protein: parseInt(document.getElementById('settingProtein').value) || defaultSettings.protein,
@@ -2960,7 +2993,12 @@
         }
         
         function applyPreset(preset) {
-            const weight = parseFloat(document.getElementById('settingWeight').value) || 70;
+            // Get weight from Picooc data (most recent measurement)
+            let weight = 70; // default
+            if (picoocData && picoocData.length > 0) {
+                const sorted = [...picoocData].sort((a, b) => new Date(b.date || b.Date) - new Date(a.date || a.Date));
+                weight = sorted[0].weight || sorted[0].Weight || 70;
+            }
             
             let calories, protein, carbs, fat;
             

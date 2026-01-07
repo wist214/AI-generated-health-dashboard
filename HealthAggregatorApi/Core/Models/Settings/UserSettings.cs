@@ -7,11 +7,6 @@ namespace HealthAggregatorApi.Core.Models.Settings;
 public class UserSettings
 {
     /// <summary>
-    /// Current weight in kilograms.
-    /// </summary>
-    public double? Weight { get; set; }
-    
-    /// <summary>
     /// Height in centimeters.
     /// </summary>
     public int? Height { get; set; }
