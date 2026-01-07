@@ -519,7 +519,15 @@
         <!-- Charts Row -->
         <div class="chart-container">
             <div class="chart-header">
-                <h2>📊 Calorie Trend (7 Days)</h2>
+                <h2>📊 Calorie Trend</h2>
+            </div>
+            <div class="time-range-selector" id="calorie-time-selector">
+                <button type="button" class="time-btn active" data-range="7d">7 Days</button>
+                <button type="button" class="time-btn" data-range="30d">30 Days</button>
+                <button type="button" class="time-btn" data-range="90d">3 Months</button>
+                <button type="button" class="time-btn" data-range="6m">6 Months</button>
+                <button type="button" class="time-btn" data-range="1y">1 Year</button>
+                <button type="button" class="time-btn" data-range="all">All Time</button>
             </div>
             <div class="chart-wrapper">
                 <canvas id="calorieTrendChart"></canvas>
@@ -1022,6 +1030,7 @@
         let calorieTrendChart = null;
         let picoocTimeRange = 'all';
         let ouraTimeRange = '1y';
+        let calorieTrendTimeRange = '7d';
         let picoocCurrentPage = 1;
         const picoocPageSize = 15;
         
@@ -1108,6 +1117,14 @@
                 const btn = e.target.closest('[data-range]');
                 if (btn) {
                     setOuraTimeRange(btn.dataset.range, btn);
+                }
+            });
+
+            // Time range buttons - Calorie Trend
+            document.getElementById('calorie-time-selector').addEventListener('click', (e) => {
+                const btn = e.target.closest('[data-range]');
+                if (btn) {
+                    setCalorieTrendTimeRange(btn.dataset.range, btn);
                 }
             });
 
@@ -2580,18 +2597,34 @@
             }
         }
 
+        function setCalorieTrendTimeRange(range, btn) {
+            calorieTrendTimeRange = range;
+            document.querySelectorAll('#calorie-time-selector .time-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            updateCalorieTrendChart(cronometerData.dailyNutrition || []);
+        }
+
         function updateCalorieTrendChart(nutrition) {
             const ctx = document.getElementById('calorieTrendChart');
             if (!ctx) return;
             
-            // Get last 7 days of data (API returns data sorted descending - newest first)
-            // Take first 7 (most recent) and reverse to get chronological order (oldest to newest, left to right)
-            const last7 = nutrition.slice(0, 7).reverse();
-            const labels = last7.map(n => {
+            // Filter by selected time range
+            const getDate = (d) => new Date(d.Date);
+            const filteredNutrition = filterDataByTimeRange(nutrition, calorieTrendTimeRange, getDate);
+            
+            // Sort chronologically (oldest to newest) for display
+            const sorted = [...filteredNutrition].sort((a, b) => new Date(a.Date) - new Date(b.Date));
+            
+            // Determine label format based on time range
+            const labelFormat = ['7d', '30d'].includes(calorieTrendTimeRange)
+                ? { weekday: 'short', month: 'short', day: 'numeric' }
+                : { month: 'short', day: 'numeric' };
+            
+            const labels = sorted.map(n => {
                 const d = new Date(n.Date);
-                return d.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+                return d.toLocaleDateString('en-US', labelFormat);
             });
-            const calories = last7.map(n => n.Energy || 0);
+            const calories = sorted.map(n => n.Energy || 0);
             
             if (calorieTrendChart) {
                 calorieTrendChart.destroy();
