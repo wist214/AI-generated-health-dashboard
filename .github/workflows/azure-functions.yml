@@ -10,6 +10,9 @@ on:
       - '.github/workflows/azure-functions.yml'
   workflow_dispatch:
 
+# Ensure workflow runs even if only dashboard files change alongside API files
+# The path filter excludes dashboard but we want Functions deployed when API code changes
+
 env:
   AZURE_FUNCTIONAPP_NAME: 'func-healthaggregator'
   AZURE_FUNCTIONAPP_PACKAGE_PATH: 'HealthAggregatorApi'
