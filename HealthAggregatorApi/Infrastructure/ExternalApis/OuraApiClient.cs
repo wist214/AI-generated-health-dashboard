@@ -63,6 +63,48 @@ public class OuraApiClient : IOuraApiClient
         return JsonSerializer.Deserialize<OuraPersonalInfo>(json, _jsonOptions);
     }
 
+    public async Task<List<OuraStressRecord>> GetDailyStressAsync(DateTime startDate, DateTime endDate)
+    {
+        var url = $"{BaseUrl}/daily_stress?start_date={startDate:yyyy-MM-dd}&end_date={endDate:yyyy-MM-dd}";
+        return await FetchPaginatedDataAsync<OuraStressRecord>(url);
+    }
+
+    public async Task<List<OuraResilienceRecord>> GetDailyResilienceAsync(DateTime startDate, DateTime endDate)
+    {
+        var url = $"{BaseUrl}/daily_resilience?start_date={startDate:yyyy-MM-dd}&end_date={endDate:yyyy-MM-dd}";
+        return await FetchPaginatedDataAsync<OuraResilienceRecord>(url);
+    }
+
+    public async Task<List<OuraVo2MaxRecord>> GetVo2MaxAsync(DateTime startDate, DateTime endDate)
+    {
+        var url = $"{BaseUrl}/vO2_max?start_date={startDate:yyyy-MM-dd}&end_date={endDate:yyyy-MM-dd}";
+        return await FetchPaginatedDataAsync<OuraVo2MaxRecord>(url);
+    }
+
+    public async Task<List<OuraCardiovascularAgeRecord>> GetCardiovascularAgeAsync(DateTime startDate, DateTime endDate)
+    {
+        var url = $"{BaseUrl}/daily_cardiovascular_age?start_date={startDate:yyyy-MM-dd}&end_date={endDate:yyyy-MM-dd}";
+        return await FetchPaginatedDataAsync<OuraCardiovascularAgeRecord>(url);
+    }
+
+    public async Task<List<OuraWorkoutRecord>> GetWorkoutsAsync(DateTime startDate, DateTime endDate)
+    {
+        var url = $"{BaseUrl}/workout?start_date={startDate:yyyy-MM-dd}&end_date={endDate:yyyy-MM-dd}";
+        return await FetchPaginatedDataAsync<OuraWorkoutRecord>(url);
+    }
+
+    public async Task<List<OuraSleepTimeRecord>> GetSleepTimeAsync(DateTime startDate, DateTime endDate)
+    {
+        var url = $"{BaseUrl}/sleep_time?start_date={startDate:yyyy-MM-dd}&end_date={endDate:yyyy-MM-dd}";
+        return await FetchPaginatedDataAsync<OuraSleepTimeRecord>(url);
+    }
+
+    public async Task<List<OuraSpO2Record>> GetSpO2Async(DateTime startDate, DateTime endDate)
+    {
+        var url = $"{BaseUrl}/daily_spo2?start_date={startDate:yyyy-MM-dd}&end_date={endDate:yyyy-MM-dd}";
+        return await FetchPaginatedDataAsync<OuraSpO2Record>(url);
+    }
+
     private async Task<List<T>> FetchPaginatedDataAsync<T>(string url)
     {
         var allData = new List<T>();

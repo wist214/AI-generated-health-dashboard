@@ -18,11 +18,28 @@ public class OuraPersonalInfo
 /// </summary>
 public class OuraData
 {
+    // Core data
     public List<OuraSleepRecord> SleepRecords { get; set; } = new();
     public List<OuraDailySleepRecord> DailySleep { get; set; } = new();
     public List<OuraReadinessRecord> Readiness { get; set; } = new();
     public List<OuraActivityRecord> Activity { get; set; } = new();
     public OuraPersonalInfo? PersonalInfo { get; set; }
+    
+    // Stress & Recovery
+    public List<OuraStressRecord> DailyStress { get; set; } = new();
+    public List<OuraResilienceRecord> DailyResilience { get; set; } = new();
+    
+    // Cardio Fitness
+    public List<OuraVo2MaxRecord> Vo2Max { get; set; } = new();
+    public List<OuraCardiovascularAgeRecord> CardiovascularAge { get; set; } = new();
+    
+    // Exercise & Sleep Guidance
+    public List<OuraWorkoutRecord> Workouts { get; set; } = new();
+    public List<OuraSleepTimeRecord> SleepTime { get; set; } = new();
+    
+    // Blood Oxygen (Gen 3 only)
+    public List<OuraSpO2Record> SpO2 { get; set; } = new();
+    
     public DateTime LastSync { get; set; }
     
     /// <summary>

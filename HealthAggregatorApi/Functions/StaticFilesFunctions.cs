@@ -6,7 +6,7 @@ using System.Reflection;
 namespace HealthAggregatorApi.Functions;
 
 /// <summary>
-/// Serves static files (dashboard HTML, CSS) for the web interface.
+/// Serves static files (dashboard HTML, CSS, JS) for the web interface.
 /// </summary>
 public class StaticFilesFunctions
 {
@@ -29,6 +29,20 @@ public class StaticFilesFunctions
         [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "css/styles.css")] HttpRequestData req)
     {
         return await ServeStaticFile(req, "css/styles.css", "text/css");
+    }
+
+    [Function("ServeStressModal")]
+    public async Task<HttpResponseData> ServeStressModal(
+        [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "js/stress-modal.js")] HttpRequestData req)
+    {
+        return await ServeStaticFile(req, "js/stress-modal.js", "application/javascript");
+    }
+
+    [Function("ServeWorkoutsModal")]
+    public async Task<HttpResponseData> ServeWorkoutsModal(
+        [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "js/workouts-modal.js")] HttpRequestData req)
+    {
+        return await ServeStaticFile(req, "js/workouts-modal.js", "application/javascript");
     }
 
     private static async Task<HttpResponseData> ServeStaticFile(HttpRequestData req, string fileName, string contentType)
@@ -65,7 +79,7 @@ public class StaticFilesFunctions
         var content = await File.ReadAllTextAsync(filePath);
         var okResponse = req.CreateResponse(HttpStatusCode.OK);
         okResponse.Headers.Add("Content-Type", contentType);
-        okResponse.Headers.Add("Cache-Control", "public, max-age=3600");
+        okResponse.Headers.Add("Cache-Control", "no-cache, no-store, must-revalidate");
         await okResponse.WriteStringAsync(content);
         return okResponse;
     }

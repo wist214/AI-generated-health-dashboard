@@ -30,14 +30,33 @@ public class OuraDataService : IOuraDataService
         var readinessTask = _apiClient.GetReadinessAsync(startDate, endDate);
         var activityTask = _apiClient.GetActivityAsync(startDate, endDate);
         var personalInfoTask = _apiClient.GetPersonalInfoAsync();
+        
+        // New endpoints
+        var dailyStressTask = _apiClient.GetDailyStressAsync(startDate, endDate);
+        var dailyResilienceTask = _apiClient.GetDailyResilienceAsync(startDate, endDate);
+        var vo2MaxTask = _apiClient.GetVo2MaxAsync(startDate, endDate);
+        var cardiovascularAgeTask = _apiClient.GetCardiovascularAgeAsync(startDate, endDate);
+        var workoutsTask = _apiClient.GetWorkoutsAsync(startDate, endDate);
+        var sleepTimeTask = _apiClient.GetSleepTimeAsync(startDate, endDate);
+        var spo2Task = _apiClient.GetSpO2Async(startDate, endDate);
 
-        await Task.WhenAll(sleepRecordsTask, dailySleepTask, readinessTask, activityTask, personalInfoTask);
+        await Task.WhenAll(
+            sleepRecordsTask, dailySleepTask, readinessTask, activityTask, personalInfoTask,
+            dailyStressTask, dailyResilienceTask, vo2MaxTask, cardiovascularAgeTask,
+            workoutsTask, sleepTimeTask, spo2Task);
 
         var sleepRecords = await sleepRecordsTask;
         var dailySleep = await dailySleepTask;
         var readiness = await readinessTask;
         var activity = await activityTask;
         var personalInfo = await personalInfoTask;
+        var dailyStress = await dailyStressTask;
+        var dailyResilience = await dailyResilienceTask;
+        var vo2Max = await vo2MaxTask;
+        var cardiovascularAge = await cardiovascularAgeTask;
+        var workouts = await workoutsTask;
+        var sleepTime = await sleepTimeTask;
+        var spo2 = await spo2Task;
 
         var existingData = await _repository.GetAsync() ?? new OuraData();
 
@@ -46,6 +65,15 @@ public class OuraDataService : IOuraDataService
         MergeData(existingData.DailySleep, dailySleep, s => s.Day);
         MergeData(existingData.Readiness, readiness, r => r.Day);
         MergeData(existingData.Activity, activity, a => a.Day);
+        
+        // Merge new data types
+        MergeData(existingData.DailyStress, dailyStress, s => s.Day);
+        MergeData(existingData.DailyResilience, dailyResilience, r => r.Day);
+        MergeData(existingData.Vo2Max, vo2Max, v => v.Day);
+        MergeData(existingData.CardiovascularAge, cardiovascularAge, c => c.Day);
+        MergeData(existingData.Workouts, workouts, w => w.Id);
+        MergeData(existingData.SleepTime, sleepTime, s => s.Day);
+        MergeData(existingData.SpO2, spo2, s => s.Day);
         
         existingData.PersonalInfo = personalInfo ?? existingData.PersonalInfo;
         existingData.LastSync = DateTime.UtcNow;

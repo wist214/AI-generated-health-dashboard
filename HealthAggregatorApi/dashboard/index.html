@@ -344,6 +344,7 @@
                 <div id="ouraStatusMessage" class="status"></div>
             </div>
 
+            <!-- Primary Scores -->
             <div class="stats-grid">
                 <div class="stat-card oura">
                     <h3>Sleep Score</h3>
@@ -361,9 +362,64 @@
                     <div class="details" id="ouraActivityDetails">No data</div>
                 </div>
                 <div class="stat-card oura">
-                    <h3>Avg Sleep Duration</h3>
+                    <h3>Sleep Duration</h3>
                     <div class="value" id="ouraAvgSleep">--</div>
                     <div class="details" id="ouraAvgSleepDetails">No data</div>
+                </div>
+            </div>
+
+            <!-- Advanced Health Metrics -->
+            <div class="section-header" onclick="toggleSection('advancedMetrics')">
+                <h3>🧬 Advanced Health Metrics</h3>
+                <span class="section-toggle">▼</span>
+            </div>
+            <div class="section-content" id="advancedMetrics-content">
+                <div class="stats-grid" style="margin-bottom: 15px;">
+                    <div class="stat-card oura stress-card clickable" onclick="openStressModal()">
+                        <h3>🧘 Daily Stress</h3>
+                        <div class="value" id="ouraStressStatus">--</div>
+                        <div class="details" id="ouraStressDetails">No data</div>
+                    </div>
+                    <div class="stat-card oura resilience-card">
+                        <h3>💪 Resilience</h3>
+                        <div class="value" id="ouraResilienceLevel">--</div>
+                        <div class="details" id="ouraResilienceDetails">No data</div>
+                    </div>
+                    <div class="stat-card oura vo2-card">
+                        <h3>🫀 VO2 Max</h3>
+                        <div class="value" id="ouraVo2Max">--</div>
+                        <div class="details" id="ouraVo2MaxDetails">No data</div>
+                    </div>
+                    <div class="stat-card oura cardio-age-card">
+                        <h3>❤️ Cardio Age</h3>
+                        <div class="value" id="ouraCardioAge">--</div>
+                        <div class="details" id="ouraCardioAgeDetails">No data</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recovery & Vitals -->
+            <div class="section-header" onclick="toggleSection('recoveryVitals')">
+                <h3>💓 Recovery & Vitals</h3>
+                <span class="section-toggle">▼</span>
+            </div>
+            <div class="section-content" id="recoveryVitals-content">
+                <div class="stats-grid" style="margin-bottom: 15px; grid-template-columns: repeat(3, 1fr);">
+                    <div class="stat-card oura spo2-card">
+                        <h3>🩸 SpO2</h3>
+                        <div class="value" id="ouraSpO2">--</div>
+                        <div class="details" id="ouraSpO2Details">No data</div>
+                    </div>
+                    <div class="stat-card oura bedtime-card">
+                        <h3>🛏️ Optimal Bedtime</h3>
+                        <div class="value" id="ouraOptimalBedtime">--</div>
+                        <div class="details" id="ouraBedtimeDetails">No data</div>
+                    </div>
+                    <div class="stat-card oura workout-card clickable" onclick="openWorkoutsModal()">
+                        <h3>🏋️ Workouts</h3>
+                        <div class="value" id="ouraWorkoutCount">--</div>
+                        <div class="details" id="ouraWorkoutDetails">No data</div>
+                    </div>
                 </div>
             </div>
 
@@ -1007,6 +1063,85 @@
         </div>
     </div>
 
+    <!-- Activity Detail Modal -->
+    <div class="modal-overlay" id="activityModal" onclick="closeActivityModal(event)">
+        <div class="modal activity-modal" onclick="event.stopPropagation()">
+            <div class="modal-header" style="background: linear-gradient(135deg, #22c55e 0%, #10b981 100%);">
+                <h2>Activity Analysis</h2>
+                <div class="modal-date" id="activityModalDate">--</div>
+                <button type="button" class="modal-close" onclick="closeActivityModal()" aria-label="Close activity analysis modal">×</button>
+            </div>
+            <div class="modal-body">
+                <!-- Hero Metrics -->
+                <div class="metric-hero activity-hero">
+                    <div class="hero-metric">
+                        <div class="hero-icon emoji-icon">🏆</div>
+                        <div class="hero-value" id="activityModalScore">--</div>
+                        <div class="hero-label">Activity Score</div>
+                    </div>
+                    <div class="hero-metric">
+                        <div class="hero-icon emoji-icon">👟</div>
+                        <div class="hero-value" id="activityModalSteps">--</div>
+                        <div class="hero-label">Steps</div>
+                    </div>
+                    <div class="hero-metric">
+                        <div class="hero-icon emoji-icon">📏</div>
+                        <div class="hero-value" id="activityModalDistance">--</div>
+                        <div class="hero-label">Distance</div>
+                    </div>
+                </div>
+
+                <!-- Calories Section -->
+                <div class="activity-calories-section">
+                    <h3>🔥 Calories Burned</h3>
+                    <div class="calories-grid">
+                        <div class="calorie-card active">
+                            <span class="calorie-value" id="activityModalActiveCal">--</span>
+                            <span class="calorie-label">Active Calories</span>
+                        </div>
+                        <div class="calorie-card total">
+                            <span class="calorie-value" id="activityModalTotalCal">--</span>
+                            <span class="calorie-label">Total Calories</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Activity Time Breakdown -->
+                <div class="activity-time-section">
+                    <h3>⏱️ Activity Time</h3>
+                    <div class="activity-bar" id="activityBar"></div>
+                    <div class="activity-legend">
+                        <div class="activity-legend-item"><span class="dot activity-high"></span> High: <span id="activityModalHigh">--</span></div>
+                        <div class="activity-legend-item"><span class="dot activity-medium"></span> Medium: <span id="activityModalMedium">--</span></div>
+                        <div class="activity-legend-item"><span class="dot activity-low"></span> Low: <span id="activityModalLow">--</span></div>
+                    </div>
+                </div>
+
+                <!-- Rest & Sedentary -->
+                <div class="rest-section">
+                    <h3>🛋️ Rest & Recovery</h3>
+                    <div class="rest-grid">
+                        <div class="rest-item">
+                            <span class="rest-icon">🪑</span>
+                            <span class="rest-value" id="activityModalSedentary">--</span>
+                            <span class="rest-label">Sedentary</span>
+                        </div>
+                        <div class="rest-item">
+                            <span class="rest-icon">😴</span>
+                            <span class="rest-value" id="activityModalResting">--</span>
+                            <span class="rest-label">Resting</span>
+                        </div>
+                        <div class="rest-item">
+                            <span class="rest-icon">🔔</span>
+                            <span class="rest-value" id="activityModalAlerts">--</span>
+                            <span class="rest-label">Inactivity Alerts</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script>
         // ============================================
         // API Configuration
@@ -1020,7 +1155,19 @@
         // Global State
         // ============================================
         let picoocData = [];
-        let ouraData = { sleepRecords: [], dailySleep: [], readiness: [], activity: [] };
+        let ouraData = { 
+            sleepRecords: [], 
+            dailySleep: [], 
+            readiness: [], 
+            activity: [],
+            dailyStress: [],
+            dailyResilience: [],
+            vo2Max: [],
+            cardiovascularAge: [],
+            workouts: [],
+            sleepTime: [],
+            spO2: []
+        };
         let cronometerData = { dailyNutrition: [], servings: [], exercises: [], biometrics: [], notes: [] };
         let picoocChart = null;
         let ouraChart = null;
@@ -1188,6 +1335,14 @@
                 const row = e.target.closest('tr[data-sleep-id]');
                 if (row) {
                     openSleepDetail(row.dataset.sleepId);
+                }
+            });
+
+            // Table row clicks with event delegation - Oura Activity
+            document.getElementById('ouraActivityTableBody').addEventListener('click', (e) => {
+                const row = e.target.closest('tr[data-activity-day]');
+                if (row) {
+                    openActivityDetail(row.dataset.activityDay);
                 }
             });
         }
@@ -2011,7 +2166,14 @@
                     sleepRecords: (data.sleepRecords || []).map(normalizeOuraRecord),
                     dailySleep: (data.dailySleep || []).map(normalizeOuraRecord),
                     readiness: (data.readiness || []).map(normalizeOuraRecord),
-                    activity: (data.activity || []).map(normalizeOuraRecord)
+                    activity: (data.activity || []).map(normalizeOuraRecord),
+                    dailyStress: (data.dailyStress || []).map(normalizeOuraRecord),
+                    dailyResilience: (data.dailyResilience || []).map(normalizeOuraRecord),
+                    vo2Max: (data.vo2Max || []).map(normalizeOuraRecord),
+                    cardiovascularAge: (data.cardiovascularAge || []).map(normalizeOuraRecord),
+                    workouts: (data.workouts || []).map(normalizeOuraRecord),
+                    sleepTime: (data.sleepTime || []).map(normalizeOuraRecord),
+                    spO2: (data.spO2 || []).map(normalizeOuraRecord)
                 };
                 updateOuraUI();
                 loadOuraStats();
@@ -2026,25 +2188,201 @@
                 const response = await fetch(`${API_BASE}/api/oura/stats`);
                 const stats = await response.json();
                 
-                if (stats.averageSleepScore) {
-                    document.getElementById('ouraSleepScore').textContent = Math.round(stats.averageSleepScore);
-                    document.getElementById('ouraSleepDetails').textContent = `${stats.totalSleepRecords} records`;
+                // Primary scores
+                if (stats.sleepScore?.current) {
+                    document.getElementById('ouraSleepScore').textContent = Math.round(stats.sleepScore.current);
+                    document.getElementById('ouraSleepDetails').textContent = 
+                        `Min: ${stats.sleepScore.min} | Max: ${stats.sleepScore.max} | Avg: ${stats.sleepScore.avg}`;
                 }
                 
-                if (stats.averageReadinessScore) {
-                    document.getElementById('ouraReadinessScore').textContent = Math.round(stats.averageReadinessScore);
-                    document.getElementById('ouraReadinessDetails').textContent = `${stats.totalReadinessRecords} records`;
+                if (stats.readinessScore?.current) {
+                    document.getElementById('ouraReadinessScore').textContent = Math.round(stats.readinessScore.current);
+                    document.getElementById('ouraReadinessDetails').textContent = 
+                        `Min: ${stats.readinessScore.min} | Max: ${stats.readinessScore.max} | Avg: ${stats.readinessScore.avg}`;
                 }
                 
-                if (stats.averageActivityScore) {
-                    document.getElementById('ouraActivityScore').textContent = Math.round(stats.averageActivityScore);
-                    document.getElementById('ouraActivityDetails').textContent = `${stats.averageSteps || 0} avg steps`;
+                if (stats.activityScore?.current) {
+                    document.getElementById('ouraActivityScore').textContent = Math.round(stats.activityScore.current);
+                    document.getElementById('ouraActivityDetails').textContent = 
+                        `Min: ${stats.activityScore.min} | Max: ${stats.activityScore.max} | Avg: ${stats.activityScore.avg}`;
                 }
                 
-                if (stats.averageSleepDuration) {
-                    document.getElementById('ouraAvgSleep').textContent = `${stats.averageSleepDuration}h`;
-                    document.getElementById('ouraAvgSleepDetails').textContent = `${stats.firstDate || ''} - ${stats.lastDate || ''}`;
+                if (stats.sleepDuration?.current) {
+                    document.getElementById('ouraAvgSleep').textContent = `${stats.sleepDuration.current}h`;
+                    document.getElementById('ouraAvgSleepDetails').textContent = 
+                        `Min: ${stats.sleepDuration.min}h | Max: ${stats.sleepDuration.max}h | Avg: ${stats.sleepDuration.avg}h`;
                 }
+                
+                // Stress data
+                if (stats.stress) {
+                    const stressEl = document.getElementById('ouraStressStatus');
+                    const stressDetailsEl = document.getElementById('ouraStressDetails');
+                    const daySummary = stats.stress.daySummary;
+                    
+                    if (daySummary) {
+                        // Format day summary with icon
+                        const summaryFormatted = daySummary === 'restored' ? '✨ Restored' :
+                                                 daySummary === 'normal' ? '😊 Normal' :
+                                                 daySummary === 'stressful' ? '😰 Stressful' : daySummary;
+                        stressEl.textContent = summaryFormatted;
+                        
+                        // Add color class based on status
+                        stressEl.className = 'value';
+                        if (daySummary === 'restored') stressEl.classList.add('status-good');
+                        else if (daySummary === 'stressful') stressEl.classList.add('status-warning');
+                    } else {
+                        stressEl.textContent = '--';
+                        stressDetailsEl.textContent = 'No recent data';
+                    }
+                    
+                    // Show stress/recovery minutes (convert from seconds to minutes)
+                    const stressHigh = stats.stress.currentStressHigh != null ? `${Math.round(stats.stress.currentStressHigh / 60)}min stress` : '';
+                    const recoveryHigh = stats.stress.currentRecoveryHigh != null ? `${Math.round(stats.stress.currentRecoveryHigh / 60)}min recovery` : '';
+                    const details = [stressHigh, recoveryHigh].filter(x => x).join(' | ');
+                    if (details && daySummary) {
+                        stressDetailsEl.textContent = details;
+                    }
+                }
+                
+                // Resilience data
+                if (stats.resilience) {
+                    const resilienceEl = document.getElementById('ouraResilienceLevel');
+                    const resilienceDetailsEl = document.getElementById('ouraResilienceDetails');
+                    const level = stats.resilience.currentLevel;
+                    
+                    if (level) {
+                        // Format level with icon
+                        const levelFormatted = level === 'exceptional' ? '🌟 Exceptional' :
+                                               level === 'strong' ? '💪 Strong' :
+                                               level === 'solid' ? '✅ Solid' :
+                                               level === 'adequate' ? '👍 Adequate' :
+                                               level === 'limited' ? '⚠️ Limited' : level;
+                        resilienceEl.textContent = levelFormatted;
+                        
+                        // Add color class
+                        resilienceEl.className = 'value';
+                        if (['exceptional', 'strong', 'solid'].includes(level)) resilienceEl.classList.add('status-good');
+                        else if (level === 'limited') resilienceEl.classList.add('status-warning');
+                        
+                        const contributors = stats.resilience.contributors;
+                        if (contributors) {
+                            const parts = [];
+                            if (contributors.sleepRecovery != null) parts.push(`Sleep: ${contributors.sleepRecovery}`);
+                            if (contributors.daytimeRecovery != null) parts.push(`Day: ${contributors.daytimeRecovery}`);
+                            resilienceDetailsEl.textContent = parts.join(' | ') || 'No contributor data';
+                        }
+                    } else {
+                        resilienceEl.textContent = '--';
+                        resilienceDetailsEl.textContent = 'Feature not available';
+                    }
+                }
+                
+                // VO2 Max data
+                if (stats.vo2Max) {
+                    const vo2El = document.getElementById('ouraVo2Max');
+                    const vo2DetailsEl = document.getElementById('ouraVo2MaxDetails');
+                    
+                    if (stats.vo2Max.current != null) {
+                        vo2El.textContent = `${stats.vo2Max.current}`;
+                        vo2El.innerHTML += '<span class="unit"> ml/kg/min</span>';
+                        
+                        if (stats.vo2Max.min != null && stats.vo2Max.max != null) {
+                            vo2DetailsEl.textContent = `Range: ${stats.vo2Max.min} - ${stats.vo2Max.max}`;
+                        }
+                    } else {
+                        vo2El.textContent = '--';
+                        vo2DetailsEl.textContent = 'Requires cardio workouts';
+                    }
+                }
+                
+                // Cardiovascular Age data
+                if (stats.cardiovascularAge) {
+                    const cardioEl = document.getElementById('ouraCardioAge');
+                    const cardioDetailsEl = document.getElementById('ouraCardioAgeDetails');
+                    
+                    const vascularAge = stats.cardiovascularAge.current;
+                    if (vascularAge != null) {
+                        cardioEl.textContent = `${vascularAge} yrs`;
+                    }
+                    
+                    // Show comparison to actual age if available
+                    const actualAge = stats.cardiovascularAge.actualAge;
+                    const diff = stats.cardiovascularAge.difference;
+                    if (diff != null) {
+                        if (diff < 0) {
+                            cardioDetailsEl.textContent = `🎉 ${Math.abs(diff)} years younger!`;
+                            cardioEl.classList.add('status-good');
+                        } else if (diff > 0) {
+                            cardioDetailsEl.textContent = `${diff} years older`;
+                            cardioEl.classList.add('status-warning');
+                        } else {
+                            cardioDetailsEl.textContent = 'Same as actual age';
+                        }
+                    } else {
+                        cardioDetailsEl.textContent = 'No comparison data';
+                    }
+                }
+                
+                // SpO2 data
+                if (stats.spo2) {
+                    const spo2El = document.getElementById('ouraSpO2');
+                    const spo2DetailsEl = document.getElementById('ouraSpO2Details');
+                    
+                    const currentSpO2 = stats.spo2.current;
+                    if (currentSpO2 != null) {
+                        spo2El.textContent = `${currentSpO2.toFixed(1)}%`;
+                        
+                        // Color based on value
+                        spo2El.className = 'value';
+                        if (currentSpO2 >= 95) spo2El.classList.add('status-good');
+                        else if (currentSpO2 >= 90) spo2El.classList.add('status-warning');
+                        else spo2El.classList.add('status-bad');
+                    }
+                    
+                    const breathing = stats.spo2.breathingDisturbanceIndex;
+                    const avg = stats.spo2.avg;
+                    const details = [];
+                    if (avg != null) details.push(`Avg: ${avg}%`);
+                    if (breathing != null) details.push(`Breathing: ${breathing}`);
+                    spo2DetailsEl.textContent = details.join(' | ') || 'No data';
+                }
+                
+                // Sleep Time / Bedtime recommendations
+                if (stats.sleepTimeRecommendation) {
+                    const bedtimeEl = document.getElementById('ouraOptimalBedtime');
+                    const bedtimeDetailsEl = document.getElementById('ouraBedtimeDetails');
+                    
+                    const optimal = stats.sleepTimeRecommendation.optimalBedtime;
+                    if (optimal && optimal.startTime) {
+                        bedtimeEl.textContent = `${optimal.startTime} - ${optimal.endTime}`;
+                    }
+                    
+                    const recommendation = stats.sleepTimeRecommendation.recommendation;
+                    const status = stats.sleepTimeRecommendation.status;
+                    if (recommendation) {
+                        // Format recommendation nicely
+                        const recFormatted = recommendation.replace(/_/g, ' ');
+                        bedtimeDetailsEl.textContent = recFormatted;
+                    } else {
+                        bedtimeDetailsEl.textContent = status || 'No recommendation';
+                    }
+                }
+                
+                // Workouts data
+                if (stats.workouts) {
+                    const workoutEl = document.getElementById('ouraWorkoutCount');
+                    const workoutDetailsEl = document.getElementById('ouraWorkoutDetails');
+                    
+                    const recentCount = stats.workouts.recentCount || 0;
+                    workoutEl.textContent = `${recentCount}`;
+                    workoutEl.innerHTML += '<span class="unit"> this week</span>';
+                    
+                    const details = [];
+                    if (stats.workouts.totalCalories) details.push(`${stats.workouts.totalCalories} kcal`);
+                    if (stats.workouts.totalDistance) details.push(`${(stats.workouts.totalDistance / 1000).toFixed(1)} km`);
+                    workoutDetailsEl.textContent = details.join(' | ') || 'No recent workouts';
+                }
+                
             } catch (e) {
                 console.error('Failed to load Oura stats:', e);
             }
@@ -2067,7 +2405,7 @@
                     // Reload data from API after successful sync
                     await loadOuraData();
                     statusEl.className = 'status success';
-                    statusEl.textContent = `✅ Synced ${result.sleepCount || 0} sleep, ${result.readinessCount || 0} readiness, ${result.activityCount || 0} activity records`;
+                    statusEl.textContent = `✅ Synced ${result.sleepCount || 0} sleep, ${result.readinessCount || 0} readiness, ${result.activityCount || 0} activity, ${result.stressCount || 0} stress, ${result.resilienceCount || 0} resilience records`;
                 } else {
                     statusEl.className = 'status error';
                     statusEl.textContent = `❌ ${result.error || 'Unknown error'}`;
@@ -2328,7 +2666,7 @@
                 activityTbody.innerHTML = `<tr><td colspan="8" class="empty-state"><h3>No data yet</h3><p>Click "Sync Oura Data" to fetch your activity data</p></td></tr>`;
             } else {
                 activityTbody.innerHTML = ouraData.activity.slice(0, 30).map(d => `
-                    <tr>
+                    <tr class="clickable-row" data-activity-day="${d.day}">
                         <td>${d.day}</td>
                         <td><span class="score-badge ${getScoreClass(d.score)}">${d.score || '--'}</span></td>
                         <td>${d.steps?.toLocaleString() || '--'}</td>
@@ -2831,6 +3169,60 @@
         }
 
         // ============================================
+        // Activity Detail Modal Functions
+        // ============================================
+        function openActivityDetail(day) {
+            const activity = ouraData.activity.find(a => a.day === day);
+            if (!activity) return;
+
+            // Populate modal
+            document.getElementById('activityModalDate').textContent = new Date(day).toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
+            document.getElementById('activityModalScore').textContent = activity.score || '--';
+            document.getElementById('activityModalSteps').textContent = activity.steps ? activity.steps.toLocaleString() : '--';
+            document.getElementById('activityModalDistance').textContent = activity.equivalentWalkingDistance ? (activity.equivalentWalkingDistance / 1000).toFixed(1) + ' km' : '--';
+            
+            // Calories
+            document.getElementById('activityModalActiveCal').textContent = activity.activeCalories || '--';
+            document.getElementById('activityModalTotalCal').textContent = activity.totalCalories || '--';
+            
+            // Activity times
+            document.getElementById('activityModalHigh').textContent = formatDuration(activity.highActivityTime);
+            document.getElementById('activityModalMedium').textContent = formatDuration(activity.mediumActivityTime);
+            document.getElementById('activityModalLow').textContent = formatDuration(activity.lowActivityTime);
+            
+            // Create activity bar
+            const total = (activity.highActivityTime || 0) + (activity.mediumActivityTime || 0) + (activity.lowActivityTime || 0);
+            if (total > 0) {
+                const highPct = ((activity.highActivityTime || 0) / total * 100).toFixed(1);
+                const medPct = ((activity.mediumActivityTime || 0) / total * 100).toFixed(1);
+                const lowPct = ((activity.lowActivityTime || 0) / total * 100).toFixed(1);
+                
+                document.getElementById('activityBar').innerHTML = `
+                    <div class="activity-segment activity-high" style="width: ${highPct}%">${highPct > 15 ? highPct + '%' : ''}</div>
+                    <div class="activity-segment activity-medium" style="width: ${medPct}%">${medPct > 15 ? medPct + '%' : ''}</div>
+                    <div class="activity-segment activity-low" style="width: ${lowPct}%">${lowPct > 15 ? lowPct + '%' : ''}</div>
+                `;
+            } else {
+                document.getElementById('activityBar').innerHTML = '<div style="width:100%;text-align:center;color:#666;">No activity data</div>';
+            }
+            
+            // Rest & sedentary
+            document.getElementById('activityModalSedentary').textContent = formatDuration(activity.sedentaryTime);
+            document.getElementById('activityModalResting').textContent = formatDuration(activity.restingTime);
+            document.getElementById('activityModalAlerts').textContent = activity.inactivityAlerts ?? '--';
+            
+            // Show modal
+            document.getElementById('activityModal').classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeActivityModal(event) {
+            if (event && event.target.closest('.activity-modal')) return;
+            document.getElementById('activityModal').classList.remove('active');
+            document.body.style.overflow = 'auto';
+        }
+
+        // ============================================
         // Measurement Detail Modal Functions
         // ============================================
         function showMeasurementDetail(index) {
@@ -2958,7 +3350,7 @@
             
             // Try to load from API
             try {
-                const response = await fetch(`${API_BASE}/settings`);
+                const response = await fetch(`${API_BASE}/api/settings`);
                 if (response.ok) {
                     const data = await response.json();
                     cachedSettings = data;
@@ -2978,7 +3370,7 @@
         
         async function saveSettingsToStorage(settings) {
             try {
-                const response = await fetch(`${API_BASE}/settings`, {
+                const response = await fetch(`${API_BASE}/api/settings`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
@@ -3145,6 +3537,40 @@
             document.body.style.overflow = 'auto';
         }
 
+        // Section toggle function
+        function toggleSection(sectionId) {
+            const header = document.querySelector(`[onclick="toggleSection('${sectionId}')"]`);
+            const content = document.getElementById(`${sectionId}-content`);
+            
+            if (header && content) {
+                header.classList.toggle('collapsed');
+                content.classList.toggle('collapsed');
+                
+                // Save state to localStorage
+                const isCollapsed = content.classList.contains('collapsed');
+                localStorage.setItem(`section-${sectionId}`, isCollapsed ? 'collapsed' : 'expanded');
+            }
+        }
+        
+        // Restore collapsed states on page load
+        function restoreCollapsedStates() {
+            const sections = ['advancedMetrics', 'recoveryVitals'];
+            sections.forEach(sectionId => {
+                const state = localStorage.getItem(`section-${sectionId}`);
+                if (state === 'collapsed') {
+                    const header = document.querySelector(`[onclick="toggleSection('${sectionId}')"]`);
+                    const content = document.getElementById(`${sectionId}-content`);
+                    if (header && content) {
+                        header.classList.add('collapsed');
+                        content.classList.add('collapsed');
+                    }
+                }
+            });
+        }
+        
+        // Call on DOM ready
+        document.addEventListener('DOMContentLoaded', restoreCollapsedStates);
+
         // Close modal on Escape key
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Escape') {
@@ -3152,9 +3578,15 @@
                 closeMeasurementModal();
                 closeFoodDetailModal();
                 closeSettingsModal();
+                if (typeof closeStressModal === 'function') closeStressModal();
+                if (typeof closeWorkoutsModal === 'function') closeWorkoutsModal();
             }
         });
     </script>
+    
+    <!-- Detail Modal Scripts -->
+    <script src="js/stress-modal.js"></script>
+    <script src="js/workouts-modal.js"></script>
 </body>
 </html>
 
