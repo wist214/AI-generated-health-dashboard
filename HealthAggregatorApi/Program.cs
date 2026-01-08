@@ -1,3 +1,4 @@
+using System.Text.Json;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.Functions.Worker.Builder;
 using Microsoft.Extensions.DependencyInjection;
@@ -15,6 +16,13 @@ using HealthAggregatorApi.Core.Models.Settings;
 var builder = FunctionsApplication.CreateBuilder(args);
 
 builder.ConfigureFunctionsWebApplication();
+
+// Configure JSON serialization to use camelCase
+builder.Services.Configure<JsonSerializerOptions>(options =>
+{
+    options.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
+    options.PropertyNameCaseInsensitive = true;
+});
 
 // Add Application Insights telemetry
 builder.Services
