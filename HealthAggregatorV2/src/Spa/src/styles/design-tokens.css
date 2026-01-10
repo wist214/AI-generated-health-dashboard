@@ -1,0 +1,90 @@
+/* Health Aggregator Design Tokens
+ * CSS Custom Properties matching V1 dashboard
+ * These variables are used throughout the application for consistent styling
+ */
+
+:root {
+  /* Primary Colors */
+  --color-primary: #00d4ff;           /* Cyan - main accent */
+  --color-primary-dark: #00a9cc;
+  --color-secondary: #7c3aed;         /* Purple - secondary accent */
+  --color-accent: #f472b6;            /* Pink accent */
+
+  /* Oura Theme */
+  --color-oura: #00a99d;              /* Teal */
+  --color-oura-light: #00d4aa;
+
+  /* Food Theme */
+  --color-food: #f97316;              /* Orange */
+  --color-food-light: #fb923c;
+
+  /* Backgrounds */
+  --bg-dark: #1a1a2e;
+  --bg-darker: #16213e;
+  --bg-card: rgba(255, 255, 255, 0.05);      /* Glass morphism */
+  --bg-card-hover: rgba(255, 255, 255, 0.08);
+
+  /* Text Colors */
+  --text-primary: #e0e0e0;
+  --text-secondary: #888;
+  --text-muted: #666;
+
+  /* Status Colors */
+  --color-success: #22c55e;
+  --color-warning: #f59e0b;
+  --color-error: #ef4444;
+  --color-info: #3b82f6;
+
+  /* Chart Colors */
+  --chart-sleep: #3b82f6;
+  --chart-readiness: #22c55e;
+  --chart-activity: #f59e0b;
+  --chart-weight: #00d4ff;
+  --chart-body-fat: #f472b6;
+  --chart-muscle: #34d399;
+  --chart-bmi: #a855f7;
+  --chart-calories: #ef4444;
+  --chart-protein: #3b82f6;
+  --chart-carbs: #f59e0b;
+  --chart-fat: #ef4444;
+
+  /* Spacing */
+  --spacing-xs: 5px;
+  --spacing-sm: 10px;
+  --spacing-md: 15px;
+  --spacing-lg: 20px;
+  --spacing-xl: 30px;
+  --spacing-2xl: 40px;
+
+  /* Border Radius */
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 15px;
+  --radius-xl: 20px;
+
+  /* Transitions */
+  --transition-fast: 0.2s ease;
+  --transition-normal: 0.3s ease;
+
+  /* Shadows */
+  --shadow-card: 0 4px 20px rgba(0, 0, 0, 0.3);
+  --shadow-hover: 0 8px 30px rgba(0, 0, 0, 0.4);
+
+  /* Font */
+  --font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+
+  /* Font Sizes */
+  --font-size-xs: 0.75rem;
+  --font-size-sm: 0.875rem;
+  --font-size-md: 1rem;
+  --font-size-lg: 1.125rem;
+  --font-size-xl: 1.5rem;
+  --font-size-2xl: 2rem;
+  --font-size-3xl: 3rem;
+
+  /* Z-Index Layers */
+  --z-dropdown: 100;
+  --z-modal-backdrop: 900;
+  --z-modal: 1000;
+  --z-tooltip: 1100;
+}

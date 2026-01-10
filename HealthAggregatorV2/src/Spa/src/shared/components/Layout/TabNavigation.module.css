@@ -1,0 +1,74 @@
+.tabNav {
+  display: flex;
+  gap: var(--spacing-sm);
+  margin-bottom: var(--spacing-xl);
+  background: var(--bg-card);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-sm);
+}
+
+.tabBtn {
+  flex: 1;
+  padding: var(--spacing-md) var(--spacing-xl);
+  border: none;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  font-size: 1rem;
+  font-weight: 600;
+  background: transparent;
+  color: var(--text-secondary);
+  transition: var(--transition-normal);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-sm);
+}
+
+.tabBtn:hover {
+  background: var(--bg-card);
+  color: var(--text-primary);
+}
+
+/* Default active state - purple to cyan gradient */
+.tabBtn.active {
+  background: linear-gradient(135deg, var(--color-secondary), var(--color-primary));
+  color: white;
+}
+
+/* Dashboard tab - orange to red gradient */
+.tabBtn.dashboard.active {
+  background: linear-gradient(135deg, #f59e0b, #ef4444);
+}
+
+/* Oura tab - teal gradient */
+.tabBtn.oura.active {
+  background: linear-gradient(135deg, var(--color-oura), var(--color-oura-light));
+}
+
+/* Food tab - orange gradient */
+.tabBtn.food.active {
+  background: linear-gradient(135deg, var(--color-food), var(--color-food-light));
+}
+
+.tabIcon {
+  font-size: 1.3rem;
+}
+
+.tabText {
+  /* Visible by default */
+}
+
+@media (max-width: 768px) {
+  .tabText {
+    display: none;
+  }
+
+  .tabBtn {
+    padding: var(--spacing-sm) var(--spacing-md);
+    font-size: 0.9rem;
+  }
+
+  .tabIcon {
+    font-size: 1.5rem;
+  }
+}

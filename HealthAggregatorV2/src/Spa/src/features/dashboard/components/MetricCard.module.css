@@ -1,0 +1,234 @@
+.metricCard {
+  background: var(--bg-card);
+  border-radius: var(--radius-xl);
+  padding: var(--spacing-lg);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  position: relative;
+  overflow: hidden;
+  transition: var(--transition-normal);
+}
+
+.metricCard:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-hover);
+  background: var(--bg-card-hover);
+}
+
+.metricCard.clickable {
+  cursor: pointer;
+}
+
+/* Colored top border variants */
+.metricCard::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+}
+
+.metricCard.weight::before {
+  background: linear-gradient(90deg, var(--color-primary), var(--color-secondary));
+}
+
+.metricCard.bodyScore::before {
+  background: linear-gradient(90deg, var(--color-primary), var(--color-secondary));
+}
+
+.metricCard.sleep::before {
+  background: linear-gradient(90deg, #3b82f6, #1d4ed8);
+}
+
+.metricCard.readiness::before {
+  background: linear-gradient(90deg, var(--color-success), #16a34a);
+}
+
+.metricCard.calories::before {
+  background: linear-gradient(90deg, #ef4444, #f97316);
+}
+
+.metricCard.protein::before {
+  background: linear-gradient(90deg, #3b82f6, #0ea5e9);
+}
+
+.metricCard.carbs::before {
+  background: linear-gradient(90deg, #f59e0b, #fbbf24);
+}
+
+.metricCard.fat::before {
+  background: linear-gradient(90deg, #ef4444, #f472b6);
+}
+
+/* Header */
+.metricHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: var(--spacing-md);
+}
+
+.metricTitle {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+}
+
+.metricTitle h3 {
+  font-size: var(--font-size-md);
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.icon {
+  font-size: 1.3rem;
+}
+
+.metricSource {
+  font-size: var(--font-size-xs);
+  color: var(--text-muted);
+  background: rgba(255, 255, 255, 0.1);
+  padding: 2px 8px;
+  border-radius: var(--radius-sm);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Value - Gradient text per variant */
+.metricValue {
+  font-size: var(--font-size-3xl);
+  font-weight: 700;
+  margin-bottom: var(--spacing-xs);
+  line-height: 1;
+}
+
+.metricValue.weight,
+.metricValue.bodyScore {
+  background: linear-gradient(90deg, var(--color-primary), var(--color-secondary));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.metricValue.sleep {
+  background: linear-gradient(90deg, #3b82f6, #1d4ed8);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.metricValue.readiness {
+  background: linear-gradient(90deg, var(--color-success), #16a34a);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.metricValue.calories {
+  background: linear-gradient(90deg, #ef4444, #f97316);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.metricValue.protein {
+  background: linear-gradient(90deg, #3b82f6, #0ea5e9);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.metricValue.carbs {
+  background: linear-gradient(90deg, #f59e0b, #fbbf24);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.metricValue.fat {
+  background: linear-gradient(90deg, #ef4444, #f472b6);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.metricUnit {
+  font-size: var(--font-size-lg);
+  font-weight: 400;
+  color: var(--text-secondary);
+  -webkit-text-fill-color: var(--text-secondary);
+}
+
+.metricDate {
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
+  margin-bottom: var(--spacing-md);
+}
+
+/* Progress Section */
+.progressSection {
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  padding-top: var(--spacing-md);
+  margin-top: var(--spacing-md);
+}
+
+.progressSection h4 {
+  font-size: var(--font-size-xs);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--text-muted);
+  margin-bottom: var(--spacing-sm);
+}
+
+.progressGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--spacing-sm);
+}
+
+.progressItem {
+  text-align: center;
+}
+
+.progressItem .label {
+  font-size: var(--font-size-xs);
+  color: var(--text-muted);
+  margin-bottom: 2px;
+}
+
+.progressItem .change {
+  font-size: var(--font-size-md);
+  font-weight: 600;
+}
+
+.progressItem .change.positive {
+  color: var(--color-success);
+}
+
+.progressItem .change.negative {
+  color: var(--color-error);
+}
+
+.progressItem .change.neutral {
+  color: var(--text-secondary);
+}
+
+.progressItem .absValue {
+  font-size: var(--font-size-xs);
+  color: var(--text-muted);
+}
+
+@media (max-width: 768px) {
+  .metricValue {
+    font-size: 2.5rem;
+  }
+
+  .progressGrid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--spacing-xs);
+  }
+
+  .progressItem .change {
+    font-size: var(--font-size-sm);
+  }
+}

@@ -1,0 +1,45 @@
+.dashboard {
+  animation: fadeIn 0.3s ease;
+}
+
+.dashboardHeader {
+  margin-bottom: var(--spacing-xl);
+}
+
+.dashboardHeader h2 {
+  font-size: 1.8rem;
+  margin-bottom: var(--spacing-xs);
+  color: var(--text-primary);
+}
+
+.date {
+  color: var(--text-secondary);
+  font-size: var(--font-size-md);
+}
+
+.dashboardGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: var(--spacing-lg);
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (max-width: 640px) {
+  .dashboardGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .dashboardHeader h2 {
+    font-size: 1.5rem;
+  }
+}
