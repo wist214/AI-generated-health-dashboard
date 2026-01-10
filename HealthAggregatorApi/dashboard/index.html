@@ -689,7 +689,7 @@
                 <h2>🍽️ Today's Food Log</h2>
                 <div class="date-selector">
                     <button type="button" class="time-btn food" id="foodPrevDay">◀</button>
-                    <span id="foodSelectedDate">Today</span>
+                    <span id="foodDateDisplay">Today</span>
                     <button type="button" class="time-btn food" id="foodNextDay">▶</button>
                 </div>
             </div>
@@ -1168,7 +1168,7 @@
             sleepTime: [],
             spO2: []
         };
-        let cronometerData = { dailyNutrition: [], servings: [], exercises: [], biometrics: [], notes: [] };
+        let cronometerData = { dailyNutrition: [], foodServings: [], exercises: [], biometrics: [], notes: [] };
         let picoocChart = null;
         let ouraChart = null;
         let sleepChart = null;
@@ -1203,9 +1203,12 @@
             document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
             document.getElementById(`${tabName}-tab`).classList.add('active');
             
-            // Refresh dashboard if switching to it
+            // Refresh content based on active tab
             if (tabName === 'dashboard') {
                 updateDashboard();
+            } else if (tabName === 'food') {
+                // Refresh food UI when switching to food tab (charts need visible container)
+                updateFoodUI();
             }
         }
 
@@ -1471,8 +1474,8 @@
             
             const nutrition = cronometerData.dailyNutrition || [];
             const today = new Date().toISOString().split('T')[0];
-            const todayNutrition = nutrition.find(n => n.Date === today);
-            const todayCalories = Math.round(todayNutrition?.Energy || 0);
+            const todayNutrition = nutrition.find(n => n.date === today);
+            const todayCalories = Math.round(todayNutrition?.energy || 0);
             
             const quickEl = document.getElementById('dashKcalQuick');
             if (quickEl) {
@@ -2760,7 +2763,7 @@
         }
 
         function updateFoodDateDisplay() {
-            const dateEl = document.getElementById('foodSelectedDate');
+            const dateEl = document.getElementById('foodDateDisplay');
             const today = getLocalDateString();
             const yesterdayDate = new Date();
             yesterdayDate.setDate(yesterdayDate.getDate() - 1);
@@ -2783,33 +2786,31 @@
             const servings = cronometerData.foodServings || [];
             const settings = await getSettings();
             
-            // Find selected date's nutrition data (API returns PascalCase properties)
+            console.log('updateFoodUI called:', { 
+                foodSelectedDate, 
+                nutritionCount: nutrition.length, 
+                servingsCount: servings.length,
+                nutritionDates: nutrition.map(n => n.date),
+                servingsDates: [...new Set(servings.map(s => s.day))]
+            });
+            
+            // Find selected date's nutrition data (API returns camelCase properties)
             // Data is sorted descending, so first item is most recent
             const today = getLocalDateString();
-            let todayNutrition = nutrition.find(n => n.Date === foodSelectedDate);
+            let todayNutrition = nutrition.find(n => n.date === foodSelectedDate);
             
-            // If requesting today but no data, keep showing today with zeros
-            // Only fallback to most recent if explicitly navigating to a past date that has no data
+            // If no data for selected date, show zeros but keep the date selected
+            // This allows users to navigate to any date even if no food was logged
             if (!todayNutrition) {
-                if (foodSelectedDate === today) {
-                    // Keep today selected, show zeros
-                    todayNutrition = {};
-                } else if (nutrition.length > 0) {
-                    // For past dates without data, fallback to most recent
-                    todayNutrition = nutrition[0];
-                    foodSelectedDate = todayNutrition.Date;
-                    updateFoodDateDisplay();
-                } else {
-                    todayNutrition = {};
-                }
+                todayNutrition = {};
             }
             
             // Update summary cards with current/target format
-            // API returns PascalCase: Energy, Protein, Carbs, Fat
-            const calories = Math.round(todayNutrition.Energy || 0);
-            const protein = Math.round(todayNutrition.Protein || 0);
-            const carbs = Math.round(todayNutrition.Carbs || 0);
-            const fat = Math.round(todayNutrition.Fat || 0);
+            // API returns camelCase: energy, protein, carbs, fat
+            const calories = Math.round(todayNutrition.energy || 0);
+            const protein = Math.round(todayNutrition.protein || 0);
+            const carbs = Math.round(todayNutrition.carbs || 0);
+            const fat = Math.round(todayNutrition.fat || 0);
             
             // Display as current / target
             document.getElementById('food-calories').innerHTML = `${calories}<span class="target">/${settings.calories}</span>`;
@@ -2836,15 +2837,15 @@
                 ? `${fatRemaining}g remaining` 
                 : `${Math.abs(fatRemaining)}g over`;
             
-            // Update nutrient progress bars (API returns PascalCase)
-            updateNutrientBar('fiber', todayNutrition.Fiber, 30, 'g');
-            updateNutrientBar('sugar', todayNutrition.Sugars, 50, 'g');
-            updateNutrientBar('sodium', todayNutrition.Sodium, 2300, 'mg');
-            updateNutrientBar('cholesterol', todayNutrition.Cholesterol, 300, 'mg');
-            updateNutrientBar('vitaminD', todayNutrition.VitaminD, 20, 'µg');
-            updateNutrientBar('calcium', todayNutrition.Calcium, 1000, 'mg');
-            updateNutrientBar('iron', todayNutrition.Iron, 18, 'mg');
-            updateNutrientBar('potassium', todayNutrition.Potassium, 3500, 'mg');
+            // Update nutrient progress bars (API returns camelCase)
+            updateNutrientBar('fiber', todayNutrition.fiber, 30, 'g');
+            updateNutrientBar('sugar', todayNutrition.sugars, 50, 'g');
+            updateNutrientBar('sodium', todayNutrition.sodium, 2300, 'mg');
+            updateNutrientBar('cholesterol', todayNutrition.cholesterol, 300, 'mg');
+            updateNutrientBar('vitaminD', todayNutrition.vitaminD, 20, 'µg');
+            updateNutrientBar('calcium', todayNutrition.calcium, 1000, 'mg');
+            updateNutrientBar('iron', todayNutrition.iron, 18, 'mg');
+            updateNutrientBar('potassium', todayNutrition.potassium, 3500, 'mg');
             
             // Update macro chart
             updateMacroChart(todayNutrition);
@@ -2881,10 +2882,10 @@
             const ctx = document.getElementById('macroChart');
             if (!ctx) return;
             
-            // API returns PascalCase properties
-            const protein = nutrition.Protein || 0;
-            const carbs = nutrition.Carbs || 0;
-            const fat = nutrition.Fat || 0;
+            // API returns camelCase properties
+            const protein = nutrition.protein || 0;
+            const carbs = nutrition.carbs || 0;
+            const fat = nutrition.fat || 0;
             const total = protein + carbs + fat;
             
             if (macroChart) {
@@ -2947,11 +2948,11 @@
             if (!ctx) return;
             
             // Filter by selected time range
-            const getDate = (d) => new Date(d.Date);
+            const getDate = (d) => new Date(d.date);
             const filteredNutrition = filterDataByTimeRange(nutrition, calorieTrendTimeRange, getDate);
             
             // Sort chronologically (oldest to newest) for display
-            const sorted = [...filteredNutrition].sort((a, b) => new Date(a.Date) - new Date(b.Date));
+            const sorted = [...filteredNutrition].sort((a, b) => new Date(a.date) - new Date(b.date));
             
             // Determine label format based on time range
             const labelFormat = ['7d', '30d'].includes(calorieTrendTimeRange)
@@ -2959,10 +2960,10 @@
                 : { month: 'short', day: 'numeric' };
             
             const labels = sorted.map(n => {
-                const d = new Date(n.Date);
+                const d = new Date(n.date);
                 return d.toLocaleDateString('en-US', labelFormat);
             });
-            const calories = sorted.map(n => n.Energy || 0);
+            const calories = sorted.map(n => n.energy || 0);
             
             if (calorieTrendChart) {
                 calorieTrendChart.destroy();
@@ -3013,9 +3014,9 @@
             const tbody = document.getElementById('foodLogBody');
             if (!tbody) return;
             
-            // Filter servings for selected date (API returns PascalCase: Day)
+            // Filter servings for selected date (API returns camelCase: day)
             const dayServings = servings.filter(s => {
-                const servingDate = s.Day || s.date;
+                const servingDate = s.day;
                 return servingDate === foodSelectedDate;
             });
             
@@ -3034,16 +3035,16 @@
                 return;
             }
             
-            // API returns PascalCase: FoodName, Category, Amount, Energy, Protein, Carbs, Fat
+            // API returns camelCase: foodName, category, amount, energy, protein, carbs, fat
             tbody.innerHTML = dayServings.map((s, index) => `
                 <tr class="clickable-row food-row" data-food-index="${index}">
-                    <td>${s.FoodName || s.name || '--'}</td>
-                    <td><span class="food-category">${s.Category || '--'}</span></td>
-                    <td>${s.Amount || '--'}</td>
-                    <td>${Math.round(s.Energy || s.calories || 0)}</td>
-                    <td>${(s.Protein || 0).toFixed(1)}</td>
-                    <td>${(s.Carbs || 0).toFixed(1)}</td>
-                    <td>${(s.Fat || 0).toFixed(1)}</td>
+                    <td>${s.foodName || '--'}</td>
+                    <td><span class="food-category">${s.category || '--'}</span></td>
+                    <td>${s.amount || '--'}</td>
+                    <td>${Math.round(s.energy || 0)}</td>
+                    <td>${(s.protein || 0).toFixed(1)}</td>
+                    <td>${(s.carbs || 0).toFixed(1)}</td>
+                    <td>${(s.fat || 0).toFixed(1)}</td>
                 </tr>
             `).join('');
             
@@ -3428,7 +3429,7 @@
             
             // Refresh the Food tab display if it's active
             if (document.querySelector('[data-tab="food"]')?.classList.contains('active')) {
-                displayCronometerData();
+                updateFoodUI();
             }
             
             // Show success notification
@@ -3508,23 +3509,23 @@
             const food = currentDayServings[index];
             if (!food) return;
             
-            // Populate modal fields
-            document.getElementById('foodModalDate').textContent = food.Day || food.date || '--';
-            document.getElementById('foodModalName').textContent = food.FoodName || food.name || '--';
-            document.getElementById('foodModalCategory').textContent = food.Category || '--';
-            document.getElementById('foodModalAmount').textContent = food.Amount || '--';
-            document.getElementById('foodModalGroup').textContent = food.Group || 'Uncategorized';
+            // Populate modal fields (API returns camelCase)
+            document.getElementById('foodModalDate').textContent = food.day || '--';
+            document.getElementById('foodModalName').textContent = food.foodName || '--';
+            document.getElementById('foodModalCategory').textContent = food.category || '--';
+            document.getElementById('foodModalAmount').textContent = food.amount || '--';
+            document.getElementById('foodModalGroup').textContent = food.group || 'Uncategorized';
             
             // Nutrition values
-            document.getElementById('foodModalCalories').textContent = Math.round(food.Energy || food.calories || 0) + ' kcal';
-            document.getElementById('foodModalProtein').textContent = (food.Protein || 0).toFixed(1) + 'g';
-            document.getElementById('foodModalCarbs').textContent = (food.Carbs || 0).toFixed(1) + 'g';
-            document.getElementById('foodModalFat').textContent = (food.Fat || 0).toFixed(1) + 'g';
+            document.getElementById('foodModalCalories').textContent = Math.round(food.energy || 0) + ' kcal';
+            document.getElementById('foodModalProtein').textContent = (food.protein || 0).toFixed(1) + 'g';
+            document.getElementById('foodModalCarbs').textContent = (food.carbs || 0).toFixed(1) + 'g';
+            document.getElementById('foodModalFat').textContent = (food.fat || 0).toFixed(1) + 'g';
             
             // Additional nutrients
-            document.getElementById('foodModalFiber').textContent = food.Fiber != null ? (food.Fiber).toFixed(1) + 'g' : '--';
-            document.getElementById('foodModalSugar').textContent = food.Sugars != null ? (food.Sugars).toFixed(1) + 'g' : '--';
-            document.getElementById('foodModalSodium').textContent = food.Sodium != null ? Math.round(food.Sodium) + 'mg' : '--';
+            document.getElementById('foodModalFiber').textContent = food.fiber != null ? (food.fiber).toFixed(1) + 'g' : '--';
+            document.getElementById('foodModalSugar').textContent = food.sugars != null ? (food.sugars).toFixed(1) + 'g' : '--';
+            document.getElementById('foodModalSodium').textContent = food.sodium != null ? Math.round(food.sodium) + 'mg' : '--';
             
             // Show modal
             document.getElementById('foodDetailModal').classList.add('active');

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { Button } from '@fluentui/react-components';
 import { 
   FoodStatCard, 
@@ -7,12 +7,12 @@ import {
   MacroChart 
 } from './components';
 import { TimeRangeSelector } from '../weight/components';
-import { useLatestNutrition, useCronometerSync } from './hooks';
+import { useLatestNutrition, useNutritionHistory, useCronometerSync } from './hooks';
 import { LoadingSpinner } from '@shared/components/LoadingSpinner';
 import { ErrorMessage } from '@shared/components/ErrorMessage';
-import { formatDate, todayISO } from '@shared/utils';
+import { formatDate, todayISO, getDateRangeFromTimeRange, formatRelativeTime } from '@shared/utils';
 import styles from './FoodPage.module.css';
-import type { TimeRange, NutrientProgress, MacroBreakdown } from './types';
+import type { TimeRange, NutrientProgress } from './types';
 
 // Default nutrient goals
 const defaultNutrients: NutrientProgress[] = [
@@ -34,13 +34,28 @@ export const FoodPage: React.FC = () => {
   const [timeRange, setTimeRange] = useState<TimeRange>('7d');
   const [selectedDate, setSelectedDate] = useState(todayISO());
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const { data: _latestData, isLoading, error, refetch } = useLatestNutrition();
+  // Get date range for history query
+  const { startDate, endDate } = useMemo(() => 
+    getDateRangeFromTimeRange(timeRange),
+    [timeRange]
+  );
+
+  // Fetch data from API
+  const { data: latestData, isLoading: isLoadingLatest, error: latestError, refetch } = useLatestNutrition();
+  const { data: historyData, isLoading: isLoadingHistory, error: historyError } = useNutritionHistory(startDate, endDate);
   const { mutate: syncData, isPending: isSyncing } = useCronometerSync();
 
-  // Mock data - would be replaced with real API data
-  const mockCalorieData: Array<{ date: string; calories: number | null }> = [];
-  const mockMacros: MacroBreakdown | null = null;
+  const isLoading = isLoadingLatest || isLoadingHistory;
+  const error = latestError || historyError;
+
+  // Transform history data for chart
+  const calorieChartData = useMemo(() => {
+    if (!historyData) return [];
+    return historyData.map(d => ({
+      date: d.date,
+      calories: d.calories,
+    }));
+  }, [historyData]);
 
   const handleSync = () => {
     syncData();
@@ -63,11 +78,13 @@ export const FoodPage: React.FC = () => {
     }
   };
 
-  // Latest values (would extract from latestData)
-  const calories = null;
-  const protein = null;
-  const carbs = null;
-  const fat = null;
+  // Extract latest values from dashboard summary
+  const calories = latestData?.calories ?? null;
+  const protein = latestData?.protein ?? null;
+  const carbs = latestData?.carbs ?? null;
+  const fat = latestData?.fat ?? null;
+  const macros = latestData?.macros ?? null;
+  const lastUpdated = latestData?.lastUpdated;
 
   const isToday = selectedDate === todayISO();
 
@@ -79,7 +96,7 @@ export const FoodPage: React.FC = () => {
     return (
       <ErrorMessage
         title="Failed to load nutrition data"
-        message={error.message}
+        message={(error as Error).message}
         onRetry={() => refetch()}
       />
     );
@@ -105,28 +122,28 @@ export const FoodPage: React.FC = () => {
           title="Calories"
           value={calories}
           unit="kcal"
-          details={calories ? 'Today' : 'No data'}
+          details={lastUpdated ? formatRelativeTime(lastUpdated) : 'No data'}
           targetValue={2000}
         />
         <FoodStatCard
           title="Protein"
           value={protein}
           unit="g"
-          details={protein ? 'Today' : 'No data'}
+          details={lastUpdated ? formatRelativeTime(lastUpdated) : 'No data'}
           targetValue={150}
         />
         <FoodStatCard
           title="Carbs"
           value={carbs}
           unit="g"
-          details={carbs ? 'Today' : 'No data'}
+          details={lastUpdated ? formatRelativeTime(lastUpdated) : 'No data'}
           targetValue={250}
         />
         <FoodStatCard
           title="Fat"
           value={fat}
           unit="g"
-          details={fat ? 'Today' : 'No data'}
+          details={lastUpdated ? formatRelativeTime(lastUpdated) : 'No data'}
           targetValue={65}
         />
       </div>
@@ -138,11 +155,11 @@ export const FoodPage: React.FC = () => {
           onChange={setTimeRange}
           variant="food"
         />
-        <CalorieTrendChart data={mockCalorieData} />
+        <CalorieTrendChart data={calorieChartData} />
       </div>
 
       {/* Macro Breakdown */}
-      <MacroChart data={mockMacros} />
+      <MacroChart data={macros} />
 
       {/* Key Nutrients */}
       <div className={styles.nutrientsSection}>

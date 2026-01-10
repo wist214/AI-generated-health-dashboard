@@ -1,5 +1,55 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { apiClient, API_ENDPOINTS } from '@shared/api';
+import { get, API_ENDPOINTS } from '@shared/api';
+import { syncPicooc } from '@shared/api/syncClient';
+import type { WeightMetric } from '../types';
+
+/**
+ * API response types matching backend DTOs
+ */
+interface DashboardSummaryDto {
+  sleepScore: number | null;
+  readinessScore: number | null;
+  totalSleepHours: number | null;
+  deepSleepHours: number | null;
+  remSleepHours: number | null;
+  sleepEfficiency: number | null;
+  activityScore: number | null;
+  steps: number | null;
+  activeCalories: number | null;
+  weight: number | null;
+  bodyFat: number | null;
+  bmi: number | null;
+  heartRateAvg: number | null;
+  heartRateMin: number | null;
+  hrvAverage: number | null;
+  caloriesConsumed: number | null;
+  protein: number | null;
+  carbs: number | null;
+  fat: number | null;
+  lastUpdated: string;
+  sourceSyncInfo: Array<{ sourceName: string; lastSyncedAt: string | null }>;
+}
+
+interface DailySummaryDto {
+  date: string;
+  sleepScore: number | null;
+  readinessScore: number | null;
+  totalSleepHours: number | null;
+  deepSleepHours: number | null;
+  remSleepHours: number | null;
+  sleepEfficiency: number | null;
+  hrvAverage: number | null;
+  restingHeartRate: number | null;
+  activityScore: number | null;
+  steps: number | null;
+  activeCalories: number | null;
+  weight: number | null;
+  bodyFat: number | null;
+  caloriesConsumed: number | null;
+  protein: number | null;
+  carbs: number | null;
+  fat: number | null;
+}
 
 /**
  * Query key factory for weight data
@@ -8,36 +58,53 @@ export const weightKeys = {
   all: ['weight'] as const,
   history: (range: string) => [...weightKeys.all, 'history', range] as const,
   latest: () => [...weightKeys.all, 'latest'] as const,
+  dashboard: () => [...weightKeys.all, 'dashboard'] as const,
 };
 
 /**
- * Fetch weight metrics for a date range
+ * Transform daily summaries to WeightMetric format
  */
-const fetchWeightHistory = async (startDate: string, endDate: string) => {
+const transformToWeightMetrics = (summaries: DailySummaryDto[]): WeightMetric[] => {
+  return summaries
+    .filter(s => s.weight !== null || s.bodyFat !== null)
+    .map(s => ({
+      date: s.date,
+      weight: s.weight,
+      bodyFat: s.bodyFat,
+      bmi: null, // Not in daily summaries
+      muscleMass: null,
+      bodyWater: null,
+      metabolicAge: null,
+      visceralFat: null,
+      boneMass: null,
+    }));
+};
+
+/**
+ * Fetch weight metrics for a date range using dashboard history endpoint
+ */
+const fetchWeightHistory = async (startDate: string, endDate: string): Promise<WeightMetric[]> => {
   const params = new URLSearchParams({
-    startDate,
-    endDate,
-    metricTypes: 'weight,body_fat,bmi,skeletal_muscle_mass,body_water,metabolic_age,visceral_fat,bone_mass'
+    from: startDate,
+    to: endDate,
   });
   
-  const response = await apiClient.get(`${API_ENDPOINTS.METRICS_RANGE}?${params}`);
-  return response;
+  const response = await get<DailySummaryDto[]>(`${API_ENDPOINTS.DASHBOARD_HISTORY}?${params}`);
+  return transformToWeightMetrics(response);
 };
 
 /**
- * Fetch latest weight metrics
+ * Fetch dashboard summary for latest weight data
  */
-const fetchLatestWeight = async () => {
-  const response = await apiClient.get(API_ENDPOINTS.METRICS_BY_CATEGORY('Body'));
-  return response;
+const fetchDashboardSummary = async (): Promise<DashboardSummaryDto> => {
+  return get<DashboardSummaryDto>(API_ENDPOINTS.DASHBOARD_SUMMARY);
 };
 
 /**
- * Trigger Picooc sync
+ * Trigger Picooc sync via Azure Functions
  */
 const syncPicoocData = async () => {
-  // TODO: Implement when sync endpoint is available
-  return { success: true, message: 'Sync started' };
+  return syncPicooc();
 };
 
 /**
@@ -52,13 +119,19 @@ export const useWeightHistory = (startDate: string, endDate: string) => {
 };
 
 /**
- * Hook for fetching latest weight metrics
+ * Hook for fetching latest weight metrics (uses dashboard summary)
  */
 export const useLatestWeight = () => {
   return useQuery({
-    queryKey: weightKeys.latest(),
-    queryFn: fetchLatestWeight,
+    queryKey: weightKeys.dashboard(),
+    queryFn: fetchDashboardSummary,
     staleTime: 5 * 60 * 1000, // 5 minutes
+    select: (data) => ({
+      weight: data.weight,
+      bodyFat: data.bodyFat,
+      bmi: data.bmi,
+      lastUpdated: data.lastUpdated,
+    }),
   });
 };
 

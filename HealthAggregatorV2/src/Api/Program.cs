@@ -33,13 +33,31 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("SpaPolicy", policy =>
     {
-        var spaOrigin = builder.Configuration["AllowedOrigins:SPA"] ?? "http://localhost:3000";
-        var swaOrigin = builder.Configuration["AllowedOrigins:SWA"] ?? "https://*.azurestaticapps.net";
+        if (builder.Environment.IsDevelopment())
+        {
+            // In development, allow common local ports
+            policy
+                .WithOrigins(
+                    "http://localhost:3000",
+                    "http://localhost:3001",
+                    "http://localhost:3002",
+                    "http://localhost:4280",
+                    "http://127.0.0.1:3000",
+                    "http://127.0.0.1:3001",
+                    "http://127.0.0.1:3002")
+                .AllowAnyMethod()
+                .AllowAnyHeader();
+        }
+        else
+        {
+            var spaOrigin = builder.Configuration["AllowedOrigins:SPA"] ?? "http://localhost:3000";
+            var swaOrigin = builder.Configuration["AllowedOrigins:SWA"] ?? "https://*.azurestaticapps.net";
 
-        policy
-            .WithOrigins(spaOrigin, swaOrigin)
-            .AllowAnyMethod()
-            .AllowAnyHeader();
+            policy
+                .WithOrigins(spaOrigin, swaOrigin)
+                .AllowAnyMethod()
+                .AllowAnyHeader();
+        }
     });
 });
 

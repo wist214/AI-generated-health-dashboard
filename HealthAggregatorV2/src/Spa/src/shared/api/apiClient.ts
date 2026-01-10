@@ -3,9 +3,10 @@ import type { ApiError } from './types';
 
 /**
  * Base URL for the API
- * Uses environment variable or defaults to localhost
+ * In development, uses empty string so Vite proxy handles /api requests
+ * In production, uses VITE_API_BASE_URL env variable
  */
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000';
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '';
 
 /**
  * Axios instance configured for the Health Aggregator API

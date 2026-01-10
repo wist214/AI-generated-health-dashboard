@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { Button } from '@fluentui/react-components';
 import { 
   OuraStatCard, 
@@ -8,26 +8,25 @@ import {
   ActivityTable 
 } from './components';
 import { TimeRangeSelector } from '../weight/components';
-import { useLatestOura, useOuraSync } from './hooks';
+import { useLatestOura, useSleepData, useActivityData, useOuraSync } from './hooks';
 import { LoadingSpinner } from '@shared/components/LoadingSpinner';
 import { ErrorMessage } from '@shared/components/ErrorMessage';
-import { formatDurationSeconds } from '@shared/utils';
+import { formatDuration, getDateRangeFromTimeRange, formatRelativeTime } from '@shared/utils';
 import styles from './OuraPage.module.css';
-import type { TimeRange, ChartSeries, OuraSleepData, OuraActivityData } from './types';
+import type { TimeRange, ChartSeries } from './types';
 
-// Default score chart series
+// Default score chart series (using 'score' from OuraSleepData, merged with activity scores)
 const defaultScoreSeries: ChartSeries[] = [
   { id: 'sleepScore', label: 'Sleep', color: '#3b82f6', enabled: true },
-  { id: 'readinessScore', label: 'Readiness', color: '#22c55e', enabled: true },
   { id: 'activityScore', label: 'Activity', color: '#f59e0b', enabled: true },
   { id: 'steps', label: 'Steps', color: '#8b5cf6', enabled: false },
 ];
 
-// Default sleep chart series
+// Default sleep chart series (values in hours for display)
 const defaultSleepSeries: ChartSeries[] = [
-  { id: 'totalSleep', label: 'Total Sleep', color: '#3b82f6', enabled: true },
-  { id: 'deepSleep', label: 'Deep Sleep', color: '#1e40af', enabled: true },
-  { id: 'remSleep', label: 'REM Sleep', color: '#8b5cf6', enabled: true },
+  { id: 'totalSleepHours', label: 'Total Sleep', color: '#3b82f6', enabled: true },
+  { id: 'deepSleepHours', label: 'Deep Sleep', color: '#1e40af', enabled: true },
+  { id: 'remSleepHours', label: 'REM Sleep', color: '#8b5cf6', enabled: true },
   { id: 'avgHeartRate', label: 'Avg HR', color: '#ef4444', enabled: false },
 ];
 
@@ -40,15 +39,49 @@ export const OuraPage: React.FC = () => {
   const [scoreSeries, setScoreSeries] = useState<ChartSeries[]>(defaultScoreSeries);
   const [sleepSeries, setSleepSeries] = useState<ChartSeries[]>(defaultSleepSeries);
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const { data: _latestData, isLoading, error, refetch } = useLatestOura();
+  // Get date range for history queries
+  const { startDate, endDate } = useMemo(() => 
+    getDateRangeFromTimeRange(timeRange),
+    [timeRange]
+  );
+
+  // Fetch data from API
+  const { data: latestData, isLoading: isLoadingLatest, error: latestError, refetch } = useLatestOura();
+  const { data: sleepData, isLoading: isLoadingSleep, error: sleepError } = useSleepData(startDate, endDate);
+  const { data: activityData, isLoading: isLoadingActivity, error: activityError } = useActivityData(startDate, endDate);
   const { mutate: syncData, isPending: isSyncing } = useOuraSync();
 
-  // Mock data - would be replaced with real API data
-  const mockSleepData: OuraSleepData[] = [];
-  const mockActivityData: OuraActivityData[] = [];
-  const mockScoreData: Array<{ date: string; sleepScore: number | null; readinessScore: number | null; activityScore: number | null; steps: number | null }> = [];
-  const mockSleepChartData: Array<{ date: string; totalSleep: number | null; deepSleep: number | null; remSleep: number | null; avgHeartRate: number | null }> = [];
+  const isLoading = isLoadingLatest || isLoadingSleep || isLoadingActivity;
+  const error = latestError || sleepError || activityError;
+
+  // Transform sleep data for charts (convert seconds to hours for display)
+  const scoreChartData = useMemo(() => {
+    if (!sleepData || !activityData) return [];
+    
+    // Create a map of activity data by date
+    const activityByDate = new Map(activityData.map(a => [a.date, a]));
+    
+    return sleepData.map(d => {
+      const activity = activityByDate.get(d.date);
+      return {
+        date: d.date,
+        sleepScore: d.score,
+        activityScore: activity?.score ?? null,
+        steps: activity?.steps ?? null,
+      };
+    });
+  }, [sleepData, activityData]);
+
+  const sleepChartData = useMemo(() => {
+    if (!sleepData) return [];
+    return sleepData.map(d => ({
+      date: d.date,
+      totalSleepHours: d.totalSleep !== null ? d.totalSleep / 3600 : null,
+      deepSleepHours: d.deepSleep !== null ? d.deepSleep / 3600 : null,
+      remSleepHours: d.remSleep !== null ? d.remSleep / 3600 : null,
+      avgHeartRate: d.avgHeartRate,
+    }));
+  }, [sleepData]);
 
   const handleScoreSeriesToggle = (id: string) => {
     setScoreSeries(prev => prev.map(s => 
@@ -66,11 +99,12 @@ export const OuraPage: React.FC = () => {
     syncData();
   };
 
-  // Latest values (would extract from latestData)
-  const sleepScore = null;
-  const readinessScore = null;
-  const activityScore = null;
-  const sleepDuration = null;
+  // Extract latest values from dashboard summary
+  const sleepScore = latestData?.sleepScore ?? null;
+  const readinessScore = latestData?.readinessScore ?? null;
+  const activityScore = latestData?.activityScore ?? null;
+  const sleepHours = latestData?.totalSleepHours ?? null;
+  const lastUpdated = latestData?.lastUpdated;
 
   if (isLoading) {
     return <LoadingSpinner label="Loading Oura data..." />;
@@ -80,7 +114,7 @@ export const OuraPage: React.FC = () => {
     return (
       <ErrorMessage
         title="Failed to load Oura data"
-        message={error.message}
+        message={(error as Error).message}
         onRetry={() => refetch()}
       />
     );
@@ -105,25 +139,25 @@ export const OuraPage: React.FC = () => {
         <OuraStatCard
           title="Sleep Score"
           value={sleepScore}
-          details={sleepScore ? 'Today' : 'No data'}
+          details={lastUpdated ? formatRelativeTime(lastUpdated) : 'No data'}
           variant="score"
         />
         <OuraStatCard
           title="Readiness Score"
           value={readinessScore}
-          details={readinessScore ? 'Today' : 'No data'}
+          details={lastUpdated ? formatRelativeTime(lastUpdated) : 'No data'}
           variant="score"
         />
         <OuraStatCard
           title="Activity Score"
           value={activityScore}
-          details={activityScore ? 'Today' : 'No data'}
+          details={lastUpdated ? formatRelativeTime(lastUpdated) : 'No data'}
           variant="score"
         />
         <OuraStatCard
           title="Sleep Duration"
-          value={sleepDuration ? formatDurationSeconds(sleepDuration) : null}
-          details={sleepDuration ? 'Last night' : 'No data'}
+          value={sleepHours !== null ? formatDuration(sleepHours * 60) : null}
+          details={lastUpdated ? formatRelativeTime(lastUpdated) : 'No data'}
           variant="metric"
         />
       </div>
@@ -201,7 +235,7 @@ export const OuraPage: React.FC = () => {
         />
         <OuraChart
           title="📊 Health Scores"
-          data={mockScoreData}
+          data={scoreChartData}
           series={scoreSeries}
           onSeriesToggle={handleScoreSeriesToggle}
         />
@@ -210,17 +244,17 @@ export const OuraPage: React.FC = () => {
       {/* Sleep Duration Chart */}
       <OuraChart
         title="😴 Sleep Duration"
-        data={mockSleepChartData}
+        data={sleepChartData}
         series={sleepSeries}
         onSeriesToggle={handleSleepSeriesToggle}
         yAxisLabel="Hours"
       />
 
       {/* Sleep History Table */}
-      <SleepTable data={mockSleepData} />
+      <SleepTable data={sleepData ?? []} />
 
       {/* Activity History Table */}
-      <ActivityTable data={mockActivityData} />
+      <ActivityTable data={activityData ?? []} />
     </div>
   );
 };

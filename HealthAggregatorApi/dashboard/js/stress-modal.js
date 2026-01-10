@@ -142,9 +142,9 @@ function closeStressModal() {
  */
 async function loadStressDetailData() {
     try {
-        const API_BASE = window.location.hostname.includes('azurestaticapps.net') 
-            ? '' 
-            : `${window.location.protocol}//${window.location.hostname}:7071`;
+        // Use empty base for Azure (azurestaticapps.net or azurewebsites.net), port 7071 for localhost
+        const isAzure = window.location.hostname.includes('azure');
+        const API_BASE = isAzure ? '' : `${window.location.protocol}//${window.location.hostname}:7071`;
         
         // Load stress data
         const response = await fetch(`${API_BASE}/api/oura/stress`);

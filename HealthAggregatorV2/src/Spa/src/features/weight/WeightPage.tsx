@@ -1,12 +1,12 @@
 import React, { useState, useMemo } from 'react';
 import { Button } from '@fluentui/react-components';
 import { StatCard, TimeRangeSelector, WeightChart, WeightTable } from './components';
-import { useLatestWeight, usePicoocSync } from './hooks';
+import { useLatestWeight, useWeightHistory, usePicoocSync } from './hooks';
 import { LoadingSpinner } from '@shared/components/LoadingSpinner';
 import { ErrorMessage } from '@shared/components/ErrorMessage';
-import { getDateRangeFromTimeRange } from '@shared/utils';
+import { getDateRangeFromTimeRange, formatRelativeTime } from '@shared/utils';
 import styles from './WeightPage.module.css';
-import type { TimeRange, ChartSeries, WeightMetric } from './types';
+import type { TimeRange, ChartSeries } from './types';
 
 // Default chart series configuration
 const defaultSeries: ChartSeries[] = [
@@ -26,26 +26,22 @@ export const WeightPage: React.FC = () => {
   const [tablePage, setTablePage] = useState(0);
   const pageSize = 10;
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const { data: _latestData, isLoading, error, refetch } = useLatestWeight();
+  // Get date range for history query
+  const { startDate, endDate } = useMemo(() => 
+    getDateRangeFromTimeRange(timeRange),
+    [timeRange]
+  );
+
+  // Fetch data from API
+  const { data: latestData, isLoading: isLoadingLatest, error: latestError, refetch: refetchLatest } = useLatestWeight();
+  const { data: historyData, isLoading: isLoadingHistory, error: historyError } = useWeightHistory(startDate, endDate);
   const { mutate: syncData, isPending: isSyncing } = usePicoocSync();
 
-  // Mock data for demonstration (would be replaced with real API data)
-  const mockData: WeightMetric[] = useMemo(() => {
-    // Return empty array - will show "no data" state
-    // Real implementation would use _latestData from API
-    return [];
-  }, []);
+  const isLoading = isLoadingLatest || isLoadingHistory;
+  const error = latestError || historyError;
 
-  // Filter data by time range
-  const filteredData = useMemo(() => {
-    if (mockData.length === 0) return [];
-    const { startDate, endDate } = getDateRangeFromTimeRange(timeRange);
-    return mockData.filter(d => {
-      const date = new Date(d.date);
-      return date >= new Date(startDate) && date <= new Date(endDate);
-    });
-  }, [mockData, timeRange]);
+  // Use history data for charts and table
+  const weightData = historyData ?? [];
 
   const handleSeriesToggle = (id: string) => {
     setSeries(prev => prev.map(s => 
@@ -57,13 +53,14 @@ export const WeightPage: React.FC = () => {
     syncData();
   };
 
-  // Extract latest values (would extract from API data)
-  const latestWeight = null as number | null;
-  const latestBodyFat = null as number | null;
-  const latestBMI = null as number | null;
-  const latestMuscle = null as number | null;
+  // Extract latest values from dashboard summary
+  const latestWeight = latestData?.weight ?? null;
+  const latestBodyFat = latestData?.bodyFat ?? null;
+  const latestBMI = latestData?.bmi ?? null;
+  const latestMuscle = null as number | null; // Not available in summary
+  const lastUpdated = latestData?.lastUpdated;
 
-  const totalPages = Math.ceil(filteredData.length / pageSize);
+  const totalPages = Math.ceil(weightData.length / pageSize);
 
   if (isLoading) {
     return <LoadingSpinner label="Loading weight data..." />;
@@ -73,8 +70,8 @@ export const WeightPage: React.FC = () => {
     return (
       <ErrorMessage
         title="Failed to load weight data"
-        message={error.message}
-        onRetry={() => refetch()}
+        message={(error as Error).message}
+        onRetry={() => refetchLatest()}
       />
     );
   }
@@ -99,27 +96,27 @@ export const WeightPage: React.FC = () => {
           title="Weight"
           value={latestWeight !== null ? latestWeight.toFixed(1) : null}
           unit="kg"
-          details={latestWeight ? 'Latest measurement' : 'No data'}
+          details={lastUpdated ? formatRelativeTime(lastUpdated) : 'No data'}
           variant="weight"
         />
         <StatCard
           title="Body Fat"
           value={latestBodyFat !== null ? latestBodyFat.toFixed(1) : null}
           unit="%"
-          details={latestBodyFat ? 'Latest measurement' : 'No data'}
+          details={lastUpdated ? formatRelativeTime(lastUpdated) : 'No data'}
           variant="weight"
         />
         <StatCard
           title="BMI"
           value={latestBMI !== null ? latestBMI.toFixed(1) : null}
-          details={latestBMI ? 'Latest measurement' : 'No data'}
+          details={lastUpdated ? formatRelativeTime(lastUpdated) : 'No data'}
           variant="weight"
         />
         <StatCard
           title="Muscle Mass"
           value={latestMuscle !== null ? latestMuscle.toFixed(1) : null}
           unit="kg"
-          details={latestMuscle ? 'Latest measurement' : 'No data'}
+          details={latestMuscle ? formatRelativeTime(lastUpdated ?? '') : 'No data'}
           variant="weight"
         />
       </div>
@@ -131,7 +128,7 @@ export const WeightPage: React.FC = () => {
           onChange={setTimeRange}
         />
         <WeightChart
-          data={filteredData}
+          data={weightData}
           series={series}
           onSeriesToggle={handleSeriesToggle}
         />
@@ -139,7 +136,7 @@ export const WeightPage: React.FC = () => {
 
       {/* Data Table */}
       <WeightTable
-        data={filteredData}
+        data={weightData}
         page={tablePage}
         pageSize={pageSize}
         totalPages={totalPages}
