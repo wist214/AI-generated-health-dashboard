@@ -1,0 +1,114 @@
+.foodPage {
+  padding: var(--spacing-lg);
+}
+
+.controls {
+  display: flex;
+  gap: var(--spacing-md);
+  margin-bottom: var(--spacing-lg);
+}
+
+.syncBtn {
+  background: linear-gradient(135deg, var(--color-food), var(--color-food-light)) !important;
+  border: none !important;
+}
+
+.statsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: var(--spacing-md);
+}
+
+.chartSection {
+  margin-top: var(--spacing-lg);
+}
+
+.nutrientsSection {
+  background: var(--bg-card);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-lg);
+  box-shadow: var(--shadow-card);
+  margin-top: var(--spacing-lg);
+  border: 1px solid rgba(249, 115, 22, 0.2);
+}
+
+.sectionTitle {
+  color: var(--text-primary);
+  font-size: var(--font-size-lg);
+  margin: 0 0 var(--spacing-md) 0;
+}
+
+.foodLogSection {
+  background: var(--bg-card);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-lg);
+  box-shadow: var(--shadow-card);
+  margin-top: var(--spacing-lg);
+  border: 1px solid rgba(249, 115, 22, 0.2);
+}
+
+.foodLogHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--spacing-md);
+  margin-bottom: var(--spacing-md);
+}
+
+.dateSelector {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+}
+
+.dateBtn {
+  min-width: auto;
+  padding: var(--spacing-xs) var(--spacing-sm) !important;
+}
+
+.dateDisplay {
+  color: var(--text-primary);
+  font-weight: 500;
+  min-width: 100px;
+  text-align: center;
+}
+
+.foodLogContent {
+  min-height: 150px;
+}
+
+.emptyState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 150px;
+  text-align: center;
+  color: var(--text-muted);
+}
+
+.emptyState h3 {
+  color: var(--text-secondary);
+  margin-bottom: var(--spacing-xs);
+}
+
+.emptyState p {
+  margin: 0;
+}
+
+@media (max-width: 768px) {
+  .foodPage {
+    padding: var(--spacing-md);
+  }
+
+  .statsGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 480px) {
+  .statsGrid {
+    grid-template-columns: 1fr;
+  }
+}

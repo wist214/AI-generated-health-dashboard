@@ -3,7 +3,9 @@ import { FluentProvider } from '@fluentui/react-components';
 import { AppLayout } from '@shared/components/Layout';
 import { ErrorBoundary } from '@shared/components/ErrorBoundary';
 import { DashboardPage } from '@features/dashboard';
-import { PlaceholderPage } from '@features/placeholder';
+import { WeightPage } from '@features/weight';
+import { OuraPage } from '@features/oura';
+import { FoodPage } from '@features/food';
 import { healthDarkTheme } from './styles/theme';
 
 /**
@@ -23,29 +25,11 @@ const App: React.FC = () => {
       case 'dashboard':
         return <DashboardPage />;
       case 'weight':
-        return (
-          <PlaceholderPage
-            title="Weight Tracking"
-            icon="⚖️"
-            description="Track your weight, body fat, BMI, and muscle mass from Picooc smart scale."
-          />
-        );
+        return <WeightPage />;
       case 'oura':
-        return (
-          <PlaceholderPage
-            title="Oura Ring Data"
-            icon="💍"
-            description="View your sleep, readiness, and activity scores from Oura Ring."
-          />
-        );
+        return <OuraPage />;
       case 'food':
-        return (
-          <PlaceholderPage
-            title="Food & Nutrition"
-            icon="🍎"
-            description="Track your calories, macros, and micronutrients from Cronometer."
-          />
-        );
+        return <FoodPage />;
       default:
         return <DashboardPage />;
     }

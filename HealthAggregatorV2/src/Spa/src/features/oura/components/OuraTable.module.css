@@ -1,0 +1,68 @@
+.tableContainer {
+  background: var(--bg-card);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-lg);
+  box-shadow: var(--shadow-card);
+  margin-top: var(--spacing-lg);
+  border: 1px solid rgba(0, 169, 157, 0.2);
+}
+
+.title {
+  color: var(--text-primary);
+  font-size: var(--font-size-lg);
+  margin: 0 0 var(--spacing-md) 0;
+}
+
+.tableWrapper {
+  overflow-x: auto;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--font-size-sm);
+}
+
+.table th,
+.table td {
+  padding: var(--spacing-sm) var(--spacing-md);
+  text-align: left;
+  border-bottom: 1px solid rgba(0, 169, 157, 0.1);
+}
+
+.table th {
+  color: var(--text-secondary);
+  font-weight: 600;
+  text-transform: uppercase;
+  font-size: var(--font-size-xs);
+  letter-spacing: 0.5px;
+  background: rgba(0, 169, 157, 0.1);
+}
+
+.table td {
+  color: var(--text-primary);
+}
+
+.table tbody tr:hover {
+  background: var(--bg-card-hover);
+}
+
+.score {
+  font-weight: 600;
+  color: var(--color-oura) !important;
+}
+
+.emptyState {
+  text-align: center;
+  padding: var(--spacing-2xl) !important;
+  color: var(--text-muted);
+}
+
+.emptyState h3 {
+  color: var(--text-secondary);
+  margin-bottom: var(--spacing-xs);
+}
+
+.emptyState p {
+  margin: 0;
+}

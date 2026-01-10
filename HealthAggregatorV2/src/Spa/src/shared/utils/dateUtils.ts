@@ -129,3 +129,40 @@ export function daysAgoISO(days: number): string {
   date.setDate(date.getDate() - days);
   return toISODateString(date);
 }
+
+/**
+ * Time range type for charts
+ */
+export type TimeRangeType = '7d' | '30d' | '90d' | '6m' | '1y' | 'all';
+
+/**
+ * Get start and end dates based on time range selection
+ */
+export function getDateRangeFromTimeRange(range: TimeRangeType): { startDate: string; endDate: string } {
+  const endDate = todayISO();
+  let startDate: string;
+
+  switch (range) {
+    case '7d':
+      startDate = daysAgoISO(7);
+      break;
+    case '30d':
+      startDate = daysAgoISO(30);
+      break;
+    case '90d':
+      startDate = daysAgoISO(90);
+      break;
+    case '6m':
+      startDate = daysAgoISO(180);
+      break;
+    case '1y':
+      startDate = daysAgoISO(365);
+      break;
+    case 'all':
+    default:
+      startDate = daysAgoISO(3650); // ~10 years
+      break;
+  }
+
+  return { startDate, endDate };
+}

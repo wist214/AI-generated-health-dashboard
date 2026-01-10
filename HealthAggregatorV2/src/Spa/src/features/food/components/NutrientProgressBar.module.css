@@ -1,0 +1,67 @@
+.container {
+  padding: var(--spacing-sm) 0;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--spacing-xs);
+}
+
+.name {
+  color: var(--text-secondary);
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+}
+
+.value {
+  color: var(--text-muted);
+  font-size: var(--font-size-xs);
+}
+
+.progressBar {
+  width: 100%;
+  height: 8px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.fill {
+  height: 100%;
+  border-radius: 4px;
+  transition: width var(--transition-normal);
+}
+
+/* Variants */
+.fiber {
+  background: linear-gradient(90deg, #22c55e, #4ade80);
+}
+
+.sugar {
+  background: linear-gradient(90deg, #f472b6, #f9a8d4);
+}
+
+.sodium {
+  background: linear-gradient(90deg, #f59e0b, #fbbf24);
+}
+
+.cholesterol {
+  background: linear-gradient(90deg, #ef4444, #f87171);
+}
+
+.vitamin {
+  background: linear-gradient(90deg, #3b82f6, #60a5fa);
+}
+
+.mineral {
+  background: linear-gradient(90deg, #8b5cf6, #a78bfa);
+}
+
+/* Grid layout */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: var(--spacing-md);
+}

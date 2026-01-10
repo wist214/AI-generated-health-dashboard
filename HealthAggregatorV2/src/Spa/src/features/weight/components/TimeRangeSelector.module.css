@@ -1,0 +1,41 @@
+.selector {
+  display: flex;
+  gap: var(--spacing-xs);
+  flex-wrap: wrap;
+  justify-content: center;
+  padding: var(--spacing-sm) 0;
+}
+
+.button {
+  background: var(--bg-card);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: var(--radius-sm);
+  color: var(--text-secondary);
+  padding: var(--spacing-xs) var(--spacing-md);
+  font-size: var(--font-size-sm);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.button:hover {
+  background: var(--bg-card-hover);
+  color: var(--text-primary);
+}
+
+.button.active {
+  background: var(--color-primary);
+  color: #000;
+  border-color: var(--color-primary);
+}
+
+/* Oura variant */
+.oura.active {
+  background: var(--color-oura);
+  border-color: var(--color-oura);
+}
+
+/* Food variant */
+.food.active {
+  background: var(--color-food);
+  border-color: var(--color-food);
+}

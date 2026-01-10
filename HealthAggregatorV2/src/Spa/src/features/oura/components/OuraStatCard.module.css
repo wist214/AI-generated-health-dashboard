@@ -1,0 +1,123 @@
+.card {
+  background: var(--bg-card);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-lg);
+  text-align: center;
+  box-shadow: var(--shadow-card);
+  transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-left: 3px solid var(--color-oura);
+}
+
+.card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-hover);
+}
+
+.clickable {
+  cursor: pointer;
+}
+
+.clickable:hover {
+  background: var(--bg-card-hover);
+}
+
+.title {
+  color: var(--text-secondary);
+  font-size: var(--font-size-sm);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin: 0 0 var(--spacing-sm) 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-xs);
+}
+
+.icon {
+  font-size: var(--font-size-lg);
+}
+
+.value {
+  font-size: var(--font-size-3xl);
+  font-weight: 700;
+  color: var(--color-oura);
+  margin-bottom: var(--spacing-xs);
+}
+
+.unit {
+  font-size: var(--font-size-lg);
+  color: var(--text-secondary);
+  margin-left: 4px;
+}
+
+.details {
+  color: var(--text-muted);
+  font-size: var(--font-size-sm);
+}
+
+/* Score variant - default oura teal */
+.score .value {
+  color: var(--color-oura);
+}
+
+/* Metric variant */
+.metric .value {
+  color: var(--color-oura-light);
+}
+
+/* Stress variant */
+.stress {
+  border-left-color: #f59e0b;
+}
+.stress .value {
+  color: #f59e0b;
+}
+
+/* Resilience variant */
+.resilience {
+  border-left-color: #22c55e;
+}
+.resilience .value {
+  color: #22c55e;
+}
+
+/* VO2 Max variant */
+.vo2 {
+  border-left-color: #ef4444;
+}
+.vo2 .value {
+  color: #ef4444;
+}
+
+/* Cardio Age variant */
+.cardio {
+  border-left-color: #ec4899;
+}
+.cardio .value {
+  color: #ec4899;
+}
+
+/* SpO2 variant */
+.spo2 {
+  border-left-color: #3b82f6;
+}
+.spo2 .value {
+  color: #3b82f6;
+}
+
+/* Bedtime variant */
+.bedtime {
+  border-left-color: #8b5cf6;
+}
+.bedtime .value {
+  color: #8b5cf6;
+}
+
+/* Workout variant */
+.workout {
+  border-left-color: #f97316;
+}
+.workout .value {
+  color: #f97316;
+}
