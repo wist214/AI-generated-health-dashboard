@@ -1,4 +1,5 @@
 using HealthAggregatorV2.Domain.Entities;
+using HealthAggregatorV2.Domain.Enums;
 
 namespace HealthAggregatorV2.Application.Interfaces.Repositories;
 
@@ -23,7 +24,12 @@ public interface IMetricTypesRepository
     Task<IEnumerable<MetricType>> GetAllAsync(CancellationToken cancellationToken = default);
 
     /// <summary>
-    /// Gets metric types by category.
+    /// Gets metric types by category (enum).
+    /// </summary>
+    Task<IEnumerable<MetricType>> GetByCategoryAsync(MetricCategory category, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Gets metric types by category (string).
     /// </summary>
     Task<IEnumerable<MetricType>> GetByCategoryAsync(string category, CancellationToken cancellationToken = default);
 }

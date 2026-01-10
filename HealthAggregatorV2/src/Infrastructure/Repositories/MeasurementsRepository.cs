@@ -66,6 +66,36 @@ public class MeasurementsRepository : IMeasurementsRepository
         await _context.SaveChangesAsync(cancellationToken);
     }
 
+    public async Task<IEnumerable<Measurement>> GetLatestByMetricTypeAsync(
+        CancellationToken cancellationToken = default)
+    {
+        // Get the latest measurement for each metric type
+        var latestIds = await _context.Measurements
+            .GroupBy(m => m.MetricTypeId)
+            .Select(g => g.OrderByDescending(m => m.Timestamp).First().Id)
+            .ToListAsync(cancellationToken);
+
+        return await _context.Measurements
+            .AsNoTracking()
+            .Include(m => m.MetricType)
+            .Include(m => m.Source)
+            .Where(m => latestIds.Contains(m.Id))
+            .ToListAsync(cancellationToken);
+    }
+
+    public async Task<Measurement?> GetLatestByMetricTypeIdAsync(
+        int metricTypeId,
+        CancellationToken cancellationToken = default)
+    {
+        return await _context.Measurements
+            .AsNoTracking()
+            .Include(m => m.MetricType)
+            .Include(m => m.Source)
+            .Where(m => m.MetricTypeId == metricTypeId)
+            .OrderByDescending(m => m.Timestamp)
+            .FirstOrDefaultAsync(cancellationToken);
+    }
+
     public async Task<Measurement?> GetLatestByMetricTypeAsync(
         string metricTypeName,
         CancellationToken cancellationToken = default)
@@ -91,6 +121,21 @@ public class MeasurementsRepository : IMeasurementsRepository
             .Where(m => m.MetricType.Name == metricTypeName)
             .OrderByDescending(m => m.Timestamp)
             .Take(count)
+            .ToListAsync(cancellationToken);
+    }
+
+    public async Task<IEnumerable<Measurement>> GetByDateRangeAsync(
+        int metricTypeId,
+        DateTime from,
+        DateTime to,
+        CancellationToken cancellationToken = default)
+    {
+        return await _context.Measurements
+            .AsNoTracking()
+            .Include(m => m.MetricType)
+            .Include(m => m.Source)
+            .Where(m => m.MetricTypeId == metricTypeId && m.Timestamp >= from && m.Timestamp <= to)
+            .OrderBy(m => m.Timestamp)
             .ToListAsync(cancellationToken);
     }
 
@@ -168,5 +213,12 @@ public class MeasurementsRepository : IMeasurementsRepository
         return await query
             .OrderByDescending(m => m.Timestamp)
             .ToListAsync(cancellationToken);
+    }
+
+    public async Task<int> GetCountBySourceAsync(long sourceId, CancellationToken cancellationToken = default)
+    {
+        return await _context.Measurements
+            .AsNoTracking()
+            .CountAsync(m => m.SourceId == sourceId, cancellationToken);
     }
 }

@@ -21,4 +21,9 @@ public interface ISourcesRepository : IRepository<Source>
     /// Updates the last synced timestamp for a source.
     /// </summary>
     Task UpdateLastSyncedAsync(long sourceId, DateTime syncedAt, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Gets all sources.
+    /// </summary>
+    new Task<IEnumerable<Source>> GetAllAsync(CancellationToken cancellationToken = default);
 }

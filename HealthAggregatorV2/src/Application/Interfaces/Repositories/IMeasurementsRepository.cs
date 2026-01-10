@@ -9,6 +9,19 @@ namespace HealthAggregatorV2.Application.Interfaces.Repositories;
 public interface IMeasurementsRepository : IRepository<Measurement>
 {
     /// <summary>
+    /// Gets the latest measurement for each metric type (includes navigation properties).
+    /// </summary>
+    Task<IEnumerable<Measurement>> GetLatestByMetricTypeAsync(
+        CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Gets the latest measurement for a specific metric type by ID.
+    /// </summary>
+    Task<Measurement?> GetLatestByMetricTypeIdAsync(
+        int metricTypeId,
+        CancellationToken cancellationToken = default);
+
+    /// <summary>
     /// Gets the latest measurement for a specific metric type.
     /// </summary>
     Task<Measurement?> GetLatestByMetricTypeAsync(
@@ -24,7 +37,16 @@ public interface IMeasurementsRepository : IRepository<Measurement>
         CancellationToken cancellationToken = default);
 
     /// <summary>
-    /// Gets measurements within a date range, optionally filtered by metric type.
+    /// Gets measurements within a date range for a specific metric type ID.
+    /// </summary>
+    Task<IEnumerable<Measurement>> GetByDateRangeAsync(
+        int metricTypeId,
+        DateTime from,
+        DateTime to,
+        CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Gets measurements within a date range, optionally filtered by metric type name.
     /// </summary>
     Task<IEnumerable<Measurement>> GetByDateRangeAsync(
         DateTime from,
@@ -57,4 +79,9 @@ public interface IMeasurementsRepository : IRepository<Measurement>
         DateTime? from = null,
         DateTime? to = null,
         CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Gets the count of measurements for a specific source.
+    /// </summary>
+    Task<int> GetCountBySourceAsync(long sourceId, CancellationToken cancellationToken = default);
 }

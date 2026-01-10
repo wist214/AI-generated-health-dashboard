@@ -46,16 +46,21 @@ public class MetricTypesRepository : IMetricTypesRepository
 
     public async Task<IEnumerable<MetricType>> GetByCategoryAsync(string category, CancellationToken cancellationToken = default)
     {
-        // Try to parse as enum, if fails use string comparison
+        // Try to parse as enum, if fails return empty
         if (Enum.TryParse<MetricCategory>(category, true, out var categoryEnum))
         {
-            return await _context.MetricTypes
-                .AsNoTracking()
-                .Where(mt => mt.Category == categoryEnum)
-                .OrderBy(mt => mt.Name)
-                .ToListAsync(cancellationToken);
+            return await GetByCategoryAsync(categoryEnum, cancellationToken);
         }
 
         return [];
+    }
+
+    public async Task<IEnumerable<MetricType>> GetByCategoryAsync(MetricCategory category, CancellationToken cancellationToken = default)
+    {
+        return await _context.MetricTypes
+            .AsNoTracking()
+            .Where(mt => mt.Category == category)
+            .OrderBy(mt => mt.Name)
+            .ToListAsync(cancellationToken);
     }
 }
