@@ -1,5 +1,6 @@
 using System.Net;
 using System.Text.Json;
+using System.Text.Json.Nodes;
 using Microsoft.Azure.Cosmos;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -48,8 +49,9 @@ public sealed class CosmosDbRepository<T> : IDataRepository<T> where T : class, 
             PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
             PropertyNameCaseInsensitive = true,
             WriteIndented = false, // Reduce storage size
-            DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.Never,
-            UnknownTypeHandling = System.Text.Json.Serialization.JsonUnknownTypeHandling.JsonElement
+            DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull,
+            // Ignore unknown properties from Cosmos DB (id, userId, _rid, _self, etc.)
+            UnmappedMemberHandling = System.Text.Json.Serialization.JsonUnmappedMemberHandling.Skip
         };
 
         _logger.LogDebug(
@@ -62,7 +64,6 @@ public sealed class CosmosDbRepository<T> : IDataRepository<T> where T : class, 
     /// <summary>
     /// Retrieves the entity from Cosmos DB.
     /// Returns a new instance if the document doesn't exist.
-    /// Handles Cosmos DB system properties (_rid, _self, _etag, _attachments, _ts) gracefully.
     /// </summary>
     public async Task<T?> GetAsync()
     {
@@ -76,22 +77,70 @@ public sealed class CosmosDbRepository<T> : IDataRepository<T> where T : class, 
                 _documentId,
                 _partitionKeyValue);
 
-            // Read as JsonElement first to strip Cosmos DB system properties
-            var response = await _container.ReadItemAsync<JsonElement>(
+            // Read as string to get raw JSON, then deserialize manually
+            var response = await _container.ReadItemStreamAsync(
                 id: _documentId,
                 partitionKey: new PartitionKey(_partitionKeyValue));
 
             stopwatch.Stop();
+            
+            if (!response.IsSuccessStatusCode)
+            {
+                if (response.StatusCode == HttpStatusCode.NotFound)
+                {
+                    _logger.LogInformation(
+                        "{EntityType} document not found (Id: {DocumentId}). Returning new instance. Latency: {LatencyMs}ms",
+                        typeof(T).Name,
+                        _documentId,
+                        stopwatch.ElapsedMilliseconds);
+                    return new T();
+                }
+                
+                _logger.LogError(
+                    "Failed to read {EntityType}. StatusCode: {StatusCode}",
+                    typeof(T).Name,
+                    response.StatusCode);
+                throw new InvalidOperationException($"Failed to read from Cosmos DB: {response.StatusCode}");
+            }
 
             _logger.LogInformation(
-                "Successfully retrieved {EntityType}. Request charge: {RequestCharge} RU, Latency: {LatencyMs}ms",
+                "Successfully retrieved {EntityType}. Latency: {LatencyMs}ms",
                 typeof(T).Name,
-                response.RequestCharge,
                 stopwatch.ElapsedMilliseconds);
 
-            // Deserialize to target type using our JSON options (ignores unknown properties)
-            var result = JsonSerializer.Deserialize<T>(response.Resource.GetRawText(), _jsonOptions);
-            return result ?? new T();
+            // Read the stream content
+            using var reader = new StreamReader(response.Content);
+            var json = await reader.ReadToEndAsync();
+            
+            try
+            {
+                // Deserialize to target type using our JSON options
+                var result = JsonSerializer.Deserialize<T>(json, _jsonOptions);
+                return result ?? new T();
+            }
+            catch (JsonException jsonEx)
+            {
+                _logger.LogWarning(jsonEx,
+                    "Failed to deserialize {EntityType} from Cosmos DB. Document may have incompatible format. " +
+                    "Deleting old document and returning new instance.",
+                    typeof(T).Name);
+                
+                // Delete the corrupted document
+                try
+                {
+                    await _container.DeleteItemStreamAsync(
+                        id: _documentId,
+                        partitionKey: new PartitionKey(_partitionKeyValue));
+                    _logger.LogInformation("Deleted corrupted {EntityType} document", typeof(T).Name);
+                }
+                catch (Exception deleteEx)
+                {
+                    _logger.LogWarning(deleteEx, "Failed to delete corrupted {EntityType} document", typeof(T).Name);
+                }
+                
+                // Return empty instance
+                return new T();
+            }
         }
         catch (CosmosException ex) when (ex.StatusCode == HttpStatusCode.NotFound)
         {
@@ -157,17 +206,15 @@ public sealed class CosmosDbRepository<T> : IDataRepository<T> where T : class, 
 
         try
         {
-            // Serialize to JSON and add required fields
+            // Serialize to JSON using JsonNode for proper manipulation
             var json = JsonSerializer.Serialize(data, _jsonOptions);
-            var document = JsonSerializer.Deserialize<Dictionary<string, object>>(json, _jsonOptions)
-                ?? throw new InvalidOperationException($"Failed to deserialize {typeof(T).Name} to dictionary");
+            var document = JsonNode.Parse(json)?.AsObject() 
+                ?? throw new InvalidOperationException($"Failed to parse {typeof(T).Name} as JSON object");
 
             // Ensure required Cosmos DB fields exist
             document["id"] = _documentId;
             document["userId"] = _partitionKeyValue;
-
-            // Add metadata
-            document["_lastModified"] = DateTime.UtcNow;
+            document["_lastModified"] = DateTime.UtcNow.ToString("o");
 
             _logger.LogDebug(
                 "Attempting to upsert {EntityType} document. Id: {DocumentId}, PartitionKey: {PartitionKey}",
@@ -175,18 +222,32 @@ public sealed class CosmosDbRepository<T> : IDataRepository<T> where T : class, 
                 _documentId,
                 _partitionKeyValue);
 
-            var response = await _container.UpsertItemAsync(
-                item: document,
+            // Use stream API to write the JSON directly
+            using var stream = new MemoryStream();
+            using var writer = new Utf8JsonWriter(stream);
+            document.WriteTo(writer);
+            await writer.FlushAsync();
+            stream.Position = 0;
+
+            var response = await _container.UpsertItemStreamAsync(
+                streamPayload: stream,
                 partitionKey: new PartitionKey(_partitionKeyValue));
 
             stopwatch.Stop();
 
+            if (!response.IsSuccessStatusCode)
+            {
+                _logger.LogError(
+                    "Failed to save {EntityType}. StatusCode: {StatusCode}",
+                    typeof(T).Name,
+                    response.StatusCode);
+                throw new InvalidOperationException($"Failed to save to Cosmos DB: {response.StatusCode}");
+            }
+
             _logger.LogInformation(
-                "Successfully saved {EntityType}. Request charge: {RequestCharge} RU, Latency: {LatencyMs}ms, ETag: {ETag}",
+                "Successfully saved {EntityType}. Latency: {LatencyMs}ms",
                 typeof(T).Name,
-                response.RequestCharge,
-                stopwatch.ElapsedMilliseconds,
-                response.ETag);
+                stopwatch.ElapsedMilliseconds);
         }
         catch (CosmosException ex) when (ex.StatusCode == HttpStatusCode.TooManyRequests)
         {
