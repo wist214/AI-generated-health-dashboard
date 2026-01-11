@@ -7,7 +7,23 @@
         "Picooc:Email": "YOUR_PICOOC_EMAIL_HERE",
         "Picooc:Password": "YOUR_PICOOC_PASSWORD_HERE",
         "Cronometer:Email": "YOUR_CRONOMETER_EMAIL_HERE",
-        "Cronometer:Password": "YOUR_CRONOMETER_PASSWORD_HERE"
+        "Cronometer:Password": "YOUR_CRONOMETER_PASSWORD_HERE",
+        
+        "// DATA STORAGE CONFIGURATION": "Choose between Blob Storage (local) or Cosmos DB (production)",
+        "// For local development": "Use CosmosDb:Enabled=false with Azurite Blob Storage (recommended)",
+        "// For production/Azure": "Use CosmosDb:Enabled=true with real Cosmos DB connection string",
+        
+        "CosmosDb:Enabled": "false",
+        "CosmosDb:UseEmulator": "false",
+        "CosmosDb:ConnectionString": "",
+        "CosmosDb:DatabaseName": "HealthAggregator",
+        "CosmosDb:OuraContainerName": "OuraData",
+        "CosmosDb:PicoocContainerName": "PicoocData",
+        "CosmosDb:CronometerContainerName": "CronometerData",
+        "CosmosDb:UserSettingsContainerName": "UserSettings",
+        "CosmosDb:MaxRetryAttempts": "3",
+        "CosmosDb:MaxRetryWaitTimeSeconds": "30",
+        "CosmosDb:DefaultPartitionKey": "default"
     },
     "Host": {
         "CORS": "*",
