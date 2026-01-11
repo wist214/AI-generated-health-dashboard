@@ -12,15 +12,18 @@ public class SyncOrchestrator : ISyncOrchestrator
 {
     private readonly IEnumerable<IDataSourceSyncService> _syncServices;
     private readonly ISourcesRepository _sourcesRepository;
+    private readonly IDailySummaryAggregationService _aggregationService;
     private readonly ILogger<SyncOrchestrator> _logger;
 
     public SyncOrchestrator(
         IEnumerable<IDataSourceSyncService> syncServices,
         ISourcesRepository sourcesRepository,
+        IDailySummaryAggregationService aggregationService,
         ILogger<SyncOrchestrator> logger)
     {
         _syncServices = syncServices;
         _sourcesRepository = sourcesRepository;
+        _aggregationService = aggregationService;
         _logger = logger;
     }
 
@@ -92,6 +95,22 @@ public class SyncOrchestrator : ISyncOrchestrator
         overallResult.IsSuccess = overallResult.FailedCount == 0;
         overallResult.CompletedAt = DateTime.UtcNow;
 
+        // After all syncs, aggregate daily summaries for the last 30 days
+        if (overallResult.SuccessCount > 0)
+        {
+            try
+            {
+                _logger.LogInformation("Aggregating daily summaries for synced data");
+                var endDate = DateTime.UtcNow.Date;
+                var startDate = endDate.AddDays(-30);
+                await _aggregationService.AggregateDailySummariesAsync(startDate, endDate, cancellationToken);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error aggregating daily summaries");
+            }
+        }
+
         return overallResult;
     }
 
@@ -126,6 +145,19 @@ public class SyncOrchestrator : ISyncOrchestrator
         {
             source.LastSyncedAt = DateTime.UtcNow;
             await _sourcesRepository.UpdateAsync(source, cancellationToken);
+
+            // Aggregate daily summaries for the last 30 days
+            try
+            {
+                _logger.LogInformation("Aggregating daily summaries after {SourceName} sync", sourceName);
+                var endDate = DateTime.UtcNow.Date;
+                var startDate = endDate.AddDays(-30);
+                await _aggregationService.AggregateDailySummariesAsync(startDate, endDate, cancellationToken);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error aggregating daily summaries for {SourceName}", sourceName);
+            }
         }
 
         return result;

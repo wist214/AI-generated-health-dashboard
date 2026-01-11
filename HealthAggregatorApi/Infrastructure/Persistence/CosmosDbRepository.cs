@@ -48,7 +48,8 @@ public sealed class CosmosDbRepository<T> : IDataRepository<T> where T : class, 
             PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
             PropertyNameCaseInsensitive = true,
             WriteIndented = false, // Reduce storage size
-            DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.Never
+            DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.Never,
+            UnknownTypeHandling = System.Text.Json.Serialization.JsonUnknownTypeHandling.JsonElement
         };
 
         _logger.LogDebug(
@@ -61,6 +62,7 @@ public sealed class CosmosDbRepository<T> : IDataRepository<T> where T : class, 
     /// <summary>
     /// Retrieves the entity from Cosmos DB.
     /// Returns a new instance if the document doesn't exist.
+    /// Handles Cosmos DB system properties (_rid, _self, _etag, _attachments, _ts) gracefully.
     /// </summary>
     public async Task<T?> GetAsync()
     {
@@ -74,7 +76,8 @@ public sealed class CosmosDbRepository<T> : IDataRepository<T> where T : class, 
                 _documentId,
                 _partitionKeyValue);
 
-            var response = await _container.ReadItemAsync<T>(
+            // Read as JsonElement first to strip Cosmos DB system properties
+            var response = await _container.ReadItemAsync<JsonElement>(
                 id: _documentId,
                 partitionKey: new PartitionKey(_partitionKeyValue));
 
@@ -86,7 +89,9 @@ public sealed class CosmosDbRepository<T> : IDataRepository<T> where T : class, 
                 response.RequestCharge,
                 stopwatch.ElapsedMilliseconds);
 
-            return response.Resource;
+            // Deserialize to target type using our JSON options (ignores unknown properties)
+            var result = JsonSerializer.Deserialize<T>(response.Resource.GetRawText(), _jsonOptions);
+            return result ?? new T();
         }
         catch (CosmosException ex) when (ex.StatusCode == HttpStatusCode.NotFound)
         {
@@ -131,9 +136,10 @@ public sealed class CosmosDbRepository<T> : IDataRepository<T> where T : class, 
             stopwatch.Stop();
 
             _logger.LogError(ex,
-                "Unexpected error while reading {EntityType}. Latency: {LatencyMs}ms",
+                "Unexpected error while reading {EntityType}. Latency: {LatencyMs}ms, Error: {ErrorMessage}",
                 typeof(T).Name,
-                stopwatch.ElapsedMilliseconds);
+                stopwatch.ElapsedMilliseconds,
+                ex.Message);
 
             throw;
         }

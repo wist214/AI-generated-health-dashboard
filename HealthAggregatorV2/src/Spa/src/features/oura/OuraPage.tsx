@@ -15,6 +15,25 @@ import { formatDuration, getDateRangeFromTimeRange, formatRelativeTime } from '@
 import styles from './OuraPage.module.css';
 import type { TimeRange, ChartSeries } from './types';
 
+// Helper function to format bedtime offset (seconds from midnight) to readable time
+const formatBedtimeOffset = (offsetSeconds: number | null): string | null => {
+  if (offsetSeconds === null) return null;
+  
+  const totalMinutes = Math.floor(offsetSeconds / 60);
+  let hours = Math.floor(totalMinutes / 60);
+  const minutes = Math.abs(totalMinutes % 60);
+  
+  // Handle negative offsets (before midnight)
+  if (hours < 0) {
+    hours = 24 + hours;
+  }
+  
+  const period = hours >= 12 ? 'PM' : 'AM';
+  const displayHours = hours > 12 ? hours - 12 : (hours === 0 ? 12 : hours);
+  
+  return `${displayHours}:${minutes.toString().padStart(2, '0')} ${period}`;
+};
+
 // Default score chart series (using 'score' from OuraSleepData, merged with activity scores)
 const defaultScoreSeries: ChartSeries[] = [
   { id: 'sleepScore', label: 'Sleep', color: '#3b82f6', enabled: true },
@@ -104,6 +123,14 @@ export const OuraPage: React.FC = () => {
   const readinessScore = latestData?.readinessScore ?? null;
   const activityScore = latestData?.activityScore ?? null;
   const sleepHours = latestData?.totalSleepHours ?? null;
+  const dailyStress = latestData?.dailyStress ?? null;
+  const resilienceLevel = latestData?.resilienceLevel ?? null;
+  const vo2Max = latestData?.vo2Max ?? null;
+  const cardiovascularAge = latestData?.cardiovascularAge ?? null;
+  const spO2Average = latestData?.spO2Average ?? null;
+  const optimalBedtimeStart = latestData?.optimalBedtimeStart ?? null;
+  const optimalBedtimeEnd = latestData?.optimalBedtimeEnd ?? null;
+  const workoutCount = latestData?.workoutCount ?? null;
   const lastUpdated = latestData?.lastUpdated;
 
   if (isLoading) {
@@ -168,31 +195,31 @@ export const OuraPage: React.FC = () => {
           <OuraStatCard
             title="Daily Stress"
             icon="🧘"
-            value={null}
-            details="No data"
+            value={dailyStress ? dailyStress.charAt(0).toUpperCase() + dailyStress.slice(1) : null}
+            details={dailyStress ? formatRelativeTime(lastUpdated!) : "No data"}
             variant="stress"
           />
           <OuraStatCard
             title="Resilience"
             icon="💪"
-            value={null}
-            details="No data"
+            value={resilienceLevel ? resilienceLevel.charAt(0).toUpperCase() + resilienceLevel.slice(1) : null}
+            details={resilienceLevel ? formatRelativeTime(lastUpdated!) : "No data"}
             variant="resilience"
           />
           <OuraStatCard
             title="VO2 Max"
             icon="🫀"
-            value={null}
+            value={vo2Max !== null ? vo2Max.toFixed(1) : null}
             unit="ml/kg/min"
-            details="No data"
+            details={vo2Max !== null ? formatRelativeTime(lastUpdated!) : "No data"}
             variant="vo2"
           />
           <OuraStatCard
             title="Cardio Age"
             icon="❤️"
-            value={null}
+            value={cardiovascularAge}
             unit="years"
-            details="No data"
+            details={cardiovascularAge !== null ? formatRelativeTime(lastUpdated!) : "No data"}
             variant="cardio"
           />
         </div>
@@ -204,23 +231,27 @@ export const OuraPage: React.FC = () => {
           <OuraStatCard
             title="SpO2"
             icon="🩸"
-            value={null}
+            value={spO2Average !== null ? spO2Average.toFixed(1) : null}
             unit="%"
-            details="No data"
+            details={spO2Average !== null ? formatRelativeTime(lastUpdated!) : "No data"}
             variant="spo2"
           />
           <OuraStatCard
             title="Optimal Bedtime"
             icon="🛏️"
-            value={null}
-            details="No data"
+            value={
+              optimalBedtimeStart !== null && optimalBedtimeEnd !== null
+                ? `${formatBedtimeOffset(optimalBedtimeStart)} - ${formatBedtimeOffset(optimalBedtimeEnd)}`
+                : null
+            }
+            details={optimalBedtimeStart !== null ? formatRelativeTime(lastUpdated!) : "No data"}
             variant="bedtime"
           />
           <OuraStatCard
             title="Workouts"
             icon="🏋️"
-            value={null}
-            details="No data"
+            value={workoutCount}
+            details={workoutCount !== null ? `${workoutCount} workout${workoutCount !== 1 ? 's' : ''} today` : "No data"}
             variant="workout"
           />
         </div>

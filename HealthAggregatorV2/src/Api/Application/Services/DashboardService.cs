@@ -102,6 +102,16 @@ public class DashboardService : IDashboardService
             Carbs = summary.CarbsGrams,
             Fat = summary.FatGrams,
 
+            // Advanced Oura metrics
+            DailyStress = summary.DailyStress,
+            ResilienceLevel = summary.ResilienceLevel,
+            Vo2Max = summary.Vo2Max,
+            CardiovascularAge = summary.CardiovascularAge,
+            SpO2Average = summary.SpO2Average,
+            OptimalBedtimeStart = summary.OptimalBedtimeStart,
+            OptimalBedtimeEnd = summary.OptimalBedtimeEnd,
+            WorkoutCount = summary.WorkoutCount,
+
             // Metadata
             LastUpdated = summary.UpdatedAt,
             SourceSyncInfo = sourceSyncInfo

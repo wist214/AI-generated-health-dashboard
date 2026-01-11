@@ -126,4 +126,46 @@ public class DailySummary : BaseEntity
     /// Fat intake in grams.
     /// </summary>
     public double? FatGrams { get; set; }
+
+    // Advanced Oura metrics
+
+    /// <summary>
+    /// Daily stress summary (restored/normal/stressful).
+    /// </summary>
+    public string? DailyStress { get; set; }
+
+    /// <summary>
+    /// Resilience level (limited/adequate/solid/strong/exceptional).
+    /// </summary>
+    public string? ResilienceLevel { get; set; }
+
+    /// <summary>
+    /// VO2 Max estimate in ml/kg/min.
+    /// </summary>
+    public double? Vo2Max { get; set; }
+
+    /// <summary>
+    /// Cardiovascular age in years.
+    /// </summary>
+    public int? CardiovascularAge { get; set; }
+
+    /// <summary>
+    /// Average SpO2 percentage for the day.
+    /// </summary>
+    public double? SpO2Average { get; set; }
+
+    /// <summary>
+    /// Optimal bedtime start offset from midnight in seconds (can be negative).
+    /// </summary>
+    public int? OptimalBedtimeStart { get; set; }
+
+    /// <summary>
+    /// Optimal bedtime end offset from midnight in seconds (can be negative).
+    /// </summary>
+    public int? OptimalBedtimeEnd { get; set; }
+
+    /// <summary>
+    /// Number of workouts recorded for the day.
+    /// </summary>
+    public int? WorkoutCount { get; set; }
 }

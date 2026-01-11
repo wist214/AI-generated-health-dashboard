@@ -45,10 +45,16 @@ namespace Infrastructure.Migrations
                     b.Property<double?>("CarbsGrams")
                         .HasColumnType("float");
 
+                    b.Property<int?>("CardiovascularAge")
+                        .HasColumnType("int");
+
                     b.Property<DateTime>("CreatedAt")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("datetime2(7)")
                         .HasDefaultValueSql("GETUTCDATE()");
+
+                    b.Property<string>("DailyStress")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<DateOnly>("Date")
                         .HasColumnType("date");
@@ -71,6 +77,12 @@ namespace Infrastructure.Migrations
                     b.Property<int?>("HrvAverage")
                         .HasColumnType("int");
 
+                    b.Property<int?>("OptimalBedtimeEnd")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("OptimalBedtimeStart")
+                        .HasColumnType("int");
+
                     b.Property<double?>("ProteinGrams")
                         .HasColumnType("float");
 
@@ -80,11 +92,17 @@ namespace Infrastructure.Migrations
                     b.Property<int?>("RemSleepDuration")
                         .HasColumnType("int");
 
+                    b.Property<string>("ResilienceLevel")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<int?>("SleepEfficiency")
                         .HasColumnType("int");
 
                     b.Property<int?>("SleepScore")
                         .HasColumnType("int");
+
+                    b.Property<double?>("SpO2Average")
+                        .HasColumnType("float");
 
                     b.Property<int?>("Steps")
                         .HasColumnType("int");
@@ -97,8 +115,14 @@ namespace Infrastructure.Migrations
                         .HasColumnType("datetime2(7)")
                         .HasDefaultValueSql("GETUTCDATE()");
 
+                    b.Property<double?>("Vo2Max")
+                        .HasColumnType("float");
+
                     b.Property<double?>("Weight")
                         .HasColumnType("float");
+
+                    b.Property<int?>("WorkoutCount")
+                        .HasColumnType("int");
 
                     b.HasKey("Id");
 
@@ -649,6 +673,102 @@ namespace Infrastructure.Migrations
                             MinValue = 5.0,
                             Name = "average_breath",
                             Unit = "breaths/min",
+                            UpdatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc)
+                        },
+                        new
+                        {
+                            Id = 58,
+                            Category = "Sleep",
+                            CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Description = "Daily stress level (0=restored, 1=normal, 2=stressful)",
+                            MaxValue = 2.0,
+                            MinValue = 0.0,
+                            Name = "daily_stress",
+                            Unit = "level",
+                            UpdatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc)
+                        },
+                        new
+                        {
+                            Id = 59,
+                            Category = "Sleep",
+                            CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Description = "Resilience level (0=limited, 1=adequate, 2=solid, 3=strong, 4=exceptional)",
+                            MaxValue = 4.0,
+                            MinValue = 0.0,
+                            Name = "resilience_level",
+                            Unit = "level",
+                            UpdatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc)
+                        },
+                        new
+                        {
+                            Id = 60,
+                            Category = "Heart",
+                            CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Description = "VO2 Max cardio fitness estimate",
+                            MaxValue = 100.0,
+                            MinValue = 10.0,
+                            Name = "vo2_max",
+                            Unit = "ml/kg/min",
+                            UpdatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc)
+                        },
+                        new
+                        {
+                            Id = 61,
+                            Category = "Heart",
+                            CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Description = "Cardiovascular age estimate",
+                            MaxValue = 150.0,
+                            MinValue = 10.0,
+                            Name = "cardiovascular_age",
+                            Unit = "years",
+                            UpdatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc)
+                        },
+                        new
+                        {
+                            Id = 62,
+                            Category = "Heart",
+                            CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Description = "Average SpO2 blood oxygen saturation",
+                            MaxValue = 100.0,
+                            MinValue = 70.0,
+                            Name = "spo2_average",
+                            Unit = "%",
+                            UpdatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc)
+                        },
+                        new
+                        {
+                            Id = 63,
+                            Category = "Sleep",
+                            CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Description = "Optimal bedtime start offset from midnight",
+                            MaxValue = 43200.0,
+                            MinValue = -43200.0,
+                            Name = "optimal_bedtime_start",
+                            Unit = "seconds",
+                            UpdatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc)
+                        },
+                        new
+                        {
+                            Id = 64,
+                            Category = "Sleep",
+                            CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Description = "Optimal bedtime end offset from midnight",
+                            MaxValue = 43200.0,
+                            MinValue = -43200.0,
+                            Name = "optimal_bedtime_end",
+                            Unit = "seconds",
+                            UpdatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc)
+                        },
+                        new
+                        {
+                            Id = 65,
+                            Category = "Activity",
+                            CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Description = "Number of workouts recorded",
+                            MaxValue = 20.0,
+                            MinValue = 0.0,
+                            Name = "workout_count",
+                            Unit = "count",
                             UpdatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc)
                         },
                         new

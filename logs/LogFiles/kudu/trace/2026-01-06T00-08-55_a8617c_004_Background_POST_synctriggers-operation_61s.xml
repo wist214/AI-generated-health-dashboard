@@ -1,0 +1,8 @@
+<step title="BackgroundTrace" date="2026-01-06T00:08:55.910" instance="a8617c" url="synctriggers-operation" method="POST" >
+  <step title="Updating shutdown sentinel last write time" date="2026-01-06T00:08:55.925" SemaphoreCount="6" /><!-- duration: 16ms -->
+  <step title="Delaying &apos;00:01:00&apos; for Functions site to restart." date="2026-01-06T00:08:55.972" /><!-- duration: 16ms -->
+  <step title="Begin HttpPost https://func-healthaggregator.azurewebsites.net/admin/host/synctriggers, x-ms-request-id: 226f03a0-9f77-4af0-a7b8-1bfeebb4f65b" date="2026-01-06T00:09:56.027" /><!-- duration: 47ms -->
+  <step title="End HttpPost, status: OK" date="2026-01-06T00:09:56.668" /><!-- duration: 78ms -->
+  <step title="Syncing function triggers by calling the functions runtime site successful." date="2026-01-06T00:09:56.761" /><!-- duration: 31ms -->
+  <step title="Deleting shutdown sentinel file" date="2026-01-06T00:09:56.824" SemaphoreCount="8" /><!-- duration: 219ms -->
+</step><!-- duration: 61258ms -->

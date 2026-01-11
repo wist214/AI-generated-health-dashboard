@@ -73,6 +73,69 @@ public class OuraApiClient : IOuraApiClient
         return await FetchAllPagesAsync<OuraReadinessData>(url, cancellationToken);
     }
 
+    public async Task<IEnumerable<OuraStressData>> GetDailyStressAsync(
+        DateTime startDate,
+        DateTime endDate,
+        CancellationToken cancellationToken = default)
+    {
+        var url = $"usercollection/daily_stress?start_date={startDate:yyyy-MM-dd}&end_date={endDate:yyyy-MM-dd}";
+        return await FetchAllPagesAsync<OuraStressData>(url, cancellationToken);
+    }
+
+    public async Task<IEnumerable<OuraResilienceData>> GetDailyResilienceAsync(
+        DateTime startDate,
+        DateTime endDate,
+        CancellationToken cancellationToken = default)
+    {
+        var url = $"usercollection/daily_resilience?start_date={startDate:yyyy-MM-dd}&end_date={endDate:yyyy-MM-dd}";
+        return await FetchAllPagesAsync<OuraResilienceData>(url, cancellationToken);
+    }
+
+    public async Task<IEnumerable<OuraVo2MaxData>> GetVo2MaxAsync(
+        DateTime startDate,
+        DateTime endDate,
+        CancellationToken cancellationToken = default)
+    {
+        var url = $"usercollection/vO2_max?start_date={startDate:yyyy-MM-dd}&end_date={endDate:yyyy-MM-dd}";
+        return await FetchAllPagesAsync<OuraVo2MaxData>(url, cancellationToken);
+    }
+
+    public async Task<IEnumerable<OuraCardiovascularAgeData>> GetCardiovascularAgeAsync(
+        DateTime startDate,
+        DateTime endDate,
+        CancellationToken cancellationToken = default)
+    {
+        var url = $"usercollection/daily_cardiovascular_age?start_date={startDate:yyyy-MM-dd}&end_date={endDate:yyyy-MM-dd}";
+        return await FetchAllPagesAsync<OuraCardiovascularAgeData>(url, cancellationToken);
+    }
+
+    public async Task<IEnumerable<OuraSpO2Data>> GetDailySpO2Async(
+        DateTime startDate,
+        DateTime endDate,
+        CancellationToken cancellationToken = default)
+    {
+        var url = $"usercollection/daily_spo2?start_date={startDate:yyyy-MM-dd}&end_date={endDate:yyyy-MM-dd}";
+        return await FetchAllPagesAsync<OuraSpO2Data>(url, cancellationToken);
+    }
+
+    public async Task<IEnumerable<OuraSleepTimeData>> GetSleepTimeAsync(
+        DateTime startDate,
+        DateTime endDate,
+        CancellationToken cancellationToken = default)
+    {
+        var url = $"usercollection/sleep_time?start_date={startDate:yyyy-MM-dd}&end_date={endDate:yyyy-MM-dd}";
+        return await FetchAllPagesAsync<OuraSleepTimeData>(url, cancellationToken);
+    }
+
+    public async Task<IEnumerable<OuraWorkoutData>> GetWorkoutsAsync(
+        DateTime startDate,
+        DateTime endDate,
+        CancellationToken cancellationToken = default)
+    {
+        var url = $"usercollection/workout?start_date={startDate:yyyy-MM-dd}&end_date={endDate:yyyy-MM-dd}";
+        return await FetchAllPagesAsync<OuraWorkoutData>(url, cancellationToken);
+    }
+
     /// <summary>
     /// Fetch all pages of data from a paginated Oura API endpoint.
     /// </summary>

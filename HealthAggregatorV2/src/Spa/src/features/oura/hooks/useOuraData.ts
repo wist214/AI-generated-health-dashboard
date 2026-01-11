@@ -26,6 +26,15 @@ interface DashboardSummaryDto {
   protein: number | null;
   carbs: number | null;
   fat: number | null;
+  // Advanced Oura metrics
+  dailyStress: string | null;
+  resilienceLevel: string | null;
+  vo2Max: number | null;
+  cardiovascularAge: number | null;
+  spO2Average: number | null;
+  optimalBedtimeStart: number | null;
+  optimalBedtimeEnd: number | null;
+  workoutCount: number | null;
   lastUpdated: string;
   sourceSyncInfo: Array<{ sourceName: string; lastSyncedAt: string | null }>;
 }
@@ -205,6 +214,15 @@ export const useLatestOura = () => {
       activeCalories: data.activeCalories,
       heartRateAvg: data.heartRateAvg,
       hrvAverage: data.hrvAverage,
+      // Advanced Oura metrics
+      dailyStress: data.dailyStress,
+      resilienceLevel: data.resilienceLevel,
+      vo2Max: data.vo2Max,
+      cardiovascularAge: data.cardiovascularAge,
+      spO2Average: data.spO2Average,
+      optimalBedtimeStart: data.optimalBedtimeStart,
+      optimalBedtimeEnd: data.optimalBedtimeEnd,
+      workoutCount: data.workoutCount,
       lastUpdated: data.lastUpdated,
     }),
   });

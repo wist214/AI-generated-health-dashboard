@@ -28,6 +28,7 @@ public static class ServiceCollectionExtensions
         // Register core sync services
         services.AddSingleton<IIdempotencyService, IdempotencyService>();
         services.AddScoped<ISyncOrchestrator, SyncOrchestrator>();
+        services.AddScoped<IDailySummaryAggregationService, DailySummaryAggregationService>();
 
         // Register API clients with retry policies
         services.AddOuraClient(configuration);

@@ -34,6 +34,16 @@ public record DashboardSummaryDto
     public double? Carbs { get; init; }
     public double? Fat { get; init; }
 
+    // Advanced Oura metrics
+    public string? DailyStress { get; init; }
+    public string? ResilienceLevel { get; init; }
+    public double? Vo2Max { get; init; }
+    public int? CardiovascularAge { get; init; }
+    public double? SpO2Average { get; init; }
+    public int? OptimalBedtimeStart { get; init; }
+    public int? OptimalBedtimeEnd { get; init; }
+    public int? WorkoutCount { get; init; }
+
     // Metadata
     public DateTime LastUpdated { get; init; }
     public IEnumerable<SourceSyncInfoDto> SourceSyncInfo { get; init; } = [];

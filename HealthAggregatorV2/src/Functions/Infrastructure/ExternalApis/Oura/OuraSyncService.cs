@@ -31,6 +31,16 @@ public class OuraSyncService : IDataSourceSyncService
     private const string ActivityScoreMetric = "activity_score";
     private const string StepsMetric = "steps";
     private const string CaloriesBurnedMetric = "total_calories";
+    
+    // Advanced Oura metrics
+    private const string DailyStressMetric = "daily_stress";
+    private const string ResilienceLevelMetric = "resilience_level";
+    private const string Vo2MaxMetric = "vo2_max";
+    private const string CardiovascularAgeMetric = "cardiovascular_age";
+    private const string SpO2AverageMetric = "spo2_average";
+    private const string OptimalBedtimeStartMetric = "optimal_bedtime_start";
+    private const string OptimalBedtimeEndMetric = "optimal_bedtime_end";
+    private const string WorkoutCountMetric = "workout_count";
 
     public string SourceName => "Oura";
 
@@ -80,8 +90,19 @@ public class OuraSyncService : IDataSourceSyncService
             var sleepCount = await SyncDailySleepAsync(dataSource, metricTypes, startDate, endDate, cancellationToken);
             var readinessCount = await SyncReadinessAsync(dataSource, metricTypes, startDate, endDate, cancellationToken);
             var activityCount = await SyncActivityAsync(dataSource, metricTypes, startDate, endDate, cancellationToken);
+            
+            // Sync advanced metrics
+            var stressCount = await SyncDailyStressAsync(dataSource, metricTypes, startDate, endDate, cancellationToken);
+            var resilienceCount = await SyncDailyResilienceAsync(dataSource, metricTypes, startDate, endDate, cancellationToken);
+            var vo2MaxCount = await SyncVo2MaxAsync(dataSource, metricTypes, startDate, endDate, cancellationToken);
+            var cardioAgeCount = await SyncCardiovascularAgeAsync(dataSource, metricTypes, startDate, endDate, cancellationToken);
+            var spo2Count = await SyncDailySpO2Async(dataSource, metricTypes, startDate, endDate, cancellationToken);
+            var sleepTimeCount = await SyncSleepTimeAsync(dataSource, metricTypes, startDate, endDate, cancellationToken);
+            var workoutCount = await SyncWorkoutsAsync(dataSource, metricTypes, startDate, endDate, cancellationToken);
 
-            var totalCount = sleepCount + readinessCount + activityCount;
+            var totalCount = sleepCount + readinessCount + activityCount + stressCount + 
+                           resilienceCount + vo2MaxCount + cardioAgeCount + spo2Count + 
+                           sleepTimeCount + workoutCount;
 
             _logger.LogInformation(
                 "Oura sync completed: {Count} records in {Duration}ms",
@@ -311,5 +332,274 @@ public class OuraSyncService : IDataSourceSyncService
 
         // Mark as processed in idempotency cache
         _idempotencyService.MarkAsProcessed(metricType.Id, dataSource.Id, timestamp);
+    }
+
+    private async Task<int> SyncDailyStressAsync(
+        Source dataSource,
+        Dictionary<string, MetricType> metricTypes,
+        DateTime startDate,
+        DateTime endDate,
+        CancellationToken cancellationToken)
+    {
+        var stressData = await _ouraClient.GetDailyStressAsync(startDate, endDate, cancellationToken);
+        var count = 0;
+
+        foreach (var stress in stressData)
+        {
+            if (!DateTime.TryParse(stress.Day, out var recordDate))
+            {
+                continue;
+            }
+
+            var timestamp = recordDate.Date;
+
+            // Store DaySummary as text metric if available
+            if (!string.IsNullOrEmpty(stress.DaySummary) && metricTypes.TryGetValue(DailyStressMetric, out var stressType))
+            {
+                if (!await _idempotencyService.IsDuplicateAsync(stressType.Id, dataSource.Id, timestamp, cancellationToken))
+                {
+                    // Store as numeric value: 0=restored, 1=normal, 2=stressful
+                    decimal value = stress.DaySummary.ToLower() switch
+                    {
+                        "restored" => 0,
+                        "normal" => 1,
+                        "stressful" => 2,
+                        _ => 1
+                    };
+                    await SaveMeasurementAsync(stressType, dataSource, timestamp, value, cancellationToken);
+                    count++;
+                }
+            }
+        }
+
+        _logger.LogDebug("Synced {Count} stress measurements", count);
+        return count;
+    }
+
+    private async Task<int> SyncDailyResilienceAsync(
+        Source dataSource,
+        Dictionary<string, MetricType> metricTypes,
+        DateTime startDate,
+        DateTime endDate,
+        CancellationToken cancellationToken)
+    {
+        var resilienceData = await _ouraClient.GetDailyResilienceAsync(startDate, endDate, cancellationToken);
+        var count = 0;
+
+        foreach (var resilience in resilienceData)
+        {
+            if (!DateTime.TryParse(resilience.Day, out var recordDate))
+            {
+                continue;
+            }
+
+            var timestamp = recordDate.Date;
+
+            if (!string.IsNullOrEmpty(resilience.Level) && metricTypes.TryGetValue(ResilienceLevelMetric, out var resilienceType))
+            {
+                if (!await _idempotencyService.IsDuplicateAsync(resilienceType.Id, dataSource.Id, timestamp, cancellationToken))
+                {
+                    // Store as numeric: 0=limited, 1=adequate, 2=solid, 3=strong, 4=exceptional
+                    decimal value = resilience.Level.ToLower() switch
+                    {
+                        "limited" => 0,
+                        "adequate" => 1,
+                        "solid" => 2,
+                        "strong" => 3,
+                        "exceptional" => 4,
+                        _ => 1
+                    };
+                    await SaveMeasurementAsync(resilienceType, dataSource, timestamp, value, cancellationToken);
+                    count++;
+                }
+            }
+        }
+
+        _logger.LogDebug("Synced {Count} resilience measurements", count);
+        return count;
+    }
+
+    private async Task<int> SyncVo2MaxAsync(
+        Source dataSource,
+        Dictionary<string, MetricType> metricTypes,
+        DateTime startDate,
+        DateTime endDate,
+        CancellationToken cancellationToken)
+    {
+        var vo2MaxData = await _ouraClient.GetVo2MaxAsync(startDate, endDate, cancellationToken);
+        var count = 0;
+
+        foreach (var vo2Max in vo2MaxData)
+        {
+            if (!DateTime.TryParse(vo2Max.Day, out var recordDate))
+            {
+                continue;
+            }
+
+            var timestamp = recordDate.Date;
+
+            if (vo2Max.Vo2Max.HasValue && metricTypes.TryGetValue(Vo2MaxMetric, out var vo2MaxType))
+            {
+                if (!await _idempotencyService.IsDuplicateAsync(vo2MaxType.Id, dataSource.Id, timestamp, cancellationToken))
+                {
+                    await SaveMeasurementAsync(vo2MaxType, dataSource, timestamp, (decimal)vo2Max.Vo2Max.Value, cancellationToken);
+                    count++;
+                }
+            }
+        }
+
+        _logger.LogDebug("Synced {Count} VO2 Max measurements", count);
+        return count;
+    }
+
+    private async Task<int> SyncCardiovascularAgeAsync(
+        Source dataSource,
+        Dictionary<string, MetricType> metricTypes,
+        DateTime startDate,
+        DateTime endDate,
+        CancellationToken cancellationToken)
+    {
+        var cardioAgeData = await _ouraClient.GetCardiovascularAgeAsync(startDate, endDate, cancellationToken);
+        var count = 0;
+
+        foreach (var cardioAge in cardioAgeData)
+        {
+            if (!DateTime.TryParse(cardioAge.Day, out var recordDate))
+            {
+                continue;
+            }
+
+            var timestamp = recordDate.Date;
+
+            if (cardioAge.VascularAge.HasValue && metricTypes.TryGetValue(CardiovascularAgeMetric, out var cardioAgeType))
+            {
+                if (!await _idempotencyService.IsDuplicateAsync(cardioAgeType.Id, dataSource.Id, timestamp, cancellationToken))
+                {
+                    await SaveMeasurementAsync(cardioAgeType, dataSource, timestamp, cardioAge.VascularAge.Value, cancellationToken);
+                    count++;
+                }
+            }
+        }
+
+        _logger.LogDebug("Synced {Count} cardiovascular age measurements", count);
+        return count;
+    }
+
+    private async Task<int> SyncDailySpO2Async(
+        Source dataSource,
+        Dictionary<string, MetricType> metricTypes,
+        DateTime startDate,
+        DateTime endDate,
+        CancellationToken cancellationToken)
+    {
+        var spo2Data = await _ouraClient.GetDailySpO2Async(startDate, endDate, cancellationToken);
+        var count = 0;
+
+        foreach (var spo2 in spo2Data)
+        {
+            if (!DateTime.TryParse(spo2.Day, out var recordDate))
+            {
+                continue;
+            }
+
+            var timestamp = recordDate.Date;
+
+            if (spo2.Spo2Percentage?.Average.HasValue == true && metricTypes.TryGetValue(SpO2AverageMetric, out var spo2Type))
+            {
+                if (!await _idempotencyService.IsDuplicateAsync(spo2Type.Id, dataSource.Id, timestamp, cancellationToken))
+                {
+                    await SaveMeasurementAsync(spo2Type, dataSource, timestamp, (decimal)spo2.Spo2Percentage.Average.Value, cancellationToken);
+                    count++;
+                }
+            }
+        }
+
+        _logger.LogDebug("Synced {Count} SpO2 measurements", count);
+        return count;
+    }
+
+    private async Task<int> SyncSleepTimeAsync(
+        Source dataSource,
+        Dictionary<string, MetricType> metricTypes,
+        DateTime startDate,
+        DateTime endDate,
+        CancellationToken cancellationToken)
+    {
+        var sleepTimeData = await _ouraClient.GetSleepTimeAsync(startDate, endDate, cancellationToken);
+        var count = 0;
+
+        foreach (var sleepTime in sleepTimeData)
+        {
+            if (!DateTime.TryParse(sleepTime.Day, out var recordDate))
+            {
+                continue;
+            }
+
+            var timestamp = recordDate.Date;
+
+            // Store bedtime start offset
+            if (sleepTime.OptimalBedtime?.StartOffset.HasValue == true && 
+                metricTypes.TryGetValue(OptimalBedtimeStartMetric, out var startType))
+            {
+                if (!await _idempotencyService.IsDuplicateAsync(startType.Id, dataSource.Id, timestamp, cancellationToken))
+                {
+                    await SaveMeasurementAsync(startType, dataSource, timestamp, sleepTime.OptimalBedtime.StartOffset.Value, cancellationToken);
+                    count++;
+                }
+            }
+
+            // Store bedtime end offset
+            if (sleepTime.OptimalBedtime?.EndOffset.HasValue == true && 
+                metricTypes.TryGetValue(OptimalBedtimeEndMetric, out var endType))
+            {
+                if (!await _idempotencyService.IsDuplicateAsync(endType.Id, dataSource.Id, timestamp, cancellationToken))
+                {
+                    await SaveMeasurementAsync(endType, dataSource, timestamp, sleepTime.OptimalBedtime.EndOffset.Value, cancellationToken);
+                    count++;
+                }
+            }
+        }
+
+        _logger.LogDebug("Synced {Count} sleep time measurements", count);
+        return count;
+    }
+
+    private async Task<int> SyncWorkoutsAsync(
+        Source dataSource,
+        Dictionary<string, MetricType> metricTypes,
+        DateTime startDate,
+        DateTime endDate,
+        CancellationToken cancellationToken)
+    {
+        var workoutData = await _ouraClient.GetWorkoutsAsync(startDate, endDate, cancellationToken);
+        var count = 0;
+
+        // Group workouts by day and count them
+        var workoutsByDay = workoutData
+            .Where(w => !string.IsNullOrEmpty(w.Day))
+            .GroupBy(w => w.Day!)
+            .ToDictionary(g => g.Key, g => g.Count());
+
+        foreach (var kvp in workoutsByDay)
+        {
+            if (!DateTime.TryParse(kvp.Key, out var recordDate))
+            {
+                continue;
+            }
+
+            var timestamp = recordDate.Date;
+
+            if (metricTypes.TryGetValue(WorkoutCountMetric, out var workoutType))
+            {
+                if (!await _idempotencyService.IsDuplicateAsync(workoutType.Id, dataSource.Id, timestamp, cancellationToken))
+                {
+                    await SaveMeasurementAsync(workoutType, dataSource, timestamp, kvp.Value, cancellationToken);
+                    count++;
+                }
+            }
+        }
+
+        _logger.LogDebug("Synced {Count} workout count measurements", count);
+        return count;
     }
 }

@@ -209,3 +209,177 @@ public class OuraReadinessContributors
     [JsonPropertyName("sleep_balance")]
     public int? SleepBalance { get; set; }
 }
+
+/// <summary>
+/// Daily stress data from daily_stress endpoint.
+/// </summary>
+public class OuraStressData
+{
+    [JsonPropertyName("id")]
+    public string Id { get; set; } = string.Empty;
+
+    [JsonPropertyName("day")]
+    public string Day { get; set; } = string.Empty;
+
+    [JsonPropertyName("stress_high")]
+    public int? StressHigh { get; set; }
+
+    [JsonPropertyName("recovery_high")]
+    public int? RecoveryHigh { get; set; }
+
+    [JsonPropertyName("day_summary")]
+    public string? DaySummary { get; set; }
+}
+
+/// <summary>
+/// Daily resilience data from daily_resilience endpoint.
+/// </summary>
+public class OuraResilienceData
+{
+    [JsonPropertyName("id")]
+    public string Id { get; set; } = string.Empty;
+
+    [JsonPropertyName("day")]
+    public string Day { get; set; } = string.Empty;
+
+    [JsonPropertyName("level")]
+    public string? Level { get; set; }
+
+    [JsonPropertyName("contributors")]
+    public OuraResilienceContributors? Contributors { get; set; }
+}
+
+public class OuraResilienceContributors
+{
+    [JsonPropertyName("sleep_recovery")]
+    public int? SleepRecovery { get; set; }
+
+    [JsonPropertyName("daytime_recovery")]
+    public int? DaytimeRecovery { get; set; }
+
+    [JsonPropertyName("stress")]
+    public int? Stress { get; set; }
+}
+
+/// <summary>
+/// VO2 Max data from vO2_max endpoint.
+/// </summary>
+public class OuraVo2MaxData
+{
+    [JsonPropertyName("id")]
+    public string Id { get; set; } = string.Empty;
+
+    [JsonPropertyName("day")]
+    public string Day { get; set; } = string.Empty;
+
+    [JsonPropertyName("timestamp")]
+    public string? Timestamp { get; set; }
+
+    [JsonPropertyName("vo2_max")]
+    public double? Vo2Max { get; set; }
+}
+
+/// <summary>
+/// Cardiovascular age data from daily_cardiovascular_age endpoint.
+/// </summary>
+public class OuraCardiovascularAgeData
+{
+    [JsonPropertyName("day")]
+    public string Day { get; set; } = string.Empty;
+
+    [JsonPropertyName("vascular_age")]
+    public int? VascularAge { get; set; }
+}
+
+/// <summary>
+/// SpO2 data from daily_spo2 endpoint (Gen 3 only).
+/// </summary>
+public class OuraSpO2Data
+{
+    [JsonPropertyName("id")]
+    public string Id { get; set; } = string.Empty;
+
+    [JsonPropertyName("day")]
+    public string Day { get; set; } = string.Empty;
+
+    [JsonPropertyName("spo2_percentage")]
+    public OuraSpO2Percentage? Spo2Percentage { get; set; }
+
+    [JsonPropertyName("breathing_disturbance_index")]
+    public double? BreathingDisturbanceIndex { get; set; }
+}
+
+public class OuraSpO2Percentage
+{
+    [JsonPropertyName("average")]
+    public double? Average { get; set; }
+}
+
+/// <summary>
+/// Sleep time recommendation from sleep_time endpoint.
+/// </summary>
+public class OuraSleepTimeData
+{
+    [JsonPropertyName("id")]
+    public string Id { get; set; } = string.Empty;
+
+    [JsonPropertyName("day")]
+    public string Day { get; set; } = string.Empty;
+
+    [JsonPropertyName("optimal_bedtime")]
+    public OuraOptimalBedtime? OptimalBedtime { get; set; }
+
+    [JsonPropertyName("recommendation")]
+    public string? Recommendation { get; set; }
+
+    [JsonPropertyName("status")]
+    public string? Status { get; set; }
+}
+
+public class OuraOptimalBedtime
+{
+    [JsonPropertyName("day_tz")]
+    public int? DayTz { get; set; }
+
+    [JsonPropertyName("end_offset")]
+    public int? EndOffset { get; set; }
+
+    [JsonPropertyName("start_offset")]
+    public int? StartOffset { get; set; }
+}
+
+/// <summary>
+/// Workout data from workout endpoint.
+/// </summary>
+public class OuraWorkoutData
+{
+    [JsonPropertyName("id")]
+    public string Id { get; set; } = string.Empty;
+
+    [JsonPropertyName("day")]
+    public string? Day { get; set; }
+
+    [JsonPropertyName("activity")]
+    public string? Activity { get; set; }
+
+    [JsonPropertyName("calories")]
+    public int? Calories { get; set; }
+
+    [JsonPropertyName("distance")]
+    public int? Distance { get; set; }
+
+    [JsonPropertyName("start_datetime")]
+    public string? StartDatetime { get; set; }
+
+    [JsonPropertyName("end_datetime")]
+    public string? EndDatetime { get; set; }
+
+    [JsonPropertyName("intensity")]
+    public string? Intensity { get; set; }
+
+    [JsonPropertyName("label")]
+    public string? Label { get; set; }
+
+    [JsonPropertyName("source")]
+    public string? Source { get; set; }
+}
