@@ -355,8 +355,11 @@ export const useOuraSync = () => {
     onSuccess: async () => {
       // Invalidate all oura-related queries
       await queryClient.invalidateQueries({ queryKey: ouraKeys.all });
+      // Invalidate dashboard to update Insights section
+      await queryClient.invalidateQueries({ queryKey: ['dashboard'] });
       // Force refetch to ensure UI updates with fresh data
       await queryClient.refetchQueries({ queryKey: ouraKeys.all, type: 'active' });
+      await queryClient.refetchQueries({ queryKey: ['dashboard'], type: 'active' });
     },
   });
 };

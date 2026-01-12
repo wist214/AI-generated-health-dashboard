@@ -92,8 +92,11 @@ export const usePicoocSync = () => {
     onSuccess: async () => {
       // Invalidate all weight-related queries
       await queryClient.invalidateQueries({ queryKey: weightKeys.all });
+      // Invalidate dashboard to update Insights section
+      await queryClient.invalidateQueries({ queryKey: ['dashboard'] });
       // Force refetch to ensure UI updates with fresh data
       await queryClient.refetchQueries({ queryKey: weightKeys.all, type: 'active' });
+      await queryClient.refetchQueries({ queryKey: ['dashboard'], type: 'active' });
     },
   });
 };
