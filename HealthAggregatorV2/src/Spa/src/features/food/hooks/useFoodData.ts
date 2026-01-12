@@ -84,10 +84,8 @@ interface CronometerDailyResponse {
  */
 export const foodKeys = {
   all: ['food'] as const,
-  daily: (date: string) => [...foodKeys.all, 'daily', date] as const,
-  history: (range: string) => [...foodKeys.all, 'history', range] as const,
-  latest: () => [...foodKeys.all, 'latest'] as const,
   data: () => [...foodKeys.all, 'data'] as const,
+  daily: (date: string) => [...foodKeys.all, 'daily', date] as const,
 };
 
 /**
@@ -109,6 +107,17 @@ const fetchCronometerDaily = async (date: string): Promise<CronometerDailyRespon
  */
 const syncCronometerData = async () => {
   return syncCronometer();
+};
+
+/**
+ * Base hook for fetching all Cronometer data - shared between other hooks
+ */
+export const useCronometerData = () => {
+  return useQuery({
+    queryKey: foodKeys.data(),
+    queryFn: fetchCronometerData,
+    staleTime: 5 * 60 * 1000,
+  });
 };
 
 /**
@@ -137,60 +146,56 @@ interface FullNutritionHistoryItem extends NutritionHistoryItem {
 }
 
 /**
- * Hook for fetching nutrition history
+ * Hook for fetching nutrition history - uses shared base query
  */
 export const useNutritionHistory = (_startDate: string, _endDate: string) => {
-  return useQuery({
-    queryKey: foodKeys.history('all'),
-    queryFn: fetchCronometerData,
-    staleTime: 5 * 60 * 1000,
-    select: (data): FullNutritionHistoryItem[] => data.dailyNutrition
-      .map(d => ({
-        date: d.date,
-        calories: d.energy,  // Map 'energy' to 'calories' for frontend
-        protein: d.protein,
-        carbs: d.carbs,
-        fat: d.fat,
-        fiber: d.fiber,
-        sugars: d.sugars,
-        sodium: d.sodium,
-        cholesterol: d.cholesterol,
-        vitaminD: d.vitaminD,
-        calcium: d.calcium,
-        iron: d.iron,
-        potassium: d.potassium,
-      })),
-  });
+  const { data, isLoading, error, refetch } = useCronometerData();
+  
+  const historyData = data?.dailyNutrition?.map(d => ({
+    date: d.date,
+    calories: d.energy,  // Map 'energy' to 'calories' for frontend
+    protein: d.protein,
+    carbs: d.carbs,
+    fat: d.fat,
+    fiber: d.fiber,
+    sugars: d.sugars,
+    sodium: d.sodium,
+    cholesterol: d.cholesterol,
+    vitaminD: d.vitaminD,
+    calcium: d.calcium,
+    iron: d.iron,
+    potassium: d.potassium,
+  })) as FullNutritionHistoryItem[] | undefined;
+  
+  return { data: historyData, isLoading, error, refetch };
 };
 
 /**
- * Hook for fetching latest nutrition
+ * Hook for fetching latest nutrition - uses shared base query
  */
 export const useLatestNutrition = () => {
-  return useQuery({
-    queryKey: foodKeys.data(),
-    queryFn: fetchCronometerData,
-    staleTime: 5 * 60 * 1000,
-    select: (data) => {
-      const latest = data.dailyNutrition?.[0];
-      const hasValidMacros = latest && 
-        latest.protein !== null && 
-        latest.carbs !== null && 
-        latest.fat !== null;
-      return {
-        calories: latest?.energy ?? null,  // Map 'energy' to 'calories'
-        protein: latest?.protein ?? null,
-        carbs: latest?.carbs ?? null,
-        fat: latest?.fat ?? null,
-        lastUpdated: data.lastSync,
-        macros: hasValidMacros 
-          ? { protein: latest.protein!, carbs: latest.carbs!, fat: latest.fat! } as MacroBreakdown
-          : null,
-        // Include food servings for the food log
-        foodServings: data.foodServings ?? [],
-      };
-    },
-  });
+  const { data, isLoading, error, refetch } = useCronometerData();
+  
+  const latest = data?.dailyNutrition?.[0];
+  const hasValidMacros = latest && 
+    latest.protein !== null && 
+    latest.carbs !== null && 
+    latest.fat !== null;
+    
+  const latestData = data ? {
+    calories: latest?.energy ?? null,  // Map 'energy' to 'calories'
+    protein: latest?.protein ?? null,
+    carbs: latest?.carbs ?? null,
+    fat: latest?.fat ?? null,
+    lastUpdated: data.lastSync,
+    macros: hasValidMacros 
+      ? { protein: latest.protein!, carbs: latest.carbs!, fat: latest.fat! } as MacroBreakdown
+      : null,
+    // Include food servings for the food log
+    foodServings: data.foodServings ?? [],
+  } : undefined;
+  
+  return { data: latestData, isLoading, error, refetch };
 };
 
 /**
