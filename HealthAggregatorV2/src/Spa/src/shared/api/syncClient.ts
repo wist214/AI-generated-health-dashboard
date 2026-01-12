@@ -3,15 +3,15 @@ import type { ApiError } from './types';
 
 /**
  * Base URL for Azure Functions (sync operations)
- * Uses environment variable or defaults to localhost:7071
+ * Uses same base URL as the main API client
  */
-const FUNCTIONS_BASE_URL = import.meta.env.VITE_FUNCTIONS_BASE_URL || 'http://localhost:7071';
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '';
 
 /**
  * Axios instance configured for Azure Functions sync endpoints
  */
 export const syncClient = axios.create({
-  baseURL: FUNCTIONS_BASE_URL,
+  baseURL: API_BASE_URL,
   timeout: 120000, // 2 minutes - sync operations can take a while
   headers: {
     'Content-Type': 'application/json',
@@ -47,28 +47,28 @@ export interface SyncResponse {
 
 /**
  * Trigger Oura data sync
- * Uses the V2 Functions endpoint: POST /api/sync/{sourceName}
+ * Route: POST /api/oura/sync
  */
 export async function syncOura(): Promise<SyncResponse> {
-  const response = await syncClient.post<SyncResponse>('/api/sync/oura');
+  const response = await syncClient.post<SyncResponse>('/api/oura/sync');
   return response.data;
 }
 
 /**
  * Trigger Picooc data sync
- * Uses the V2 Functions endpoint: POST /api/sync/{sourceName}
+ * Route: POST /api/picooc/sync
  */
 export async function syncPicooc(): Promise<SyncResponse> {
-  const response = await syncClient.post<SyncResponse>('/api/sync/picooc');
+  const response = await syncClient.post<SyncResponse>('/api/picooc/sync');
   return response.data;
 }
 
 /**
  * Trigger Cronometer data sync
- * Uses the V2 Functions endpoint: POST /api/sync/{sourceName}
+ * Route: POST /api/cronometer/sync
  */
 export async function syncCronometer(): Promise<SyncResponse> {
-  const response = await syncClient.post<SyncResponse>('/api/sync/cronometer');
+  const response = await syncClient.post<SyncResponse>('/api/cronometer/sync');
   return response.data;
 }
 
@@ -76,6 +76,18 @@ export async function syncCronometer(): Promise<SyncResponse> {
  * Trigger sync for all sources
  */
 export async function syncAll(): Promise<SyncResponse> {
-  const response = await syncClient.post<SyncResponse>('/api/sync');
-  return response.data;
+  // Sync all sources in parallel
+  const results = await Promise.allSettled([
+    syncOura(),
+    syncPicooc(),
+    syncCronometer(),
+  ]);
+  
+  const succeeded = results.filter(r => r.status === 'fulfilled').length;
+  const failed = results.filter(r => r.status === 'rejected').length;
+  
+  return {
+    success: failed === 0,
+    message: `Sync completed: ${succeeded} succeeded, ${failed} failed`,
+  };
 }
