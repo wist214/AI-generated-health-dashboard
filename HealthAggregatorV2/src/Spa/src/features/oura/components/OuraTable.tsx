@@ -3,6 +3,17 @@ import styles from './OuraTable.module.css';
 import { formatDate, formatDurationSeconds } from '@shared/utils';
 import type { OuraSleepData, OuraActivityData } from '../types';
 
+/**
+ * Get CSS class for score value based on Oura scoring guidelines
+ * 85+ = Optimal (green), 70-84 = Good (yellow/orange), <70 = Pay attention (red)
+ */
+const getScoreColorClass = (score: number | null): string => {
+  if (score === null) return '';
+  if (score >= 85) return styles.scoreOptimal ?? '';
+  if (score >= 70) return styles.scoreGood ?? '';
+  return styles.scoreAttention ?? '';
+};
+
 interface OuraSleepTableProps {
   data: OuraSleepData[];
 }
@@ -77,7 +88,11 @@ export const SleepTable: React.FC<OuraSleepTableProps> = ({ data }) => {
               data.map((row, index) => (
                 <tr key={`${row.date}-${index}`} onClick={() => handleRowClick(row)}>
                   <td>{formatDate(row.date)}</td>
-                  <td className={styles.score}>{row.score ?? '--'}</td>
+                  <td>
+                    <span className={`${styles.scoreBadge} ${getScoreColorClass(row.score)}`}>
+                      {row.score ?? '--'}
+                    </span>
+                  </td>
                   <td>{row.totalSleep ? formatDurationSeconds(row.totalSleep) : '--'}</td>
                   <td>{row.deepSleep ? formatDurationSeconds(row.deepSleep) : '--'}</td>
                   <td>{row.remSleep ? formatDurationSeconds(row.remSleep) : '--'}</td>
@@ -352,7 +367,11 @@ export const ActivityTable: React.FC<OuraActivityTableProps> = ({ data }) => {
               data.map((row, index) => (
                 <tr key={`${row.date}-${index}`} onClick={() => handleRowClick(row)}>
                   <td>{formatDate(row.date)}</td>
-                  <td className={styles.score}>{row.score ?? '--'}</td>
+                  <td>
+                    <span className={`${styles.scoreBadge} ${getScoreColorClass(row.score)}`}>
+                      {row.score ?? '--'}
+                    </span>
+                  </td>
                   <td>{row.steps?.toLocaleString() ?? '--'}</td>
                   <td>{row.activeCalories ?? '--'}</td>
                   <td>{row.totalCalories ?? '--'}</td>

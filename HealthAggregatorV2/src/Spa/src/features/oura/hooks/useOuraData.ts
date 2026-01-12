@@ -161,7 +161,8 @@ const transformToSleepData = (ouraData: OuraDataResponse): OuraSleepData[] => {
           totalSleep: s.contributors.totalSleep ?? null,
         } : null,
       };
-    }) ?? [];
+    })
+    .sort((a, b) => b.date.localeCompare(a.date)) ?? [];
 };
 
 /**
@@ -183,7 +184,8 @@ const transformToActivityData = (ouraData: OuraDataResponse): OuraActivityData[]
       sedentaryTime: a.sedentaryTime,
       restingTime: a.restingTime,
       inactivityAlerts: a.inactivityAlerts,
-    })) ?? [];
+    }))
+    .sort((a, b) => b.date.localeCompare(a.date)) ?? [];
 };
 
 /**
@@ -235,7 +237,7 @@ export const useReadinessData = (_startDate: string, _endDate: string) => {
     select: (data) => data.readiness?.map(r => ({
       date: r.day,
       score: r.score,
-    })) ?? [],
+    })).sort((a, b) => b.date.localeCompare(a.date)) ?? [],
   });
 };
 
@@ -252,7 +254,7 @@ export const useStressData = () => {
       stressHigh: s.stressHigh,
       recoveryHigh: s.recoveryHigh,
       daySummary: s.daySummary,
-    })) ?? [],
+    })).sort((a, b) => b.day.localeCompare(a.day)) ?? [],
   });
 };
 
