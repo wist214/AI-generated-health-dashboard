@@ -202,7 +202,9 @@ export const useCronometerSync = () => {
   return useMutation({
     mutationFn: syncCronometerData,
     onSuccess: () => {
+      // Invalidate and refetch all food queries to ensure UI updates
       queryClient.invalidateQueries({ queryKey: foodKeys.all });
+      queryClient.refetchQueries({ queryKey: foodKeys.all });
     },
   });
 };

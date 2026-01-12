@@ -89,9 +89,11 @@ export const usePicoocSync = () => {
   return useMutation({
     mutationFn: syncPicoocData,
     onSuccess: () => {
-      // Invalidate all weight queries to refetch
+      // Invalidate and refetch all weight queries to ensure UI updates
       queryClient.invalidateQueries({ queryKey: weightKeys.all });
       queryClient.invalidateQueries({ queryKey: ['dashboard'] });
+      queryClient.refetchQueries({ queryKey: weightKeys.all });
+      queryClient.refetchQueries({ queryKey: ['dashboard'] });
     },
   });
 };

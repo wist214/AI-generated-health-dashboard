@@ -351,8 +351,11 @@ export const useOuraSync = () => {
   return useMutation({
     mutationFn: syncOuraData,
     onSuccess: () => {
+      // Invalidate and refetch all queries to ensure UI updates
       queryClient.invalidateQueries({ queryKey: ouraKeys.all });
       queryClient.invalidateQueries({ queryKey: ['dashboard'] });
+      queryClient.refetchQueries({ queryKey: ouraKeys.all });
+      queryClient.refetchQueries({ queryKey: ['dashboard'] });
     },
   });
 };
