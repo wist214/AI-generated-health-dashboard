@@ -2,54 +2,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { get, API_ENDPOINTS } from '@shared/api';
 import { syncPicooc } from '@shared/api/syncClient';
 import type { WeightMetric } from '../types';
-
-/**
- * API response types matching backend DTOs
- */
-interface DashboardSummaryDto {
-  sleepScore: number | null;
-  readinessScore: number | null;
-  totalSleepHours: number | null;
-  deepSleepHours: number | null;
-  remSleepHours: number | null;
-  sleepEfficiency: number | null;
-  activityScore: number | null;
-  steps: number | null;
-  activeCalories: number | null;
-  weight: number | null;
-  bodyFat: number | null;
-  bmi: number | null;
-  heartRateAvg: number | null;
-  heartRateMin: number | null;
-  hrvAverage: number | null;
-  caloriesConsumed: number | null;
-  protein: number | null;
-  carbs: number | null;
-  fat: number | null;
-  lastUpdated: string;
-  sourceSyncInfo: Array<{ sourceName: string; lastSyncedAt: string | null }>;
-}
-
-interface DailySummaryDto {
-  date: string;
-  sleepScore: number | null;
-  readinessScore: number | null;
-  totalSleepHours: number | null;
-  deepSleepHours: number | null;
-  remSleepHours: number | null;
-  sleepEfficiency: number | null;
-  hrvAverage: number | null;
-  restingHeartRate: number | null;
-  activityScore: number | null;
-  steps: number | null;
-  activeCalories: number | null;
-  weight: number | null;
-  bodyFat: number | null;
-  caloriesConsumed: number | null;
-  protein: number | null;
-  carbs: number | null;
-  fat: number | null;
-}
+import type { DashboardSummaryResponse } from '@shared/api/types';
 
 /**
  * Query key factory for weight data
@@ -62,42 +15,30 @@ export const weightKeys = {
 };
 
 /**
- * Transform daily summaries to WeightMetric format
+ * Transform Picooc measurements to WeightMetric format
  */
-const transformToWeightMetrics = (summaries: DailySummaryDto[]): WeightMetric[] => {
-  return summaries
-    .filter(s => s.weight !== null || s.bodyFat !== null)
-    .map(s => ({
-      date: s.date,
-      weight: s.weight,
-      bodyFat: s.bodyFat,
-      bmi: null, // Not in daily summaries
-      muscleMass: null,
-      bodyWater: null,
-      metabolicAge: null,
-      visceralFat: null,
-      boneMass: null,
+const transformToWeightMetrics = (measurements: DashboardSummaryResponse['picooc']['measurements']): WeightMetric[] => {
+  return measurements
+    .filter(m => m.weight !== null)
+    .map(m => ({
+      date: m.date,
+      weight: m.weight,
+      bodyFat: m.bodyFat,
+      bmi: m.bmi,
+      muscleMass: m.skeletalMuscleMass,
+      bodyWater: m.bodyWater,
+      metabolicAge: m.metabolicAge,
+      visceralFat: m.visceralFat,
+      boneMass: m.boneMass,
+      bmr: m.basalMetabolism,
     }));
 };
 
 /**
- * Fetch weight metrics for a date range using dashboard history endpoint
+ * Fetch dashboard data which contains both Picooc and Oura data
  */
-const fetchWeightHistory = async (startDate: string, endDate: string): Promise<WeightMetric[]> => {
-  const params = new URLSearchParams({
-    from: startDate,
-    to: endDate,
-  });
-  
-  const response = await get<DailySummaryDto[]>(`${API_ENDPOINTS.DASHBOARD_HISTORY}?${params}`);
-  return transformToWeightMetrics(response);
-};
-
-/**
- * Fetch dashboard summary for latest weight data
- */
-const fetchDashboardSummary = async (): Promise<DashboardSummaryDto> => {
-  return get<DashboardSummaryDto>(API_ENDPOINTS.DASHBOARD_SUMMARY);
+const fetchDashboardData = async (): Promise<DashboardSummaryResponse> => {
+  return get<DashboardSummaryResponse>(API_ENDPOINTS.DASHBOARD);
 };
 
 /**
@@ -108,13 +49,14 @@ const syncPicoocData = async () => {
 };
 
 /**
- * Hook for fetching weight history
+ * Hook for fetching weight history (uses Picooc measurements from dashboard)
  */
-export const useWeightHistory = (startDate: string, endDate: string) => {
+export const useWeightHistory = (_startDate: string, _endDate: string) => {
   return useQuery({
-    queryKey: weightKeys.history(`${startDate}-${endDate}`),
-    queryFn: () => fetchWeightHistory(startDate, endDate),
+    queryKey: weightKeys.history(`all`),
+    queryFn: fetchDashboardData,
     staleTime: 5 * 60 * 1000, // 5 minutes
+    select: (data) => transformToWeightMetrics(data.picooc?.measurements ?? []),
   });
 };
 
@@ -124,14 +66,17 @@ export const useWeightHistory = (startDate: string, endDate: string) => {
 export const useLatestWeight = () => {
   return useQuery({
     queryKey: weightKeys.dashboard(),
-    queryFn: fetchDashboardSummary,
+    queryFn: fetchDashboardData,
     staleTime: 5 * 60 * 1000, // 5 minutes
-    select: (data) => ({
-      weight: data.weight,
-      bodyFat: data.bodyFat,
-      bmi: data.bmi,
-      lastUpdated: data.lastUpdated,
-    }),
+    select: (data) => {
+      const latestMeasurement = data.picooc?.measurements?.[0];
+      return {
+        weight: data.latest?.weight ?? null,
+        bodyFat: data.latest?.bodyFat ?? null,
+        bmi: latestMeasurement?.bmi ?? null,
+        lastUpdated: data.latest?.weightDate ?? data.picooc?.lastSync ?? null,
+      };
+    },
   });
 };
 
@@ -146,6 +91,7 @@ export const usePicoocSync = () => {
     onSuccess: () => {
       // Invalidate all weight queries to refetch
       queryClient.invalidateQueries({ queryKey: weightKeys.all });
+      queryClient.invalidateQueries({ queryKey: ['dashboard'] });
     },
   });
 };

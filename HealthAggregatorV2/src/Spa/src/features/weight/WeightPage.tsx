@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { Button } from '@fluentui/react-components';
-import { StatCard, TimeRangeSelector, WeightChart, WeightTable } from './components';
+import { StatCard, WeightChart, WeightTable } from './components';
 import { useLatestWeight, useWeightHistory, usePicoocSync } from './hooks';
 import { LoadingSpinner } from '@shared/components/LoadingSpinner';
 import { ErrorMessage } from '@shared/components/ErrorMessage';
@@ -15,6 +15,19 @@ const defaultSeries: ChartSeries[] = [
   { id: 'bmi', label: 'BMI', color: '#a78bfa', enabled: false },
   { id: 'muscleMass', label: 'Muscle', color: '#34d399', enabled: false },
 ];
+
+// Helper to calculate statistics from an array of numbers
+const calculateStats = (values: (number | null | undefined)[]) => {
+  const validValues = values.filter((v): v is number => v !== null && v !== undefined);
+  if (validValues.length === 0) {
+    return { min: null, max: null, avg: null };
+  }
+  return {
+    min: Math.min(...validValues),
+    max: Math.max(...validValues),
+    avg: validValues.reduce((a, b) => a + b, 0) / validValues.length,
+  };
+};
 
 /**
  * Weight tracking page
@@ -40,8 +53,18 @@ export const WeightPage: React.FC = () => {
   const isLoading = isLoadingLatest || isLoadingHistory;
   const error = latestError || historyError;
 
-  // Use history data for charts and table
-  const weightData = historyData ?? [];
+  // Use history data for charts and table, filtered by time range
+  const weightData = useMemo(() => {
+    const allData = historyData ?? [];
+    if (timeRange === 'all') return allData;
+    return allData.filter(d => d.date >= startDate && d.date <= endDate);
+  }, [historyData, timeRange, startDate, endDate]);
+
+  // Calculate statistics for each metric
+  const weightStats = useMemo(() => calculateStats(weightData.map(d => d.weight)), [weightData]);
+  const bodyFatStats = useMemo(() => calculateStats(weightData.map(d => d.bodyFat)), [weightData]);
+  const bmiStats = useMemo(() => calculateStats(weightData.map(d => d.bmi)), [weightData]);
+  const muscleStats = useMemo(() => calculateStats(weightData.map(d => d.muscleMass)), [weightData]);
 
   const handleSeriesToggle = (id: string) => {
     setSeries(prev => prev.map(s => 
@@ -53,11 +76,12 @@ export const WeightPage: React.FC = () => {
     syncData();
   };
 
-  // Extract latest values from dashboard summary
+  // Extract latest values from history data (first item is most recent)
+  const latestFromHistory = weightData[0] ?? null;
   const latestWeight = latestData?.weight ?? null;
   const latestBodyFat = latestData?.bodyFat ?? null;
   const latestBMI = latestData?.bmi ?? null;
-  const latestMuscle = null as number | null; // Not available in summary
+  const latestMuscle = latestFromHistory?.muscleMass ?? null;
   const lastUpdated = latestData?.lastUpdated;
 
   const totalPages = Math.ceil(weightData.length / pageSize);
@@ -88,6 +112,11 @@ export const WeightPage: React.FC = () => {
         >
           {isSyncing ? '🔄 Syncing...' : '🔄 Sync Data'}
         </Button>
+        {lastUpdated && (
+          <span className={styles.lastUpdated}>
+            Last updated: {formatRelativeTime(lastUpdated)}
+          </span>
+        )}
       </div>
 
       {/* Stats Grid */}
@@ -96,41 +125,39 @@ export const WeightPage: React.FC = () => {
           title="Weight"
           value={latestWeight !== null ? latestWeight.toFixed(1) : null}
           unit="kg"
-          details={lastUpdated ? formatRelativeTime(lastUpdated) : 'No data'}
           variant="weight"
+          statistics={weightStats}
         />
         <StatCard
           title="Body Fat"
           value={latestBodyFat !== null ? latestBodyFat.toFixed(1) : null}
           unit="%"
-          details={lastUpdated ? formatRelativeTime(lastUpdated) : 'No data'}
           variant="weight"
+          statistics={bodyFatStats}
         />
         <StatCard
           title="BMI"
           value={latestBMI !== null ? latestBMI.toFixed(1) : null}
-          details={lastUpdated ? formatRelativeTime(lastUpdated) : 'No data'}
           variant="weight"
+          statistics={bmiStats}
         />
         <StatCard
           title="Muscle Mass"
           value={latestMuscle !== null ? latestMuscle.toFixed(1) : null}
           unit="kg"
-          details={latestMuscle ? formatRelativeTime(lastUpdated ?? '') : 'No data'}
           variant="weight"
+          statistics={muscleStats}
         />
       </div>
 
       {/* Chart Section */}
       <div className={styles.chartSection}>
-        <TimeRangeSelector
-          value={timeRange}
-          onChange={setTimeRange}
-        />
         <WeightChart
           data={weightData}
           series={series}
           onSeriesToggle={handleSeriesToggle}
+          timeRange={timeRange}
+          onTimeRangeChange={setTimeRange}
         />
       </div>
 

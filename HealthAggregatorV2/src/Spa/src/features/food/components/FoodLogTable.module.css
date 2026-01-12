@@ -1,0 +1,498 @@
+/* ===========================================
+   Food Log Table - V1 Style
+   =========================================== */
+
+.foodLogTable {
+  width: 100%;
+  border-collapse: collapse;
+  background: var(--color-surface);
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.foodLogTable th,
+.foodLogTable td {
+  padding: 14px 16px;
+  text-align: left;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.foodLogTable th {
+  background: linear-gradient(135deg, rgba(88, 66, 128, 0.95) 0%, rgba(55, 48, 89, 0.95) 100%);
+  color: rgba(255, 255, 255, 0.85);
+  font-weight: 600;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  border-bottom: 2px solid rgba(139, 92, 246, 0.5);
+  padding: 16px;
+}
+
+.foodLogTable tbody tr {
+  cursor: pointer;
+  transition: background 0.15s ease;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.foodLogTable tbody tr:nth-child(odd) {
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.foodLogTable tbody tr:nth-child(even) {
+  background: rgba(0, 0, 0, 0.1);
+}
+
+.foodLogTable tbody tr:hover {
+  background: rgba(249, 115, 22, 0.15);
+}
+
+.foodLogTable tbody tr:last-child {
+  border-bottom: none;
+}
+
+.foodName {
+  font-weight: 500;
+  color: var(--color-text);
+  max-width: 300px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.amount {
+  color: var(--color-text-secondary);
+}
+
+.calories {
+  font-weight: 600;
+  color: #f97316;
+}
+
+.macro {
+  font-size: 13px;
+  color: var(--color-text-secondary);
+}
+
+/* Category Column */
+.categoryCell {
+  padding: 12px 8px;
+}
+
+.categoryBadge {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: capitalize;
+  letter-spacing: 0.3px;
+  background: linear-gradient(135deg, rgba(107, 114, 128, 0.3) 0%, rgba(107, 114, 128, 0.2) 100%);
+  color: #9ca3af;
+  border: 1px solid rgba(107, 114, 128, 0.4);
+}
+
+/* Category-specific colors */
+.categoryBadge[data-category="sweets"],
+.categoryBadge[data-category="desserts"] {
+  background: linear-gradient(135deg, rgba(249, 115, 22, 0.3) 0%, rgba(249, 115, 22, 0.2) 100%);
+  color: #fb923c;
+  border: 1px solid rgba(249, 115, 22, 0.4);
+}
+
+.categoryBadge[data-category="snacks"] {
+  background: linear-gradient(135deg, rgba(139, 92, 246, 0.3) 0%, rgba(139, 92, 246, 0.2) 100%);
+  color: #a78bfa;
+  border: 1px solid rgba(139, 92, 246, 0.4);
+}
+
+.categoryBadge[data-category="beverages"],
+.categoryBadge[data-category="drinks"] {
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.3) 0%, rgba(59, 130, 246, 0.2) 100%);
+  color: #60a5fa;
+  border: 1px solid rgba(59, 130, 246, 0.4);
+}
+
+.categoryBadge[data-category="fruits"],
+.categoryBadge[data-category="vegetables"] {
+  background: linear-gradient(135deg, rgba(34, 197, 94, 0.3) 0%, rgba(34, 197, 94, 0.2) 100%);
+  color: #4ade80;
+  border: 1px solid rgba(34, 197, 94, 0.4);
+}
+
+.categoryBadge[data-category="meat"],
+.categoryBadge[data-category="protein"],
+.categoryBadge[data-category="poultry"] {
+  background: linear-gradient(135deg, rgba(239, 68, 68, 0.3) 0%, rgba(239, 68, 68, 0.2) 100%);
+  color: #f87171;
+  border: 1px solid rgba(239, 68, 68, 0.4);
+}
+
+.categoryBadge[data-category="dairy"],
+.categoryBadge[data-category="milk"] {
+  background: linear-gradient(135deg, rgba(251, 191, 36, 0.3) 0%, rgba(251, 191, 36, 0.2) 100%);
+  color: #fbbf24;
+  border: 1px solid rgba(251, 191, 36, 0.4);
+}
+
+.categoryBadge[data-category="grains"],
+.categoryBadge[data-category="bread"],
+.categoryBadge[data-category="cereals"] {
+  background: linear-gradient(135deg, rgba(180, 83, 9, 0.3) 0%, rgba(180, 83, 9, 0.2) 100%);
+  color: #d97706;
+  border: 1px solid rgba(180, 83, 9, 0.4);
+}
+
+.categoryBadge[data-category="supplements"] {
+  background: linear-gradient(135deg, rgba(20, 184, 166, 0.3) 0%, rgba(20, 184, 166, 0.2) 100%);
+  color: #2dd4bf;
+  border: 1px solid rgba(20, 184, 166, 0.4);
+}
+
+.emptyState {
+  padding: 40px 20px;
+  text-align: center;
+  color: var(--color-text-secondary);
+}
+
+.emptyState h3 {
+  margin: 0 0 8px 0;
+  font-size: 16px;
+  color: var(--color-text);
+}
+
+.emptyState p {
+  margin: 0;
+  font-size: 14px;
+}
+
+/* ===========================================
+   Modal Base Styles
+   =========================================== */
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.85);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  backdrop-filter: blur(8px);
+  animation: fadeIn 0.2s ease-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideIn {
+  from { 
+    opacity: 0;
+    transform: translateY(-20px) scale(0.95);
+  }
+  to { 
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* ===========================================
+   Food Modal - Orange Theme
+   =========================================== */
+.foodModal {
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+  border-radius: 20px;
+  max-width: 600px;
+  width: 95%;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 
+    0 25px 70px rgba(0, 0, 0, 0.6),
+    0 0 1px rgba(249, 115, 22, 0.5),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(249, 115, 22, 0.3);
+  animation: slideIn 0.3s ease-out;
+  position: relative;
+}
+
+.closeButtonFloating {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  background: rgba(255, 255, 255, 0.1);
+  border: none;
+  font-size: 24px;
+  cursor: pointer;
+  color: rgba(255, 255, 255, 0.7);
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  line-height: 1;
+  z-index: 10;
+}
+
+.closeButtonFloating:hover {
+  background: rgba(255, 255, 255, 0.2);
+  color: #ffffff;
+  transform: scale(1.05);
+}
+
+.foodModalHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 28px;
+  background: linear-gradient(135deg, #f97316 0%, #fb923c 100%);
+  border-radius: 20px 20px 0 0;
+}
+
+.foodModalHeader h2 {
+  margin: 0;
+  font-size: 1.5rem;
+  color: #ffffff;
+  font-weight: 700;
+}
+
+.headerContent {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.modalDate {
+  font-size: 0.95rem;
+  color: rgba(26, 26, 46, 0.9);
+  font-weight: 600;
+}
+
+.closeButton {
+  background: rgba(255, 255, 255, 0.2);
+  border: none;
+  font-size: 24px;
+  cursor: pointer;
+  color: #ffffff;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  line-height: 1;
+}
+
+.closeButton:hover {
+  background: rgba(255, 255, 255, 0.3);
+  transform: scale(1.05);
+}
+
+/* ===========================================
+   Modal Body
+   =========================================== */
+.modalBody {
+  padding: 24px 28px;
+}
+
+/* ===========================================
+   Food Hero
+   =========================================== */
+.foodHero {
+  display: flex;
+  justify-content: center;
+  padding: 40px 20px 32px;
+  background: linear-gradient(180deg, rgba(139, 92, 246, 0.3) 0%, rgba(139, 92, 246, 0.1) 50%, transparent 100%);
+  border-radius: 20px 20px 0 0;
+  margin: -24px -28px 24px -28px;
+  padding-top: 32px;
+}
+
+.heroMetric {
+  text-align: center;
+  max-width: 100%;
+}
+
+.heroIcon {
+  font-size: 3rem;
+  margin-bottom: 16px;
+  line-height: 1;
+}
+
+.heroValue {
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: #a78bfa;
+  line-height: 1.3;
+  word-wrap: break-word;
+  margin-bottom: 8px;
+}
+
+.heroLabel {
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  font-weight: 500;
+}
+
+/* ===========================================
+   Sections
+   =========================================== */
+.section {
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 16px;
+  padding: 20px;
+  margin-bottom: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.section h3 {
+  margin: 0 0 16px 0;
+  font-size: 1.1rem;
+  color: var(--text-primary, #e0e0e0);
+  font-weight: 600;
+}
+
+/* ===========================================
+   Food Info Rows
+   =========================================== */
+.foodInfoRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.foodInfoRow:last-child {
+  border-bottom: none;
+}
+
+.foodInfoLabel {
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 0.95rem;
+}
+
+.foodInfoValue {
+  color: #ffffff;
+  font-weight: 600;
+  font-size: 1rem;
+}
+
+/* ===========================================
+   Nutrition Grid
+   =========================================== */
+.nutritionGrid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+}
+
+.nutritionCard {
+  border-radius: 12px;
+  padding: 16px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.2s ease;
+}
+
+.nutritionCard:hover {
+  transform: translateY(-2px);
+}
+
+.nutritionCard.caloriesCard {
+  background: linear-gradient(135deg, rgba(239, 68, 68, 0.2) 0%, rgba(239, 68, 68, 0.1) 100%);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+}
+
+.nutritionCard.proteinCard {
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.2) 0%, rgba(59, 130, 246, 0.1) 100%);
+  border: 1px solid rgba(59, 130, 246, 0.3);
+}
+
+.nutritionCard.carbsCard {
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.2) 0%, rgba(245, 158, 11, 0.1) 100%);
+  border: 1px solid rgba(245, 158, 11, 0.3);
+}
+
+.nutritionCard.fatCard {
+  background: linear-gradient(135deg, rgba(34, 197, 94, 0.2) 0%, rgba(34, 197, 94, 0.1) 100%);
+  border: 1px solid rgba(34, 197, 94, 0.3);
+}
+
+.nutritionIcon {
+  font-size: 2.2rem;
+  line-height: 1;
+  margin-bottom: 8px;
+}
+
+.nutritionValue {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #ffffff;
+}
+
+.nutritionLabel {
+  font-size: 0.65rem;
+  color: rgba(255, 255, 255, 0.5);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-top: 4px;
+}
+
+/* ===========================================
+   Extra Nutrients Grid
+   =========================================== */
+.extraGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+
+.extraItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 16px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.extraLabel {
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 0.9rem;
+}
+
+.extraValue {
+  color: #00d4ff;
+  font-weight: 600;
+  font-size: 1rem;
+}
+
+/* ===========================================
+   Responsive
+   =========================================== */
+@media (max-width: 600px) {
+  .nutritionGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .extraGrid {
+    grid-template-columns: 1fr;
+  }
+  
+  .heroValue {
+    font-size: 1.2rem;
+  }
+}

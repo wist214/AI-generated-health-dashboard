@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { FluentProvider } from '@fluentui/react-components';
 import { AppLayout } from '@shared/components/Layout';
 import { ErrorBoundary } from '@shared/components/ErrorBoundary';
+import { SettingsModal } from '@shared/components/SettingsModal';
 import { DashboardPage } from '@features/dashboard';
 import { WeightPage } from '@features/weight';
 import { OuraPage } from '@features/oura';
@@ -14,10 +15,10 @@ import { healthDarkTheme } from './styles/theme';
  */
 const App: React.FC = () => {
   const [activeTab, setActiveTab] = useState('dashboard');
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
   const handleSettingsClick = () => {
-    // TODO: Implement settings modal
-    console.log('Settings clicked');
+    setIsSettingsOpen(true);
   };
 
   const renderTabContent = () => {
@@ -45,6 +46,10 @@ const App: React.FC = () => {
         >
           {renderTabContent()}
         </AppLayout>
+        <SettingsModal
+          isOpen={isSettingsOpen}
+          onClose={() => setIsSettingsOpen(false)}
+        />
       </ErrorBoundary>
     </FluentProvider>
   );

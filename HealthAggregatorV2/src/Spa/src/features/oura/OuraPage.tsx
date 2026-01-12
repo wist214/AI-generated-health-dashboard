@@ -5,10 +5,10 @@ import {
   CollapsibleSection, 
   OuraChart, 
   SleepTable, 
-  ActivityTable 
+  ActivityTable,
+  StressModal
 } from './components';
-import { TimeRangeSelector } from '../weight/components';
-import { useLatestOura, useSleepData, useActivityData, useOuraSync } from './hooks';
+import { useLatestOura, useSleepData, useActivityData, useReadinessData, useStressData, useOuraSync } from './hooks';
 import { LoadingSpinner } from '@shared/components/LoadingSpinner';
 import { ErrorMessage } from '@shared/components/ErrorMessage';
 import { formatDuration, getDateRangeFromTimeRange, formatRelativeTime } from '@shared/utils';
@@ -49,6 +49,19 @@ const defaultSleepSeries: ChartSeries[] = [
   { id: 'avgHeartRate', label: 'Avg HR', color: '#ef4444', enabled: false },
 ];
 
+// Helper to calculate statistics from an array of numbers
+const calculateStats = (values: (number | null | undefined)[]) => {
+  const validValues = values.filter((v): v is number => v !== null && v !== undefined);
+  if (validValues.length === 0) {
+    return { min: null, max: null, avg: null };
+  }
+  return {
+    min: Math.min(...validValues),
+    max: Math.max(...validValues),
+    avg: validValues.reduce((a, b) => a + b, 0) / validValues.length,
+  };
+};
+
 /**
  * Oura Ring data page
  * Displays Sleep, Readiness, and Activity data
@@ -57,6 +70,7 @@ export const OuraPage: React.FC = () => {
   const [timeRange, setTimeRange] = useState<TimeRange>('1y');
   const [scoreSeries, setScoreSeries] = useState<ChartSeries[]>(defaultScoreSeries);
   const [sleepSeries, setSleepSeries] = useState<ChartSeries[]>(defaultSleepSeries);
+  const [isStressModalOpen, setIsStressModalOpen] = useState(false);
 
   // Get date range for history queries
   const { startDate, endDate } = useMemo(() => 
@@ -68,38 +82,54 @@ export const OuraPage: React.FC = () => {
   const { data: latestData, isLoading: isLoadingLatest, error: latestError, refetch } = useLatestOura();
   const { data: sleepData, isLoading: isLoadingSleep, error: sleepError } = useSleepData(startDate, endDate);
   const { data: activityData, isLoading: isLoadingActivity, error: activityError } = useActivityData(startDate, endDate);
+  const { data: readinessData, isLoading: isLoadingReadiness, error: readinessError } = useReadinessData(startDate, endDate);
+  const { data: stressData } = useStressData();
   const { mutate: syncData, isPending: isSyncing } = useOuraSync();
 
-  const isLoading = isLoadingLatest || isLoadingSleep || isLoadingActivity;
-  const error = latestError || sleepError || activityError;
+  const isLoading = isLoadingLatest || isLoadingSleep || isLoadingActivity || isLoadingReadiness;
+  const error = latestError || sleepError || activityError || readinessError;
 
   // Transform sleep data for charts (convert seconds to hours for display)
+  // Filter by time range
   const scoreChartData = useMemo(() => {
     if (!sleepData || !activityData) return [];
     
     // Create a map of activity data by date
     const activityByDate = new Map(activityData.map(a => [a.date, a]));
     
-    return sleepData.map(d => {
-      const activity = activityByDate.get(d.date);
-      return {
-        date: d.date,
-        sleepScore: d.score,
-        activityScore: activity?.score ?? null,
-        steps: activity?.steps ?? null,
-      };
-    });
-  }, [sleepData, activityData]);
+    return sleepData
+      .filter(d => d.date >= startDate && d.date <= endDate)
+      .map(d => {
+        const activity = activityByDate.get(d.date);
+        return {
+          date: d.date,
+          sleepScore: d.score,
+          activityScore: activity?.score ?? null,
+          steps: activity?.steps ?? null,
+        };
+      });
+  }, [sleepData, activityData, startDate, endDate]);
 
   const sleepChartData = useMemo(() => {
     if (!sleepData) return [];
-    return sleepData.map(d => ({
-      date: d.date,
-      totalSleepHours: d.totalSleep !== null ? d.totalSleep / 3600 : null,
-      deepSleepHours: d.deepSleep !== null ? d.deepSleep / 3600 : null,
-      remSleepHours: d.remSleep !== null ? d.remSleep / 3600 : null,
-      avgHeartRate: d.avgHeartRate,
-    }));
+    return sleepData
+      .filter(d => d.date >= startDate && d.date <= endDate)
+      .map(d => ({
+        date: d.date,
+        totalSleepHours: d.totalSleep !== null ? d.totalSleep / 3600 : null,
+        deepSleepHours: d.deepSleep !== null ? d.deepSleep / 3600 : null,
+        remSleepHours: d.remSleep !== null ? d.remSleep / 3600 : null,
+        avgHeartRate: d.avgHeartRate,
+      }));
+  }, [sleepData, startDate, endDate]);
+
+  // Calculate statistics for each metric
+  const sleepScoreStats = useMemo(() => calculateStats(sleepData?.map(d => d.score) ?? []), [sleepData]);
+  const readinessScoreStats = useMemo(() => calculateStats(readinessData?.map(d => d.score) ?? []), [readinessData]);
+  const activityScoreStats = useMemo(() => calculateStats(activityData?.map(d => d.score) ?? []), [activityData]);
+  const sleepHoursStats = useMemo(() => {
+    const hours = sleepData?.map(d => d.totalSleep !== null ? d.totalSleep / 3600 : null) ?? [];
+    return calculateStats(hours);
   }, [sleepData]);
 
   const handleScoreSeriesToggle = (id: string) => {
@@ -122,7 +152,12 @@ export const OuraPage: React.FC = () => {
   const sleepScore = latestData?.sleepScore ?? null;
   const readinessScore = latestData?.readinessScore ?? null;
   const activityScore = latestData?.activityScore ?? null;
-  const sleepHours = latestData?.totalSleepHours ?? null;
+  // Get sleep hours from latestData, or fall back to most recent sleep record
+  const latestSleepHours = latestData?.totalSleepHours ?? null;
+  const recentSleepHours = sleepData?.[0]?.totalSleep !== null && sleepData?.[0]?.totalSleep !== undefined 
+    ? sleepData[0].totalSleep / 3600 
+    : null;
+  const sleepHours = latestSleepHours ?? recentSleepHours;
   const dailyStress = latestData?.dailyStress ?? null;
   const resilienceLevel = latestData?.resilienceLevel ?? null;
   const vo2Max = latestData?.vo2Max ?? null;
@@ -159,6 +194,11 @@ export const OuraPage: React.FC = () => {
         >
           {isSyncing ? '🔄 Syncing...' : '🔄 Sync Oura Data'}
         </Button>
+        {lastUpdated && (
+          <span className={styles.lastUpdated}>
+            Last updated: {formatRelativeTime(lastUpdated)}
+          </span>
+        )}
       </div>
 
       {/* Primary Scores */}
@@ -166,26 +206,26 @@ export const OuraPage: React.FC = () => {
         <OuraStatCard
           title="Sleep Score"
           value={sleepScore}
-          details={lastUpdated ? formatRelativeTime(lastUpdated) : 'No data'}
           variant="score"
+          statistics={sleepScoreStats}
         />
         <OuraStatCard
           title="Readiness Score"
           value={readinessScore}
-          details={lastUpdated ? formatRelativeTime(lastUpdated) : 'No data'}
           variant="score"
+          statistics={readinessScoreStats}
         />
         <OuraStatCard
           title="Activity Score"
           value={activityScore}
-          details={lastUpdated ? formatRelativeTime(lastUpdated) : 'No data'}
           variant="score"
+          statistics={activityScoreStats}
         />
         <OuraStatCard
           title="Sleep Duration"
           value={sleepHours !== null ? formatDuration(sleepHours * 60) : null}
-          details={lastUpdated ? formatRelativeTime(lastUpdated) : 'No data'}
           variant="metric"
+          statistics={sleepHoursStats}
         />
       </div>
 
@@ -196,14 +236,13 @@ export const OuraPage: React.FC = () => {
             title="Daily Stress"
             icon="🧘"
             value={dailyStress ? dailyStress.charAt(0).toUpperCase() + dailyStress.slice(1) : null}
-            details={dailyStress ? formatRelativeTime(lastUpdated!) : "No data"}
             variant="stress"
+            onClick={() => setIsStressModalOpen(true)}
           />
           <OuraStatCard
             title="Resilience"
             icon="💪"
             value={resilienceLevel ? resilienceLevel.charAt(0).toUpperCase() + resilienceLevel.slice(1) : null}
-            details={resilienceLevel ? formatRelativeTime(lastUpdated!) : "No data"}
             variant="resilience"
           />
           <OuraStatCard
@@ -211,7 +250,6 @@ export const OuraPage: React.FC = () => {
             icon="🫀"
             value={vo2Max !== null ? vo2Max.toFixed(1) : null}
             unit="ml/kg/min"
-            details={vo2Max !== null ? formatRelativeTime(lastUpdated!) : "No data"}
             variant="vo2"
           />
           <OuraStatCard
@@ -219,7 +257,6 @@ export const OuraPage: React.FC = () => {
             icon="❤️"
             value={cardiovascularAge}
             unit="years"
-            details={cardiovascularAge !== null ? formatRelativeTime(lastUpdated!) : "No data"}
             variant="cardio"
           />
         </div>
@@ -233,7 +270,6 @@ export const OuraPage: React.FC = () => {
             icon="🩸"
             value={spO2Average !== null ? spO2Average.toFixed(1) : null}
             unit="%"
-            details={spO2Average !== null ? formatRelativeTime(lastUpdated!) : "No data"}
             variant="spo2"
           />
           <OuraStatCard
@@ -244,14 +280,12 @@ export const OuraPage: React.FC = () => {
                 ? `${formatBedtimeOffset(optimalBedtimeStart)} - ${formatBedtimeOffset(optimalBedtimeEnd)}`
                 : null
             }
-            details={optimalBedtimeStart !== null ? formatRelativeTime(lastUpdated!) : "No data"}
             variant="bedtime"
           />
           <OuraStatCard
             title="Workouts"
             icon="🏋️"
             value={workoutCount}
-            details={workoutCount !== null ? `${workoutCount} workout${workoutCount !== 1 ? 's' : ''} today` : "No data"}
             variant="workout"
           />
         </div>
@@ -259,16 +293,13 @@ export const OuraPage: React.FC = () => {
 
       {/* Score Chart */}
       <div className={styles.chartSection}>
-        <TimeRangeSelector
-          value={timeRange}
-          onChange={setTimeRange}
-          variant="oura"
-        />
         <OuraChart
           title="📊 Health Scores"
           data={scoreChartData}
           series={scoreSeries}
           onSeriesToggle={handleScoreSeriesToggle}
+          timeRange={timeRange}
+          onTimeRangeChange={setTimeRange}
         />
       </div>
 
@@ -286,6 +317,14 @@ export const OuraPage: React.FC = () => {
 
       {/* Activity History Table */}
       <ActivityTable data={activityData ?? []} />
+
+      {/* Stress Detail Modal */}
+      <StressModal
+        isOpen={isStressModalOpen}
+        onClose={() => setIsStressModalOpen(false)}
+        stressData={stressData ?? []}
+        latestStress={stressData?.[0] ?? null}
+      />
     </div>
   );
 };

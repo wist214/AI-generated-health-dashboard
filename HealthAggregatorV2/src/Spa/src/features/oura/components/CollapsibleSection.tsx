@@ -36,7 +36,9 @@ export const CollapsibleSection: React.FC<CollapsibleSectionProps> = ({
         </span>
       </button>
       <div className={`${styles.content} ${isExpanded ? styles.expanded : ''}`}>
-        {children}
+        <div className={styles.contentInner}>
+          {children}
+        </div>
       </div>
     </div>
   );

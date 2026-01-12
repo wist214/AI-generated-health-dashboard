@@ -104,8 +104,8 @@ function closeWorkoutsModal() {
 async function loadWorkoutsDetailData() {
     try {
         const API_BASE = window.location.hostname.includes('azurestaticapps.net') 
-            ? '' 
-            : `${window.location.protocol}//${window.location.hostname}:7071`;
+            ? 'https://func-healthaggregator.azurewebsites.net' 
+            : 'http://localhost:7071';
         
         // Load workouts data
         const response = await fetch(`${API_BASE}/api/oura/workouts`);

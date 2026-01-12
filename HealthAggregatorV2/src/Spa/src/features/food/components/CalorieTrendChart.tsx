@@ -2,17 +2,33 @@ import React, { useRef, useEffect } from 'react';
 import { Chart, registerables, ChartConfiguration } from 'chart.js';
 import 'chartjs-adapter-date-fns';
 import styles from './CalorieTrendChart.module.css';
+import type { TimeRange } from '../types';
 
 Chart.register(...registerables);
 
+const timeRanges: { value: TimeRange; label: string }[] = [
+  { value: '7d', label: '7 Days' },
+  { value: '30d', label: '30 Days' },
+  { value: '90d', label: '3 Months' },
+  { value: '6m', label: '6 Months' },
+  { value: '1y', label: '1 Year' },
+  { value: 'all', label: 'All Time' },
+];
+
 interface CalorieTrendChartProps {
   data: Array<{ date: string; calories: number | null }>;
+  timeRange?: TimeRange;
+  onTimeRangeChange?: (range: TimeRange) => void;
 }
 
 /**
  * Calorie trend line chart
  */
-export const CalorieTrendChart: React.FC<CalorieTrendChartProps> = ({ data }) => {
+export const CalorieTrendChart: React.FC<CalorieTrendChartProps> = ({ 
+  data,
+  timeRange,
+  onTimeRangeChange
+}) => {
   const chartRef = useRef<HTMLCanvasElement>(null);
   const chartInstance = useRef<Chart | null>(null);
 
@@ -110,7 +126,23 @@ export const CalorieTrendChart: React.FC<CalorieTrendChartProps> = ({ data }) =>
 
   return (
     <div className={styles.chartContainer}>
-      <h2 className={styles.title}>📊 Calorie Trend</h2>
+      <div className={styles.chartHeader}>
+        <h2 className={styles.title}>📊 Calorie Trend</h2>
+        {timeRange && onTimeRangeChange && (
+          <div className={styles.timeRangeButtons}>
+            {timeRanges.map((range) => (
+              <button
+                key={range.value}
+                type="button"
+                className={`${styles.rangeBtn} ${timeRange === range.value ? styles.active : ''}`}
+                onClick={() => onTimeRangeChange(range.value)}
+              >
+                {range.label}
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
       <div className={styles.chartWrapper}>
         {data.length > 0 ? (
           <canvas ref={chartRef} />

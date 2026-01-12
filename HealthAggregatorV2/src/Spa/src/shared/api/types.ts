@@ -66,18 +66,92 @@ export interface LatestMetricResponse {
 }
 
 /**
- * Dashboard summary response
+ * Dashboard summary response - matches actual API response
  */
 export interface DashboardSummaryResponse {
-  date: string;
-  sleepScore: number | null;
-  readinessScore: number | null;
-  activityScore: number | null;
-  steps: number | null;
-  caloriesBurned: number | null;
-  weight: number | null;
-  bodyFatPercentage: number | null;
-  lastUpdated: string;
+  oura: {
+    dailySleep: Array<{
+      id: string;
+      day: string;
+      score: number | null;
+      totalSleepDuration: number | null;
+      deepSleepDuration: number | null;
+      remSleepDuration: number | null;
+      lightSleepDuration: number | null;
+      awakeTime: number | null;
+      efficiency: number | null;
+      averageHeartRate: number | null;
+      lowestHeartRate: number | null;
+      averageHrv: number | null;
+      bedtimeStart: string | null;
+      bedtimeEnd: string | null;
+      latencyDuration: number | null;
+      restfulness: string | null;
+    }>;
+    readiness: Array<{
+      id: string;
+      day: string;
+      score: number | null;
+      temperatureDeviation: number | null;
+      activityBalance: number | null;
+      bodyTemperature: string | null;
+      hrvBalance: number | null;
+      previousDayActivity: number | null;
+      previousNight: number | null;
+      recoveryIndex: number | null;
+      restingHeartRate: number | null;
+      sleepBalance: number | null;
+    }>;
+    activity: Array<{
+      id: string;
+      day: string;
+      score: number | null;
+      activeCalories: number | null;
+      totalCalories: number | null;
+      steps: number | null;
+      targetCalories: number | null;
+      averageMetMinutes: number | null;
+      highActivityMetMinutes: number | null;
+      lowActivityMetMinutes: number | null;
+      mediumActivityMetMinutes: number | null;
+      nonWearMinutes: number | null;
+      restingMetMinutes: number | null;
+      sedentaryMetMinutes: number | null;
+      totalSteps: number | null;
+      inactivityAlerts: number | null;
+    }>;
+    lastSync: string | null;
+  };
+  picooc: {
+    measurements: Array<{
+      date: string;
+      weight: number | null;
+      bmi: number | null;
+      bodyFat: number | null;
+      bodyWater: number | null;
+      boneMass: number | null;
+      metabolicAge: number | null;
+      visceralFat: number | null;
+      basalMetabolism: number | null;
+      skeletalMuscleMass: number | null;
+      source: string | null;
+      hasValidWeight: boolean;
+      hasBodyComposition: boolean;
+    }>;
+    lastSync: string | null;
+  };
+  latest: {
+    weight: number | null;
+    bodyFat: number | null;
+    weightDate: string | null;
+    sleepScore: number | null;
+    sleepDate: string | null;
+    readinessScore: number | null;
+    readinessDate: string | null;
+    activityScore: number | null;
+    steps: number | null;
+    activityDate: string | null;
+  };
 }
 
 /**

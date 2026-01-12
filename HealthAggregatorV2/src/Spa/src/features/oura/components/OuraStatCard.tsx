@@ -1,6 +1,12 @@
 import React from 'react';
 import styles from './OuraStatCard.module.css';
 
+interface StatisticsData {
+  min: number | null;
+  max: number | null;
+  avg: number | null;
+}
+
 interface OuraStatCardProps {
   title: string;
   value: string | number | null;
@@ -9,6 +15,7 @@ interface OuraStatCardProps {
   icon?: string;
   onClick?: () => void;
   variant?: 'score' | 'metric' | 'stress' | 'resilience' | 'vo2' | 'cardio' | 'spo2' | 'bedtime' | 'workout';
+  statistics?: StatisticsData;
 }
 
 /**
@@ -21,9 +28,15 @@ export const OuraStatCard: React.FC<OuraStatCardProps> = ({
   details,
   icon,
   onClick,
-  variant = 'score'
+  variant = 'score',
+  statistics
 }) => {
   const isClickable = !!onClick;
+
+  const formatStatValue = (val: number | null) => {
+    if (val === null || val === undefined) return '--';
+    return val.toFixed(1);
+  };
   
   return (
     <div 
@@ -46,6 +59,22 @@ export const OuraStatCard: React.FC<OuraStatCardProps> = ({
         {unit && <span className={styles.unit}>{unit}</span>}
       </div>
       {details && <div className={styles.details}>{details}</div>}
+      {statistics && (
+        <div className={styles.statistics}>
+          <div className={styles.statItem}>
+            <span className={styles.statLabel}>Min</span>
+            <span className={styles.statValue}>{formatStatValue(statistics.min)}</span>
+          </div>
+          <div className={styles.statItem}>
+            <span className={styles.statLabel}>Max</span>
+            <span className={styles.statValue}>{formatStatValue(statistics.max)}</span>
+          </div>
+          <div className={styles.statItem}>
+            <span className={styles.statLabel}>Avg</span>
+            <span className={styles.statValue}>{formatStatValue(statistics.avg)}</span>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

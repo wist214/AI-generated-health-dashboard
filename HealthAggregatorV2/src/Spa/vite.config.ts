@@ -29,8 +29,9 @@ export default defineConfig({
   server: {
     port: 3000,
     proxy: {
+      // Proxy API requests to local Azure Functions during development
       '/api': {
-        target: 'http://localhost:5100',
+        target: 'http://localhost:7071',
         changeOrigin: true,
       },
     },

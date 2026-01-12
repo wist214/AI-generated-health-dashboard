@@ -27,6 +27,9 @@
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
+  white-space: nowrap;
+  line-height: 1.2;
+  padding-top: 0.1em;
 }
 
 .subtitle {

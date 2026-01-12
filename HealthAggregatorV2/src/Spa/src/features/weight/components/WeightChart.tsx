@@ -2,7 +2,7 @@ import React, { useRef, useEffect } from 'react';
 import { Chart, registerables, ChartConfiguration } from 'chart.js';
 import 'chartjs-adapter-date-fns';
 import styles from './WeightChart.module.css';
-import type { WeightMetric, ChartSeries } from '../types';
+import type { WeightMetric, ChartSeries, TimeRange } from '../types';
 
 Chart.register(...registerables);
 
@@ -10,7 +10,18 @@ interface WeightChartProps {
   data: WeightMetric[];
   series: ChartSeries[];
   onSeriesToggle: (id: string) => void;
+  timeRange?: TimeRange;
+  onTimeRangeChange?: (range: TimeRange) => void;
 }
+
+const timeRanges: { value: TimeRange; label: string }[] = [
+  { value: '7d', label: '7 Days' },
+  { value: '30d', label: '30 Days' },
+  { value: '90d', label: '3 Months' },
+  { value: '6m', label: '6 Months' },
+  { value: '1y', label: '1 Year' },
+  { value: 'all', label: 'All Time' },
+];
 
 /**
  * Weight trends chart component
@@ -18,7 +29,9 @@ interface WeightChartProps {
 export const WeightChart: React.FC<WeightChartProps> = ({
   data,
   series,
-  onSeriesToggle
+  onSeriesToggle,
+  timeRange,
+  onTimeRangeChange
 }) => {
   const chartRef = useRef<HTMLCanvasElement>(null);
   const chartInstance = useRef<Chart | null>(null);
@@ -118,6 +131,20 @@ export const WeightChart: React.FC<WeightChartProps> = ({
     <div className={styles.chartContainer}>
       <div className={styles.chartHeader}>
         <h2>📊 Weight Trends</h2>
+        {timeRange && onTimeRangeChange && (
+          <div className={styles.timeRangeButtons}>
+            {timeRanges.map((range) => (
+              <button
+                key={range.value}
+                type="button"
+                className={`${styles.rangeBtn} ${timeRange === range.value ? styles.active : ''}`}
+                onClick={() => onTimeRangeChange(range.value)}
+              >
+                {range.label}
+              </button>
+            ))}
+          </div>
+        )}
         <div className={styles.toggles}>
           {series.map(s => (
             <label key={s.id} className={styles.toggle}>

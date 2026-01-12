@@ -4,6 +4,7 @@
 
 .dashboardHeader {
   margin-bottom: var(--spacing-xl);
+  text-align: center;
 }
 
 .dashboardHeader h2 {

@@ -20,6 +20,17 @@ export interface DailyNutrition {
 }
 
 /**
+ * Nutrition history item (for charts)
+ */
+export interface NutritionHistoryItem {
+  date: string;
+  calories: number | null;
+  protein: number | null;
+  carbs: number | null;
+  fat: number | null;
+}
+
+/**
  * Macro breakdown
  */
 export interface MacroBreakdown {

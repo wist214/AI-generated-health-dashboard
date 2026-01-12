@@ -16,6 +16,7 @@ export interface WeightMetric {
   metabolicAge: number | null;
   visceralFat: number | null;
   boneMass: number | null;
+  bmr: number | null;
 }
 
 /**

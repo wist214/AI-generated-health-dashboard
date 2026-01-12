@@ -5,7 +5,13 @@
 .controls {
   display: flex;
   gap: var(--spacing-md);
+  align-items: center;
   margin-bottom: var(--spacing-lg);
+}
+
+.lastUpdated {
+  color: var(--text-secondary, #6b7280);
+  font-size: 0.875rem;
 }
 
 .syncBtn {

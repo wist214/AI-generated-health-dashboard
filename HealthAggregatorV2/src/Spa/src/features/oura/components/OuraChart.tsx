@@ -2,9 +2,18 @@ import React, { useRef, useEffect } from 'react';
 import { Chart, registerables, ChartConfiguration } from 'chart.js';
 import 'chartjs-adapter-date-fns';
 import styles from './OuraChart.module.css';
-import type { ChartSeries } from '../types';
+import type { ChartSeries, TimeRange } from '../types';
 
 Chart.register(...registerables);
+
+const timeRanges: { value: TimeRange; label: string }[] = [
+  { value: '7d', label: '7 Days' },
+  { value: '30d', label: '30 Days' },
+  { value: '90d', label: '3 Months' },
+  { value: '6m', label: '6 Months' },
+  { value: '1y', label: '1 Year' },
+  { value: 'all', label: 'All Time' },
+];
 
 interface OuraChartProps {
   title: string;
@@ -12,6 +21,8 @@ interface OuraChartProps {
   series: ChartSeries[];
   onSeriesToggle: (id: string) => void;
   yAxisLabel?: string;
+  timeRange?: TimeRange;
+  onTimeRangeChange?: (range: TimeRange) => void;
 }
 
 /**
@@ -22,7 +33,9 @@ export const OuraChart: React.FC<OuraChartProps> = ({
   data,
   series,
   onSeriesToggle,
-  yAxisLabel
+  yAxisLabel,
+  timeRange,
+  onTimeRangeChange
 }) => {
   const chartRef = useRef<HTMLCanvasElement>(null);
   const chartInstance = useRef<Chart | null>(null);
@@ -123,6 +136,20 @@ export const OuraChart: React.FC<OuraChartProps> = ({
     <div className={styles.chartContainer}>
       <div className={styles.chartHeader}>
         <h2>{title}</h2>
+        {timeRange && onTimeRangeChange && (
+          <div className={styles.timeRangeButtons}>
+            {timeRanges.map((range) => (
+              <button
+                key={range.value}
+                type="button"
+                className={`${styles.rangeBtn} ${timeRange === range.value ? styles.active : ''}`}
+                onClick={() => onTimeRangeChange(range.value)}
+              >
+                {range.label}
+              </button>
+            ))}
+          </div>
+        )}
         <div className={styles.toggles}>
           {series.map(s => (
             <label key={s.id} className={styles.toggle}>

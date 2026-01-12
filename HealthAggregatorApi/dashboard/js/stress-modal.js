@@ -142,9 +142,10 @@ function closeStressModal() {
  */
 async function loadStressDetailData() {
     try {
-        // Use empty base for Azure (azurestaticapps.net or azurewebsites.net), port 7071 for localhost
-        const isAzure = window.location.hostname.includes('azure');
-        const API_BASE = isAzure ? '' : `${window.location.protocol}//${window.location.hostname}:7071`;
+        // Use Functions API URL for Azure Static Web Apps, port 7071 for localhost
+        const API_BASE = window.location.hostname.includes('azurestaticapps.net') 
+            ? 'https://func-healthaggregator.azurewebsites.net' 
+            : 'http://localhost:7071';
         
         // Load stress data
         const response = await fetch(`${API_BASE}/api/oura/stress`);

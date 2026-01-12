@@ -27,8 +27,22 @@ export interface OuraSleepData {
   sleepEfficiency: number | null; // percentage
   sleepLatency: number | null; // seconds
   avgHeartRate: number | null;
+  lowestHeartRate: number | null;
   avgHrv: number | null;
   avgBreath: number | null;
+  bedtimeStart: string | null; // ISO datetime
+  bedtimeEnd: string | null; // ISO datetime
+  timeInBed: number | null; // seconds
+  restlessPeriods: number | null;
+  contributors: {
+    deepSleep: number | null;
+    efficiency: number | null;
+    latency: number | null;
+    remSleep: number | null;
+    restfulness: number | null;
+    timing: number | null;
+    totalSleep: number | null;
+  } | null;
 }
 
 /**
@@ -45,6 +59,8 @@ export interface OuraActivityData {
   mediumActivity: number | null; // seconds
   lowActivity: number | null; // seconds
   sedentaryTime: number | null; // seconds
+  restingTime: number | null; // seconds
+  inactivityAlerts: number | null;
 }
 
 /**

@@ -4,8 +4,15 @@
 
 .controls {
   display: flex;
+  align-items: center;
   gap: var(--spacing-md);
   margin-bottom: var(--spacing-lg);
+  flex-wrap: wrap;
+}
+
+.lastUpdated {
+  color: var(--text-secondary, #6b7280);
+  font-size: 0.875rem;
 }
 
 .syncBtn {

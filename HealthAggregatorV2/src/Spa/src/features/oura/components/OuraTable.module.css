@@ -1,3 +1,7 @@
+/* ===========================================
+   Oura Tables - V1 Style
+   =========================================== */
+
 .tableContainer {
   background: var(--bg-card);
   border-radius: var(--radius-lg);
@@ -43,8 +47,13 @@
   color: var(--text-primary);
 }
 
+.table tbody tr {
+  cursor: pointer;
+  transition: background var(--transition-fast);
+}
+
 .table tbody tr:hover {
-  background: var(--bg-card-hover);
+  background: rgba(0, 169, 157, 0.1);
 }
 
 .score {
@@ -65,4 +74,603 @@
 
 .emptyState p {
   margin: 0;
+}
+
+/* ===========================================
+   Modal Base Styles
+   =========================================== */
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.85);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  backdrop-filter: blur(8px);
+  animation: fadeIn 0.2s ease-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideIn {
+  from { 
+    opacity: 0;
+    transform: translateY(-20px) scale(0.95);
+  }
+  to { 
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* ===========================================
+   Sleep Modal - Blue Theme
+   =========================================== */
+.sleepModal {
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+  border-radius: 20px;
+  max-width: 700px;
+  width: 95%;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 
+    0 25px 70px rgba(0, 0, 0, 0.6),
+    0 0 1px rgba(59, 130, 246, 0.5),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(59, 130, 246, 0.3);
+  animation: slideIn 0.3s ease-out;
+}
+
+.sleepModalHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 28px;
+  background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+  border-radius: 20px 20px 0 0;
+}
+
+.sleepModalHeader h2 {
+  margin: 0;
+  font-size: 1.5rem;
+  color: #ffffff;
+  font-weight: 700;
+}
+
+/* ===========================================
+   Activity Modal - Green Theme
+   =========================================== */
+.activityModal {
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+  border-radius: 20px;
+  max-width: 700px;
+  width: 95%;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 
+    0 25px 70px rgba(0, 0, 0, 0.6),
+    0 0 1px rgba(34, 197, 94, 0.5),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(34, 197, 94, 0.3);
+  animation: slideIn 0.3s ease-out;
+}
+
+.activityModalHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 28px;
+  background: linear-gradient(135deg, #22c55e 0%, #10b981 100%);
+  border-radius: 20px 20px 0 0;
+}
+
+.activityModalHeader h2 {
+  margin: 0;
+  font-size: 1.5rem;
+  color: #ffffff;
+  font-weight: 700;
+}
+
+/* ===========================================
+   Modal Header Common
+   =========================================== */
+.headerContent {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.modalDate {
+  font-size: 0.95rem;
+  color: rgba(255, 255, 255, 0.9);
+  font-weight: 500;
+}
+
+.closeButton {
+  background: rgba(255, 255, 255, 0.2);
+  border: none;
+  font-size: 24px;
+  cursor: pointer;
+  color: #ffffff;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  line-height: 1;
+}
+
+.closeButton:hover {
+  background: rgba(255, 255, 255, 0.3);
+  transform: scale(1.05);
+}
+
+/* ===========================================
+   Modal Body
+   =========================================== */
+.modalBody {
+  padding: 24px 28px;
+}
+
+/* ===========================================
+   Hero Metrics - Large Top Row
+   =========================================== */
+.metricHero {
+  display: flex;
+  justify-content: center;
+  gap: 50px;
+  padding: 24px 20px;
+  background: linear-gradient(180deg, rgba(59, 130, 246, 0.1) 0%, transparent 100%);
+  border-radius: 16px;
+  margin-bottom: 20px;
+}
+
+.activityHero {
+  display: flex;
+  justify-content: center;
+  gap: 50px;
+  padding: 24px 20px;
+  background: linear-gradient(180deg, rgba(34, 197, 94, 0.1) 0%, transparent 100%);
+  border-radius: 16px;
+  margin-bottom: 20px;
+}
+
+.heroMetric {
+  text-align: center;
+}
+
+.heroIcon {
+  font-size: 2.5rem;
+  margin-bottom: 8px;
+  line-height: 1;
+}
+
+.heroValue {
+  font-size: 2.5rem;
+  font-weight: 700;
+  background: linear-gradient(135deg, #00d4ff 0%, #7c3aed 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  line-height: 1.1;
+}
+
+.heroLabel {
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-top: 6px;
+}
+
+/* ===========================================
+   Sleep Timing Section
+   =========================================== */
+.sleepTimingSection {
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 16px;
+  padding: 20px;
+  margin-bottom: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.timingRow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 32px;
+  flex-wrap: wrap;
+}
+
+.timingItem {
+  text-align: center;
+}
+
+.timingLabel {
+  display: block;
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 6px;
+}
+
+.timingValue {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: #00d4ff;
+}
+
+.timingValueGreen {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: #22c55e;
+}
+
+.timingArrow {
+  font-size: 1.5rem;
+  color: var(--text-muted);
+}
+
+.timingEfficiency {
+  margin-left: 16px;
+}
+
+/* ===========================================
+   Sections
+   =========================================== */
+.section {
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 16px;
+  padding: 20px;
+  margin-bottom: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.section h3 {
+  margin: 0 0 16px 0;
+  font-size: 1.1rem;
+  color: var(--text-primary);
+  font-weight: 600;
+}
+
+.sectionTitle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 16px 0;
+  font-size: 1.1rem;
+  color: var(--text-primary);
+  font-weight: 600;
+}
+
+.sectionIcon {
+  font-size: 1.3rem;
+  line-height: 1;
+}
+
+/* ===========================================
+   Sleep Stage Bar
+   =========================================== */
+.stageBar {
+  display: flex;
+  height: 30px;
+  border-radius: 8px;
+  overflow: hidden;
+  margin-bottom: 16px;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.stage {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: white;
+  transition: width 0.5s ease;
+}
+
+.stageDeep { background: linear-gradient(180deg, #1e40af 0%, #1d4ed8 100%); }
+.stageLight { background: linear-gradient(180deg, #3b82f6 0%, #60a5fa 100%); }
+.stageRem { background: linear-gradient(180deg, #8b5cf6 0%, #a78bfa 100%); }
+.stageAwake { background: linear-gradient(180deg, #f97316 0%, #fb923c 100%); }
+
+.stageLegend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.legendItem {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+}
+
+.dotDeep { background: #1e40af; }
+.dotLight { background: #3b82f6; }
+.dotRem { background: #8b5cf6; }
+.dotAwake { background: #f97316; }
+
+/* ===========================================
+   Activity Bar
+   =========================================== */
+.activityBar {
+  display: flex;
+  position: relative;
+  height: 24px;
+  border-radius: 8px;
+  overflow: hidden;
+  margin-bottom: 16px;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.activityBarLabel {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: white;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+}
+
+.activityBarEmpty {
+  width: 100%;
+  height: 100%;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.activitySegment {
+  transition: width 0.5s ease;
+}
+
+.activityHigh { background: linear-gradient(180deg, #ef4444 0%, #f87171 100%); }
+.activityMedium { background: linear-gradient(180deg, #f59e0b 0%, #fbbf24 100%); }
+.activityLow { background: linear-gradient(180deg, #22c55e 0%, #4ade80 100%); }
+
+.activityLegend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.dotHigh { background: #ef4444; }
+.dotMedium { background: #f59e0b; }
+.dotLow { background: #22c55e; }
+
+/* ===========================================
+   Vitals Grid
+   =========================================== */
+.vitalsGrid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+}
+
+.vitalCard {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+  padding: 16px;
+  text-align: center;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  transition: all 0.2s ease;
+}
+
+.vitalCard:hover {
+  transform: translateY(-2px);
+  border-color: rgba(59, 130, 246, 0.3);
+}
+
+.vitalIcon {
+  font-size: 1.8rem;
+  margin-bottom: 8px;
+  line-height: 1;
+}
+
+.vitalValue {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: #00d4ff;
+}
+
+.vitalLabel {
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.6);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-top: 6px;
+}
+
+.vitalSub {
+  font-size: 0.8rem;
+  color: rgba(255, 255, 255, 0.4);
+  margin-top: 2px;
+}
+
+/* ===========================================
+   Calories Grid
+   =========================================== */
+.caloriesGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+}
+
+.calorieCard {
+  border-radius: 12px;
+  padding: 24px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.calorieCard.activeCard {
+  background: linear-gradient(135deg, rgba(239, 68, 68, 0.2) 0%, rgba(239, 68, 68, 0.1) 100%);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+}
+
+.calorieCard.totalCard {
+  background: linear-gradient(135deg, rgba(34, 197, 94, 0.2) 0%, rgba(34, 197, 94, 0.1) 100%);
+  border: 1px solid rgba(34, 197, 94, 0.3);
+}
+
+.calorieValue {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #ffffff;
+}
+
+.calorieLabel {
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.7);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+/* ===========================================
+   Rest Grid
+   =========================================== */
+.restGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+
+.restItem {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+  padding: 16px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.restIcon {
+  font-size: 1.5rem;
+}
+
+.restValue {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: #00d4ff;
+}
+
+.restLabel {
+  font-size: 0.8rem;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+/* ===========================================
+   Time in Bed Info
+   =========================================== */
+.timeInBedInfo {
+  display: flex;
+  justify-content: center;
+  gap: 32px;
+  padding: 12px 16px;
+  background: rgba(255, 255, 255, 0.02);
+  border-radius: 8px;
+  margin-bottom: 16px;
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+}
+
+/* ===========================================
+   Score Contributors Section
+   =========================================== */
+.contributorsSection {
+  background: var(--bg-card);
+  border-radius: 12px;
+  padding: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.contributorTitle {
+  color: var(--text-primary);
+  margin: 0 0 16px 0;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.contributorList {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+
+.contributorItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 14px;
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 8px;
+}
+
+.contributorName {
+  color: var(--text-secondary);
+  font-size: 0.85rem;
+}
+
+.contributorValue {
+  font-weight: 600;
+  color: #00d4ff;
+  font-size: 1rem;
+}
+
+/* ===========================================
+   Responsive
+   =========================================== */
+@media (max-width: 600px) {
+  .metricHero,
+  .activityHero {
+    flex-direction: column;
+    gap: 24px;
+  }
+  
+  .vitalsGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .restGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .contributorList {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .timeInBedInfo {
+    flex-direction: column;
+    gap: 8px;
+    text-align: center;
+  }
+  
+  .heroValue {
+    font-size: 2rem;
+  }
 }
