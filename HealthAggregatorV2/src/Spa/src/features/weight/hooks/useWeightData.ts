@@ -74,7 +74,8 @@ export const useLatestWeight = () => {
         weight: data.latest?.weight ?? null,
         bodyFat: data.latest?.bodyFat ?? null,
         bmi: latestMeasurement?.bmi ?? null,
-        lastUpdated: data.latest?.weightDate ?? data.picooc?.lastSync ?? null,
+        // Show sync time to indicate when data was last fetched from Picooc
+        lastUpdated: data.picooc?.lastSync ?? data.latest?.weightDate ?? null,
       };
     },
   });
@@ -88,12 +89,11 @@ export const usePicoocSync = () => {
   
   return useMutation({
     mutationFn: syncPicoocData,
-    onSuccess: () => {
-      // Invalidate and refetch all weight queries to ensure UI updates
-      queryClient.invalidateQueries({ queryKey: weightKeys.all });
-      queryClient.invalidateQueries({ queryKey: ['dashboard'] });
-      queryClient.refetchQueries({ queryKey: weightKeys.all });
-      queryClient.refetchQueries({ queryKey: ['dashboard'] });
+    onSuccess: async () => {
+      // Invalidate all weight-related queries
+      await queryClient.invalidateQueries({ queryKey: weightKeys.all });
+      // Force refetch to ensure UI updates with fresh data
+      await queryClient.refetchQueries({ queryKey: weightKeys.all, type: 'active' });
     },
   });
 };
