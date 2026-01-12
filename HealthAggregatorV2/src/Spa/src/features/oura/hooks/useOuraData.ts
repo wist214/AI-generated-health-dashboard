@@ -2,7 +2,6 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { get, API_ENDPOINTS } from '@shared/api';
 import { syncOura } from '@shared/api/syncClient';
 import type { OuraSleepData, OuraActivityData } from '../types';
-import type { DashboardSummaryResponse } from '@shared/api/types';
 
 /**
  * Oura Data API response (from /api/oura/data)
@@ -195,13 +194,6 @@ const fetchOuraData = async (): Promise<OuraDataResponse> => {
 };
 
 /**
- * Fetch dashboard data which contains summary stats
- */
-const fetchDashboardData = async (): Promise<DashboardSummaryResponse> => {
-  return get<DashboardSummaryResponse>(API_ENDPOINTS.DASHBOARD);
-};
-
-/**
  * Trigger Oura sync via Azure Functions
  */
 const syncOuraData = async () => {
@@ -293,7 +285,7 @@ export const useLatestOura = () => {
         }
       });
       const latestSleepRecord = data.sleepRecords?.length 
-        ? sleepRecordsMap.get(data.sleepRecords[0].day) 
+        ? sleepRecordsMap.get(data.sleepRecords[0]?.day ?? '') 
         : null;
       
       const latestDailySleep = data.dailySleep?.[0];

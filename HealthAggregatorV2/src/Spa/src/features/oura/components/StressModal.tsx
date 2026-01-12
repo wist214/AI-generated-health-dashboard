@@ -55,7 +55,7 @@ const getStatusIcon = (summary: string | null): string => {
   }
 };
 
-const getStatusLabel = (summary: string | null): string => {
+const getStatusLabel = (summary: string | null | undefined): string => {
   if (!summary) return '--';
   return summary.charAt(0).toUpperCase() + summary.slice(1);
 };
